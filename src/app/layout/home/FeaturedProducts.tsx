@@ -12,6 +12,34 @@ import { formatPrice } from "@/lib/priceUtils";
 import LazyLoader from "@/components/ui/LazyLoader";
 import ProductQuickViewModal from "@/app/components/ProductQuickViewModal";
 
+type SizeOption = { label: string; value: number; priceFactor: number };
+type ProductItem = {
+  id?: string;
+  _id?: string;
+  name: string;
+  price?: number | string;
+  basePrice?: number;
+  image: string;
+  imageHover?: string;
+  category?: string;
+  subtext?: string;
+  sizes?: SizeOption[];
+  slug?: string;
+};
+
+type QuickViewProduct = {
+  id: string;
+  name: string;
+  price?: number;
+  basePrice?: number;
+  image: string;
+  description?: string;
+  notes?: { top?: string; heart?: string; base?: string };
+  href?: string;
+  sizes?: SizeOption[];
+  slug?: string;
+};
+
 const bundles = [
   {
     id: 1,
@@ -52,10 +80,10 @@ export default function FeaturedProducts() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const allProductsScrollRef = useRef<HTMLDivElement>(null);
 
-  const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<ProductItem[]>([]);
   const [loading, setLoading] = useState(true);
   const { country, setCountry } = useCountry();
-  const [quickViewProduct, setQuickViewProduct] = useState<any>(null);
+  const [quickViewProduct, setQuickViewProduct] = useState<QuickViewProduct | null>(null);
   const [quickViewIndex, setQuickViewIndex] = useState<number | null>(null);
   const [showQuickView, setShowQuickView] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
@@ -115,8 +143,18 @@ export default function FeaturedProducts() {
     }
   };
 
+  const coercePriceToNumber = (value?: number | string): number => {
+    if (typeof value === "number") return value;
+    if (typeof value === "string") {
+      const cleaned = value.replace(/[^0-9.]/g, "");
+      const parsed = parseFloat(cleaned);
+      return Number.isFinite(parsed) ? parsed : 0;
+    }
+    return 0;
+  };
+
   // Pagination functions
-  const getCurrentProducts = () => {
+  const getCurrentProducts = (): ProductItem[] => {
     const startIndex = currentPage * productsPerPage;
     return products.slice(startIndex, startIndex + productsPerPage);
   };
@@ -131,27 +169,31 @@ export default function FeaturedProducts() {
     setCurrentPage((prev) => (prev - 1 + totalPages) % totalPages);
   };
 
-  const handleAddToCart = (product: any) => {
+  const handleAddToCart = (product: ProductItem) => {
     const price =
       typeof product.price === "string"
         ? parseFloat(product.price.replace("$", ""))
         : product.price;
     addToCart({
-      id: product.id?.toString() || product._id,
+      id: (product.id ?? product._id ?? "").toString(),
       name: product.name,
-      price: price,
+      price: price || 0,
       image: product.image,
       quantity: 1,
     });
   };
 
-  const handleViewDetails = (product: any, indexInSlice?: number) => {
+  const handleViewDetails = (product: ProductItem, indexInSlice?: number) => {
     const slice = getCurrentProducts();
-    const index = typeof indexInSlice === 'number' ? indexInSlice : slice.findIndex((p: any) => (p._id || p.id) === (product._id || product.id));
+    const index = typeof indexInSlice === 'number' ? indexInSlice : slice.findIndex((p) => (p._id || p.id) === (product._id || product.id));
     setQuickViewIndex(index >= 0 ? index : 0);
     setQuickViewProduct({
-      ...product,
-      basePrice: product.basePrice || product.price || 0,
+      id: (product.id ?? product._id ?? "").toString(),
+      name: product.name,
+      image: product.image,
+      slug: product.slug,
+      description: product.subtext,
+      basePrice: coercePriceToNumber(product.basePrice ?? product.price),
       sizes: product.sizes || defaultSizes,
     });
     setShowQuickView(true);
@@ -162,10 +204,15 @@ export default function FeaturedProducts() {
     const slice = getCurrentProducts();
     const newIndex = (quickViewIndex - 1 + slice.length) % slice.length;
     const nextProduct = slice[newIndex];
+    if (!nextProduct) return;
     setQuickViewIndex(newIndex);
     setQuickViewProduct({
-      ...nextProduct,
-      basePrice: nextProduct.basePrice || nextProduct.price || 0,
+      id: (nextProduct.id ?? nextProduct._id ?? "").toString(),
+      name: nextProduct.name,
+      image: nextProduct.image,
+      slug: nextProduct.slug,
+      description: nextProduct.subtext,
+      basePrice: coercePriceToNumber(nextProduct.basePrice ?? nextProduct.price),
       sizes: nextProduct.sizes || defaultSizes,
     });
   };
@@ -175,10 +222,15 @@ export default function FeaturedProducts() {
     const slice = getCurrentProducts();
     const newIndex = (quickViewIndex + 1) % slice.length;
     const nextProduct = slice[newIndex];
+    if (!nextProduct) return;
     setQuickViewIndex(newIndex);
     setQuickViewProduct({
-      ...nextProduct,
-      basePrice: nextProduct.basePrice || nextProduct.price || 0,
+      id: (nextProduct.id ?? nextProduct._id ?? "").toString(),
+      name: nextProduct.name,
+      image: nextProduct.image,
+      slug: nextProduct.slug,
+      description: nextProduct.subtext,
+      basePrice: coercePriceToNumber(nextProduct.basePrice ?? nextProduct.price),
       sizes: nextProduct.sizes || defaultSizes,
     });
   };
@@ -248,7 +300,7 @@ export default function FeaturedProducts() {
                   No products found.
                 </div>
               ) : (
-                getCurrentProducts().map((product: any, index: number) => (
+                getCurrentProducts().map((product: ProductItem, index: number) => (
                   <motion.div
                     key={`${product._id || product.id || "product"}-${index}`}
                     initial={{ opacity: 0, y: 40 }}
