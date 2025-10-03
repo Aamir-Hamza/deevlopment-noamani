@@ -31,6 +31,7 @@ export default function ShopPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const { country } = useCountry();
   const { addToCart } = useCart();
 
@@ -53,9 +54,25 @@ export default function ShopPage() {
     fetchProducts();
   }, []);
 
-  const handleQuickView = (product: Product) => {
+  const handleQuickView = (product: Product, index?: number) => {
+    const idx = typeof index === 'number' ? index : products.findIndex((p) => (p as any)._id === (product as any)._id || p.id === product.id);
+    setSelectedIndex(idx >= 0 ? idx : 0);
     setSelectedProduct(product);
     setIsQuickViewOpen(true);
+  };
+
+  const handlePrev = () => {
+    if (selectedIndex === null || products.length === 0) return;
+    const newIndex = (selectedIndex - 1 + products.length) % products.length;
+    setSelectedIndex(newIndex);
+    setSelectedProduct(products[newIndex]);
+  };
+
+  const handleNext = () => {
+    if (selectedIndex === null || products.length === 0) return;
+    const newIndex = (selectedIndex + 1) % products.length;
+    setSelectedIndex(newIndex);
+    setSelectedProduct(products[newIndex]);
   };
 
   const handleAddToCart = async (e: React.MouseEvent, product: Product) => {
@@ -209,7 +226,7 @@ export default function ShopPage() {
                   NEW
                 </div>
               )}
-              <div className="relative aspect-[3/4] flex flex-col items-center justify-center mb-4">
+              <div className="relative aspect-[3/4] flex flex-col items-center justify-center mb-4" onClick={() => handleQuickView(product, index)}>
                 <Image
                   src={product.image}
                   alt={product.name}
@@ -268,6 +285,8 @@ export default function ShopPage() {
         open={isQuickViewOpen}
         onClose={() => setIsQuickViewOpen(false)}
         product={selectedProduct}
+        onPrev={handlePrev}
+        onNext={handleNext}
       />
       <Footer />
     </div>

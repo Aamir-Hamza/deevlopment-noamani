@@ -66,6 +66,19 @@
   position: relative !important;
 }
 
+/* Responsive adjustments for the Noamani heading */
+@media (max-width: 1024px) {
+  .noamani-heading {
+    font-size: 3.5rem !important;
+  }
+}
+@media (max-width: 640px) {
+  .noamani-heading {
+    font-size: 2.25rem !important;
+    text-shadow: 0 2px 16px #ffb30066, 0 1px 1px #00000055 !important;
+  }
+}
+
 @keyframes fadeZoomIn {
   to {
     opacity: 1;

@@ -1293,13 +1293,13 @@ export default function Navbar() {
             onClick={() => setShowSearchModal(false)}
           >
             <div
-              className="fixed top-16 right-10 w-[90vw] max-w-sm bg-white rounded-2xl shadow-2xl flex items-center px-6 py-3 animate-slide-in-right border border-pink-200"
+              className="fixed left-1/2 -translate-x-1/2 top-6 sm:top-16 w-[92vw] sm:w-[90vw] max-w-md bg-white rounded-2xl shadow-2xl flex items-center px-4 sm:px-6 py-3 animate-slide-in-right border border-pink-200"
               style={{ zIndex: 1001 }}
               onClick={e => e.stopPropagation()}
             >
               <input
                 type="text"
-                className="flex-1 border-none outline-none bg-transparent text-lg px-3 py-2 placeholder-pink-400 text-gray-900"
+                className="flex-1 border-none outline-none bg-transparent text-base sm:text-lg px-2 sm:px-3 py-2 placeholder-pink-400 text-gray-900"
                 placeholder="Search products..."
                 value={searchQuery}
                 onChange={e => handleSearch(e.target.value)}
@@ -1316,7 +1316,7 @@ export default function Navbar() {
             </div>
             {/* Results Dropdown */}
             {searchQuery && (
-              <div className="fixed top-28 right-10 w-[90vw] max-w-sm bg-white rounded-xl shadow-xl mt-2 overflow-y-auto max-h-80 border border-pink-100 animate-fade-in-down" style={{ zIndex: 1002 }}>
+              <div className="fixed left-1/2 -translate-x-1/2 top-20 sm:top-28 w-[92vw] sm:w-[90vw] max-w-md bg-white rounded-xl shadow-xl mt-2 overflow-y-auto max-h-[60vh] border border-pink-100 animate-fade-in-down" style={{ zIndex: 1002 }}>
                 {loadingProducts && (
                   <div className="text-center text-gray-500 py-6">Loading products...</div>
                 )}
@@ -1351,7 +1351,7 @@ export default function Navbar() {
 
         {/* Mobile Hamburger Sidebar */}
         {showMobileMenu && (
-          <div className="fixed inset-0 z-50 bg-black/40 flex md:hidden" onClick={() => setShowMobileMenu(false)}>
+          <div className="fixed inset-0 z-[120] bg-black/40 flex md:hidden" onClick={() => setShowMobileMenu(false)}>
             <div
               className="bg-white w-64 h-full p-6 flex flex-col gap-6 shadow-lg animate-slide-in-left"
               onClick={e => e.stopPropagation()}
@@ -1366,6 +1366,7 @@ export default function Navbar() {
               <nav className="flex flex-col gap-4">
                 <Link href="/bestsellers" className="text-lg font-medium text-gray-900 hover:text-pink-600" onClick={() => setShowMobileMenu(false)}>Bestsellers</Link>
                 <Link href="/fragrance" className="text-lg font-medium text-gray-900 hover:text-pink-600" onClick={() => setShowMobileMenu(false)}>Fragrance</Link>
+                <Link href="/product/recreations" className="text-lg font-medium text-gray-900 hover:text-pink-600" onClick={() => setShowMobileMenu(false)}>Recreations</Link>
                 <Link href="/about" className="text-lg font-medium text-gray-900 hover:text-pink-600" onClick={() => setShowMobileMenu(false)}>About Us</Link>
               </nav>
             </div>

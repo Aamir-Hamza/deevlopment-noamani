@@ -15,6 +15,7 @@ export default function AllProductsPage() {
   const [loading, setLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const countryObj = useCountry();
   const country = typeof countryObj === 'string' ? countryObj : countryObj.country;
   const { addToCart } = useCart();
@@ -41,9 +42,25 @@ export default function AllProductsPage() {
     };
   }, []);
 
-  const handleQuickView = (product: any) => {
+  const handleQuickView = (product: any, index?: number) => {
+    const idx = typeof index === 'number' ? index : products.findIndex((p) => (p._id || p.id) === (product._id || product.id));
+    setSelectedIndex(idx >= 0 ? idx : 0);
     setSelectedProduct(product);
     setIsQuickViewOpen(true);
+  };
+
+  const handlePrev = () => {
+    if (selectedIndex === null || products.length === 0) return;
+    const newIndex = (selectedIndex - 1 + products.length) % products.length;
+    setSelectedIndex(newIndex);
+    setSelectedProduct(products[newIndex]);
+  };
+
+  const handleNext = () => {
+    if (selectedIndex === null || products.length === 0) return;
+    const newIndex = (selectedIndex + 1) % products.length;
+    setSelectedIndex(newIndex);
+    setSelectedProduct(products[newIndex]);
   };
 
   const handleAddToCart = async (product: any) => {
@@ -149,7 +166,7 @@ export default function AllProductsPage() {
                 </a>
                   <div className="flex gap-2 mt-2">
                     <button
-                      onClick={() => handleQuickView(product)}
+                      onClick={() => handleQuickView(product, index)}
                       className="flex-1 bg-black text-white px-4 py-3 text-sm font-medium hover:bg-gray-800 transition-colors rounded-full"
                     >
                     Quick View
@@ -166,7 +183,7 @@ export default function AllProductsPage() {
           )}
         </div>
       </div>
-      <ProductQuickViewModal open={isQuickViewOpen} onClose={() => setIsQuickViewOpen(false)} product={selectedProduct} />
+      <ProductQuickViewModal open={isQuickViewOpen} onClose={() => setIsQuickViewOpen(false)} product={selectedProduct} onPrev={handlePrev} onNext={handleNext} />
     </div>
   );
 } 

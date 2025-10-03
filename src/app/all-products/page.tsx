@@ -1,14 +1,27 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { products } from "@/data/products";
 
 export default function AllProducts() {
   const [currentPage, setCurrentPage] = useState(0);
-  const PRODUCTS_PER_PAGE = 3;
+  const [itemsPerPage, setItemsPerPage] = useState(3);
 
-  const totalPages = Math.ceil(products.length / PRODUCTS_PER_PAGE);
+  useEffect(() => {
+    const computeItems = () => {
+      const width = window.innerWidth;
+      if (width < 640) return 1; // mobile
+      if (width < 1024) return 2; // tablet
+      return 3; // desktop
+    };
+    const update = () => setItemsPerPage(computeItems());
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
+
+  const totalPages = Math.ceil(products.length / itemsPerPage);
 
   const nextSlide = () => {
     setCurrentPage((prev) => (prev + 1) % totalPages);
@@ -19,8 +32,8 @@ export default function AllProducts() {
   };
 
   const getCurrentProducts = () => {
-    const startIndex = currentPage * PRODUCTS_PER_PAGE;
-    return products.slice(startIndex, startIndex + PRODUCTS_PER_PAGE);
+    const startIndex = currentPage * itemsPerPage;
+    return products.slice(startIndex, startIndex + itemsPerPage);
   };
 
   const getProductLabel = (index: number) => {
@@ -66,7 +79,7 @@ export default function AllProducts() {
         `}</style>
         {/* Header */}
         <div className="flex items-center justify-center gap-4 mb-12">
-          <h1 className="text-4xl font-serif text-gray-800 tracking-wide">
+          <h1 className="text-3xl sm:text-4xl font-serif text-gray-800 tracking-wide">
             All Products
           </h1>
           <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center shadow-sm">
@@ -82,31 +95,31 @@ export default function AllProducts() {
         <div className="w-24 h-1 bg-black mx-auto mb-16"></div>
 
         {/* Product Carousel - EXACTLY 3 PRODUCTS */}
-        <div className="relative max-w-4xl mx-auto">
+        <div className="relative max-w-5xl mx-auto">
           {/* Navigation Arrows */}
           <button
             onClick={prevSlide}
-            className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 w-12 h-12 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center shadow-lg transition-colors"
+            className="hidden sm:flex absolute left-0 top-1/2 transform -translate-y-1/2 z-10 w-12 h-12 bg-gray-100 hover:bg-gray-200 rounded-full items-center justify-center shadow-lg transition-colors"
           >
             <ChevronLeft className="w-6 h-6 text-gray-600" />
           </button>
 
           <button
             onClick={nextSlide}
-            className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 w-12 h-12 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center shadow-lg transition-colors"
+            className="hidden sm:flex absolute right-0 top-1/2 transform -translate-y-1/2 z-10 w-12 h-12 bg-gray-100 hover:bg-gray-200 rounded-full items-center justify-center shadow-lg transition-colors"
           >
             <ChevronRight className="w-6 h-6 text-gray-600" />
           </button>
 
           {/* Product Container - HARDCODED 3 PRODUCTS ONLY */}
-          <div className="flex justify-center items-center px-20">
-            <div className="flex justify-center items-center gap-6" style={{ width: '900px', maxWidth: '900px' }}>
+          <div className="flex justify-center items-center px-4 sm:px-10">
+            <div className="flex justify-center items-center gap-4 sm:gap-6">
               {/* Product 1 */}
               {currentProducts[0] && (
                 <div className="group" style={{ width: '280px', flexShrink: 0 }}>
                   <div className="relative bg-gradient-to-b from-pink-100 to-gray-100 rounded-2xl p-8 h-80 flex flex-col items-center justify-center overflow-hidden">
-                    <div className={`absolute top-4 left-4 ${getProductLabelColor(currentPage * PRODUCTS_PER_PAGE + 0)} text-white px-3 py-1 rounded-full text-sm font-medium`}>
-                      {getProductLabel(currentPage * PRODUCTS_PER_PAGE + 0)}
+                    <div className={`absolute top-4 left-4 ${getProductLabelColor(currentPage * itemsPerPage + 0)} text-white px-3 py-1 rounded-full text-sm font-medium`}>
+                      {getProductLabel(currentPage * itemsPerPage + 0)}
                     </div>
                     <div className="flex-1 flex items-center justify-center">
                       <img
@@ -126,8 +139,8 @@ export default function AllProducts() {
               {currentProducts[1] && (
                 <div className="group" style={{ width: '280px', flexShrink: 0 }}>
                   <div className="relative bg-gradient-to-b from-pink-100 to-gray-100 rounded-2xl p-8 h-80 flex flex-col items-center justify-center overflow-hidden">
-                    <div className={`absolute top-4 left-4 ${getProductLabelColor(currentPage * PRODUCTS_PER_PAGE + 1)} text-white px-3 py-1 rounded-full text-sm font-medium`}>
-                      {getProductLabel(currentPage * PRODUCTS_PER_PAGE + 1)}
+                    <div className={`absolute top-4 left-4 ${getProductLabelColor(currentPage * itemsPerPage + 1)} text-white px-3 py-1 rounded-full text-sm font-medium`}>
+                      {getProductLabel(currentPage * itemsPerPage + 1)}
                     </div>
                     <div className="flex-1 flex items-center justify-center">
                       <img
@@ -147,8 +160,8 @@ export default function AllProducts() {
               {currentProducts[2] && (
                 <div className="group" style={{ width: '280px', flexShrink: 0 }}>
                   <div className="relative bg-gradient-to-b from-pink-100 to-gray-100 rounded-2xl p-8 h-80 flex flex-col items-center justify-center overflow-hidden">
-                    <div className={`absolute top-4 left-4 ${getProductLabelColor(currentPage * PRODUCTS_PER_PAGE + 2)} text-white px-3 py-1 rounded-full text-sm font-medium`}>
-                      {getProductLabel(currentPage * PRODUCTS_PER_PAGE + 2)}
+                    <div className={`absolute top-4 left-4 ${getProductLabelColor(currentPage * itemsPerPage + 2)} text-white px-3 py-1 rounded-full text-sm font-medium`}>
+                      {getProductLabel(currentPage * itemsPerPage + 2)}
                     </div>
                     <div className="flex-1 flex items-center justify-center">
                       <img
@@ -166,25 +179,35 @@ export default function AllProducts() {
             </div>
           </div>
 
-          {/* Dots Indicator */}
+        {/* Dots Indicator (show max 3 dots at a time) */}
+        {totalPages > 1 && (
           <div className="flex justify-center mt-8 gap-2">
-            {Array.from({ length: totalPages }).map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentPage(index)}
-                className={`w-3 h-3 rounded-full transition-colors ${
-                  currentPage === index
-                    ? 'bg-gray-800'
-                    : 'bg-gray-300'
-                }`}
-              />
-            ))}
+            {(() => {
+              const windowSize = 3;
+              const half = Math.floor(windowSize / 2);
+              let start = Math.max(0, currentPage - half);
+              let end = Math.min(totalPages - 1, start + windowSize - 1);
+              start = Math.max(0, end - windowSize + 1);
+              const pages: number[] = [];
+              for (let i = start; i <= end; i += 1) pages.push(i);
+              return pages.map((index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentPage(index)}
+                  className={`w-3 h-3 rounded-full transition-colors ${
+                    currentPage === index ? 'bg-gray-800' : 'bg-gray-300'
+                  }`}
+                  aria-label={`Go to page ${index + 1}`}
+                />
+              ));
+            })()}
           </div>
+        )}
         </div>
 
         {/* Product Count Info */}
         <div className="text-center mt-8 text-gray-600">
-          Showing {currentPage * PRODUCTS_PER_PAGE + 1}-{Math.min((currentPage + 1) * PRODUCTS_PER_PAGE, products.length)} of {products.length} products
+          Showing {currentPage * itemsPerPage + 1}-{Math.min((currentPage + 1) * itemsPerPage, products.length)} of {products.length} products
         </div>
       </div>
     </div>

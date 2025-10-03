@@ -10,20 +10,20 @@ const italianno = Italianno({ weight: '400', subsets: ['latin'] });
 
 export default function HeroSection() {
   return (
-    <div className="relative h-screen flex items-center justify-center overflow-hidden">
+    <div className="relative min-h-[85vh] sm:min-h-[90vh] md:h-screen flex items-center justify-center overflow-hidden">
       {/* Background image */}
       <div className="absolute inset-0 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1500&q=80')" }}>
         <div className="absolute inset-0 bg-black/20"></div>
       </div>
       {/* Noamani Heading */}
-      <div className="absolute top-16 left-0 w-full flex justify-center z-20 pointer-events-none select-none">
+      <div className="absolute top-10 sm:top-14 md:top-16 left-0 w-full flex justify-center z-20 pointer-events-none select-none px-4">
         <motion.h1
           className={italianno.className}
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1.2, ease: [0.23, 1, 0.32, 1] }}
           style={{
-            fontSize: "5rem",
+            fontSize: "clamp(2.5rem, 10vw, 5rem)",
             fontWeight: 400,
             color: "#fff",
             letterSpacing: "2px",
@@ -39,7 +39,7 @@ export default function HeroSection() {
       {/* Content */}
       <div className="relative z-10 text-center text-white px-4 sm:px-6 lg:px-8 max-w-4xl">
         <motion.h1
-          className="text-4xl md:text-6xl font-serif font-light tracking-wider mb-4"
+          className="text-3xl sm:text-4xl md:text-6xl font-serif font-light tracking-wider mb-4"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.2 }}
@@ -48,7 +48,7 @@ export default function HeroSection() {
         </motion.h1>
 
         <motion.p
-          className="text-lg md:text-xl mb-8 max-w-2xl mx-auto"
+          className="text-base sm:text-lg md:text-xl mb-8 max-w-2xl mx-auto"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.4 }}
@@ -64,13 +64,13 @@ export default function HeroSection() {
         >
           <Link
             href="/shop"
-            className="inline-block bg-white text-brand-dark px-8 py-3 rounded-sm font-medium tracking-wider text-sm uppercase hover:bg-brand-pink transition-colors duration-300 mr-4"
+            className="inline-block bg-white text-brand-dark px-6 sm:px-8 py-2.5 sm:py-3 rounded-sm font-medium tracking-wider text-xs sm:text-sm uppercase hover:bg-brand-pink transition-colors duration-300 mr-2 sm:mr-4"
           >
             Shop Now
           </Link>
           <Link
             href="/quiz/start"
-            className="inline-block bg-transparent border border-white text-white px-8 py-3 rounded-sm font-medium tracking-wider text-sm uppercase hover:bg-white/20 transition-colors duration-300"
+            className="inline-block bg-transparent border border-white text-white px-6 sm:px-8 py-2.5 sm:py-3 rounded-sm font-medium tracking-wider text-xs sm:text-sm uppercase hover:bg-white/20 transition-colors duration-300"
           >
             Find Your Scent
           </Link>

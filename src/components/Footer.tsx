@@ -47,27 +47,27 @@ export default function Footer() {
   };
 
   return (
-    <footer className="w-full bg-[#f8f6f0] pt-24 pb-20 px-8 min-h-[80vh]">
+    <footer className="w-full bg-[#f8f6f0] pt-16 sm:pt-20 md:pt-24 pb-14 sm:pb-16 md:pb-20 px-4 sm:px-6 md:px-8 min-h-[60vh]">
       <div className="max-w-screen-2xl mx-auto">
         {/* Newsletter Signup Section */}
-        <div className="mb-24">
+        <div className="mb-14 sm:mb-16 md:mb-24">
           <form onSubmit={handleSubscribe}>
-            <div className="flex flex-col md:flex-row items-start md:items-center gap-12 mb-12">
-              <h2 className="text-4xl font-medium text-gray-800 tracking-wide">
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-6 sm:gap-8 md:gap-12 mb-8 sm:mb-10 md:mb-12">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-medium text-gray-800 tracking-wide">
                 SIGN UP FOR EXCLUSIVITY
               </h2>
-              <div className="flex items-center gap-6">
+              <div className="flex flex-col sm:flex-row w-full md:w-auto items-stretch sm:items-center gap-3 sm:gap-4 md:gap-6">
                 <input
                   type="email"
                   placeholder="Enter an email"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  className="px-6 py-4 border border-gray-300 bg-white text-gray-800 placeholder:text-gray-500 focus:outline-none focus:border-gray-400 min-w-[400px] text-lg"
+                  className="px-4 sm:px-5 md:px-6 py-3 sm:py-4 border border-gray-300 bg-white text-gray-800 placeholder:text-gray-500 focus:outline-none focus:border-gray-400 w-full sm:w-[360px] md:w-[400px] text-base sm:text-lg"
                   required
                   disabled={loading}
                 />
                 <button
-                  className="px-12 py-4 bg-gray-800 text-white font-medium rounded hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 text-lg"
+                  className="px-6 sm:px-8 md:px-12 py-3 sm:py-4 bg-gray-800 text-white font-medium rounded hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 text-base sm:text-lg"
                   type="submit"
                   disabled={loading}
                 >
@@ -78,17 +78,17 @@ export default function Footer() {
           </form>
           
           {/* Accessibility Toggle */}
-          <div className="flex items-center gap-6 mt-8">
-            <span className="text-xl text-gray-800 font-medium">Accessibility: Better contrast</span>
+          <div className="flex items-center gap-4 sm:gap-6 mt-6 sm:mt-8">
+            <span className="text-base sm:text-lg md:text-xl text-gray-800 font-medium">Accessibility: Better contrast</span>
             <button
               onClick={() => setAccessibility(!accessibility)}
-              className={`relative w-16 h-8 rounded-full transition-colors ${
+              className={`relative w-14 sm:w-16 h-7 sm:h-8 rounded-full transition-colors ${
                 accessibility ? 'bg-gray-800' : 'bg-gray-300'
               }`}
             >
               <div
-                className={`absolute top-1 w-6 h-6 bg-white rounded-full transition-transform ${
-                  accessibility ? 'translate-x-9' : 'translate-x-1'
+                className={`absolute top-1 w-5 sm:w-6 h-5 sm:h-6 bg-white rounded-full transition-transform ${
+                  accessibility ? 'translate-x-8 sm:translate-x-9' : 'translate-x-1'
                 }`}
               />
             </button>
@@ -108,10 +108,10 @@ export default function Footer() {
         </div>
 
         {/* Four Column Navigation */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-16">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-10 sm:gap-12 md:gap-16">
           {/* Find a boutique */}
           <div>
-            <h3 className="text-2xl font-medium text-gray-800 mb-8">Find a boutique</h3>
+            <h3 className="text-xl sm:text-2xl font-medium text-gray-800 mb-4 sm:mb-6 md:mb-8">Find a boutique</h3>
             <ul className="space-y-4">
               <li>
                 <Link href="/find-a-boutique" className="text-gray-600 hover:text-gray-800 transition-colors">
@@ -128,7 +128,7 @@ export default function Footer() {
 
           {/* Client Services */}
           <div>
-            <h3 className="text-2xl font-medium text-gray-800 mb-8">Client Services</h3>
+            <h3 className="text-xl sm:text-2xl font-medium text-gray-800 mb-4 sm:mb-6 md:mb-8">Client Services</h3>
             <ul className="space-y-4">
               <li>
                 <Link href="/customer-care/contact" className="text-gray-600 hover:text-gray-800 transition-colors flex items-center gap-2">
@@ -158,7 +158,7 @@ export default function Footer() {
 
           {/* Maison Noamani */}
           <div>
-            <h3 className="text-2xl font-medium text-gray-800 mb-8">Maison Noamani</h3>
+            <h3 className="text-xl sm:text-2xl font-medium text-gray-800 mb-4 sm:mb-6 md:mb-8">Maison Noamani</h3>
             <ul className="space-y-4">
               <li>
                 <Link href="/maison-noamani" className="text-gray-600 hover:text-gray-800 transition-colors flex items-center gap-2">
@@ -181,7 +181,7 @@ export default function Footer() {
 
           {/* Legal */}
           <div>
-            <h3 className="text-2xl font-medium text-gray-800 mb-8">Legal</h3>
+            <h3 className="text-xl sm:text-2xl font-medium text-gray-800 mb-4 sm:mb-6 md:mb-8">Legal</h3>
             <ul className="space-y-4">
               <li>
                 <Link href="/legal/terms" className="text-gray-600 hover:text-gray-800 transition-colors flex items-center gap-2">
@@ -217,10 +217,10 @@ export default function Footer() {
         </div>
 
         {/* Bottom Bar - Social Media, Brand, Region Selector */}
-        <div className="mt-20 pt-8 border-t border-gray-300">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+        <div className="mt-12 sm:mt-16 md:mt-20 pt-6 sm:pt-8 border-t border-gray-300">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6 sm:gap-8">
             {/* Left Section - Social Media Links */}
-            <div className="flex flex-wrap items-center gap-3 text-lg text-gray-700">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-base sm:text-lg text-gray-700">
               <span className="font-medium">Follow us :</span>
               <Link href="#" className="text-gray-700 hover:text-gray-900 transition-colors">
                 Tiktok
@@ -240,16 +240,16 @@ export default function Footer() {
             </div>
 
             {/* Center Section - Brand Logo */}
-            <div className="text-4xl font-serif text-gray-800 tracking-widest">
+            <div className="text-3xl sm:text-4xl font-serif text-gray-800 tracking-widest">
               NOAMANI
             </div>
 
             {/* Right Section - Region and Language Selector */}
-            <div className="flex flex-col items-end">
-              <div className="text-sm text-gray-700 mb-1">
+            <div className="flex flex-col items-center md:items-end">
+              <div className="text-xs sm:text-sm text-gray-700 mb-1">
                 Choose your Country or Region & Language
               </div>
-              <div className="flex items-center gap-2 text-lg text-gray-700">
+              <div className="flex items-center gap-2 text-base sm:text-lg text-gray-700">
                 <span>International version (English)</span>
                 <ChevronRight className="w-4 h-4" />
               </div>

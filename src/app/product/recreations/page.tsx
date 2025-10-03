@@ -66,12 +66,12 @@ export default function RecreationsPage() {
   ];
 
   return (
-    <div className="bg-[#f5f5f5] min-h-screen pb-16 flex flex-col min-h-screen">
+    <div className="bg-[#f5f5f5] min-h-screen pb-16 flex flex-col">
       {/* Hero Section */}
-      <div className="w-full min-h-[480px] flex flex-col md:flex-row justify-center items-stretch mt-28">
+      <div className="w-full min-h-[360px] sm:min-h-[440px] md:min-h-[480px] flex flex-col md:flex-row justify-center items-stretch mt-28 px-4">
         {/* Left: Image */}
         <div className="md:w-1/2 w-full flex items-center justify-center bg-white">
-          <div className="relative w-full h-[260px] md:h-[400px] max-w-[420px] mx-auto">
+          <div className="relative w-full h-[200px] sm:h-[260px] md:h-[400px] max-w-[480px] mx-auto">
             <Image
               src="/boxs.png"
               alt="Recreations"
@@ -82,12 +82,12 @@ export default function RecreationsPage() {
           </div>
         </div>
         {/* Right: Text */}
-        <div className="md:w-1/2 w-full flex flex-col justify-center items-center bg-white px-8 md:px-16 py-10 md:py-0">
+        <div className="md:w-1/2 w-full flex flex-col justify-center items-center bg-white px-6 sm:px-8 md:px-16 py-10 md:py-0">
           <div className="max-w-lg">
-            <h1 className="text-2xl md:text-3xl font-serif tracking-[0.2em] font-semibold mb-6 text-gray-900 uppercase text-center md:text-left">
+            <h1 className="text-2xl sm:text-3xl md:text-3xl font-serif tracking-[0.2em] font-semibold mb-4 sm:mb-6 text-gray-900 uppercase text-center md:text-left">
               Recreations
             </h1>
-            <p className="text-gray-700 text-base md:text-lg leading-relaxed text-center md:text-left">
+            <p className="text-gray-700 text-sm sm:text-base md:text-lg leading-relaxed text-center md:text-left">
               Dive into a world of fragrance nostalgia with our collection of meticulously crafted recreations, paying homage to iconic scents. From the allure of timeless classics to the intrigue of modern favourites, each bottle encapsulates a unique blend of familiarity and innovation. Immerse yourself in the artistry of scent as you explore a range of captivating aromas, meticulously formulated to evoke emotions and memories. Elevate your fragrance experience with our collection, where every scent tells a story of sophistication, elegance, and timeless beauty.
             </p>
           </div>
@@ -133,7 +133,7 @@ export default function RecreationsPage() {
             </div>
           </div>
         </div>
-        <div className="flex gap-8">
+        <div className="flex gap-6 sm:gap-8">
           {/* Sidebar */}
           <aside className="hidden md:block w-56 flex-shrink-0">
             <div className="bg-white rounded-lg border border-gray-200 p-4 mb-6">
@@ -153,18 +153,18 @@ export default function RecreationsPage() {
           </aside>
           {/* Product Grid */}
           <section className="flex-1">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-12">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-8 lg:gap-12">
               {paginatedProducts.map((product, idx) => (
                 <Link
                   key={product.slug}
                   href={`/product/recreations/${product.slug}`}
-                  className="bg-gradient-to-b from-neutral-900 to-black rounded-2xl flex flex-col items-center justify-center aspect-square min-h-[220px] max-w-[220px] mx-auto relative group shadow-xl hover:shadow-2xl hover:scale-105 hover:ring-2 hover:ring-pink-400/40 transition-all duration-300 p-4"
+                  className="bg-gradient-to-b from-neutral-900 to-black rounded-2xl flex flex-col items-center justify-center aspect-square min-h-[200px] w-full max-w-[320px] sm:max-w-[260px] md:max-w-[220px] mx-auto relative group shadow-xl hover:shadow-2xl hover:scale-105 hover:ring-2 hover:ring-pink-400/40 transition-all duration-300 p-4"
                 >
                   <span className="absolute left-3 top-3 bg-black/80 text-[11px] text-white px-2 py-1 rounded uppercase tracking-widest font-semibold">Inspired By</span>
                   <div className="flex-1 flex flex-col items-center justify-center w-full px-2">
                     <div className="text-center w-full flex-1 flex flex-col justify-center items-center">
                       <span
-                        className="text-xl md:text-2xl font-serif text-gray-100 tracking-[0.18em] font-bold uppercase leading-tight break-words whitespace-pre-line drop-shadow overflow-hidden max-h-[4.5em] block"
+                        className="text-xl sm:text-2xl md:text-2xl font-serif text-gray-100 tracking-[0.18em] font-bold uppercase leading-tight break-words whitespace-pre-line drop-shadow overflow-hidden max-h-[4.5em] block"
                         style={{ wordBreak: 'break-word', display: 'block' }}
                         title={product.brand}
                       >

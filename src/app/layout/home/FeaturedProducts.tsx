@@ -55,10 +55,11 @@ export default function FeaturedProducts() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const { country, setCountry } = useCountry();
-  const [quickViewProduct, setQuickViewProduct] = useState(null);
+  const [quickViewProduct, setQuickViewProduct] = useState<any>(null);
+  const [quickViewIndex, setQuickViewIndex] = useState<number | null>(null);
   const [showQuickView, setShowQuickView] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
-  const PRODUCTS_PER_PAGE = 3;
+  const [productsPerPage, setProductsPerPage] = useState(3);
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -75,6 +76,23 @@ export default function FeaturedProducts() {
       }
     };
     fetchProducts();
+  }, []);
+
+  // Responsive items per page
+  useEffect(() => {
+    const updatePerPage = () => {
+      const width = window.innerWidth;
+      if (width < 640) {
+        setProductsPerPage(1);
+      } else if (width < 1024) {
+        setProductsPerPage(2);
+      } else {
+        setProductsPerPage(3);
+      }
+    };
+    updatePerPage();
+    window.addEventListener('resize', updatePerPage);
+    return () => window.removeEventListener('resize', updatePerPage);
   }, []);
 
   useEffect(() => {
@@ -99,11 +117,11 @@ export default function FeaturedProducts() {
 
   // Pagination functions
   const getCurrentProducts = () => {
-    const startIndex = currentPage * PRODUCTS_PER_PAGE;
-    return products.slice(startIndex, startIndex + PRODUCTS_PER_PAGE);
+    const startIndex = currentPage * productsPerPage;
+    return products.slice(startIndex, startIndex + productsPerPage);
   };
 
-  const totalPages = Math.ceil(products.length / PRODUCTS_PER_PAGE);
+  const totalPages = Math.ceil(products.length / productsPerPage) || 1;
 
   const nextPage = () => {
     setCurrentPage((prev) => (prev + 1) % totalPages);
@@ -127,13 +145,42 @@ export default function FeaturedProducts() {
     });
   };
 
-  const handleViewDetails = (product: any) => {
+  const handleViewDetails = (product: any, indexInSlice?: number) => {
+    const slice = getCurrentProducts();
+    const index = typeof indexInSlice === 'number' ? indexInSlice : slice.findIndex((p: any) => (p._id || p.id) === (product._id || product.id));
+    setQuickViewIndex(index >= 0 ? index : 0);
     setQuickViewProduct({
       ...product,
       basePrice: product.basePrice || product.price || 0,
       sizes: product.sizes || defaultSizes,
     });
     setShowQuickView(true);
+  };
+
+  const handleModalPrev = () => {
+    if (quickViewIndex === null) return;
+    const slice = getCurrentProducts();
+    const newIndex = (quickViewIndex - 1 + slice.length) % slice.length;
+    const nextProduct = slice[newIndex];
+    setQuickViewIndex(newIndex);
+    setQuickViewProduct({
+      ...nextProduct,
+      basePrice: nextProduct.basePrice || nextProduct.price || 0,
+      sizes: nextProduct.sizes || defaultSizes,
+    });
+  };
+
+  const handleModalNext = () => {
+    if (quickViewIndex === null) return;
+    const slice = getCurrentProducts();
+    const newIndex = (quickViewIndex + 1) % slice.length;
+    const nextProduct = slice[newIndex];
+    setQuickViewIndex(newIndex);
+    setQuickViewProduct({
+      ...nextProduct,
+      basePrice: nextProduct.basePrice || nextProduct.price || 0,
+      sizes: nextProduct.sizes || defaultSizes,
+    });
   };
 
   const scroll = (
@@ -155,14 +202,14 @@ export default function FeaturedProducts() {
   return (
     <div className="bg-white">
       {/* Bestsellers Section */}
-      <div className="py-16">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="py-10 sm:py-14 md:py-16">
+        <div className="max-w-[1200px] lg:max-w-[1400px] mx-auto px-3 sm:px-6 lg:px-8">
           <motion.h2
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
-            className="flex items-center justify-center gap-4 text-4xl md:text-5xl font-light text-center mb-6 text-black drop-shadow-lg"
+            className="flex items-center justify-center gap-3 sm:gap-4 text-3xl sm:text-4xl md:text-5xl font-light text-center mb-4 sm:mb-6 text-black drop-shadow-lg"
             style={{ fontFamily: 'Didot, serif', letterSpacing: 2 }}
           >
             <span>All Products</span>
@@ -171,23 +218,24 @@ export default function FeaturedProducts() {
             </span>
           </motion.h2>
           <div className="flex justify-center mb-12">
-            <div className="h-1 w-24 rounded-full bg-black shadow-md" />
+            <div className="h-1 w-16 sm:w-24 rounded-full bg-black shadow-md" />
           </div>
 
-          <div className="relative px-4 md:px-6 lg:px-8">
+          <div className="relative px-2 sm:px-4 md:px-6 lg:px-8">
             {/* Left navigation button */}
             <button
               onClick={prevPage}
-              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/80 p-2 rounded-full shadow-lg hover:bg-white transition-colors"
+              className="flex absolute left-1 top-1/2 -translate-y-1/2 z-10 w-10 h-10 items-center justify-center rounded-full bg-white shadow-lg hover:bg-white transition-colors"
+              aria-label="Previous"
             >
-              <ChevronLeft className="w-6 h-6" />
+              <ChevronLeft className="w-5 h-5 text-gray-800" />
             </button>
 
             <div
               ref={scrollContainerRef}
-              className="flex overflow-hidden gap-6 md:gap-8 lg:gap-10 pb-6 justify-center transition-all duration-300"
+              className="flex overflow-hidden gap-4 sm:gap-6 md:gap-8 lg:gap-10 pb-6 justify-center transition-all duration-300"
               style={{ 
-                maxWidth: "1100px",
+                maxWidth: "100%",
                 margin: "0 auto"
               }}
             >
@@ -211,11 +259,11 @@ export default function FeaturedProducts() {
                       duration: 0.6,
                       type: "spring",
                     }}
-                    className="flex-none w-[280px] group px-2 mx-1"
+                    className="flex-none w-[230px] sm:w-[260px] md:w-[280px] group px-1 sm:px-2 mx-1"
                   >
                     <div
                       className="relative aspect-[2/3] bg-gradient-to-br from-pink-100 to-blue-100 overflow-hidden mb-4 rounded-2xl shadow-xl group-hover:shadow-2xl transition-shadow duration-300"
-                      onClick={() => handleViewDetails(product)}
+                      onClick={() => handleViewDetails(product, index)}
                     >
                       <Image
                         src={product.image}
@@ -249,13 +297,13 @@ export default function FeaturedProducts() {
                       )}
                     </div>
                     <div className="text-center">
-                      <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-pink-600 transition-colors duration-300" style={{ fontFamily: 'Didot, serif', fontWeight: 'bold' }}>
+                      <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-1 group-hover:text-pink-600 transition-colors duration-300" style={{ fontFamily: 'Didot, serif', fontWeight: 'bold' }}>
                         {product.name}
                       </h3>
                       <p className="text-xs text-gray-500 mb-2">
                         {product.subtext}
                       </p>
-                      <p className="text-xl font-extrabold text-pink-600 mb-2">
+                      <p className="text-lg sm:text-xl font-extrabold text-pink-600 mb-2">
                         {isClient && typeof product.price === "number"
                           ? `${getPrice(product.price).symbol}${
                               getPrice(product.price).value
@@ -271,7 +319,7 @@ export default function FeaturedProducts() {
                     >
                       <button
                         onClick={() => handleAddToCart(product)}
-                        className="w-[80%] mx-auto bg-black text-white py-1.5 text-sm rounded-full font-semibold shadow-lg hover:bg-gray-800 transition-colors duration-200"
+                        className="w-[85%] sm:w-[80%] mx-auto bg-black text-white py-1.5 text-xs sm:text-sm rounded-full font-semibold shadow-lg hover:bg-gray-800 transition-colors duration-200"
                         style={{ display: 'block' }}
                       >
                         Add to Cart
@@ -284,33 +332,43 @@ export default function FeaturedProducts() {
             {/* Right navigation button */}
             <button
               onClick={nextPage}
-              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/80 p-2 rounded-full shadow-lg hover:bg-white transition-colors"
+              className="flex absolute right-1 top-1/2 -translate-y-1/2 z-10 w-10 h-10 items-center justify-center rounded-full bg-white shadow-lg hover:bg-white transition-colors"
+              aria-label="Next"
             >
-              <ChevronRight className="w-6 h-6" />
+              <ChevronRight className="w-5 h-5 text-gray-800" />
             </button>
           </div>
 
-          {/* Page indicators */}
+          {/* Page indicators (show max 3 dots at a time) */}
           {totalPages > 1 && (
             <div className="flex justify-center mt-6 gap-2">
-              {Array.from({ length: totalPages }).map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentPage(index)}
-                  className={`w-3 h-3 rounded-full transition-colors ${
-                    currentPage === index
-                      ? 'bg-gray-800'
-                      : 'bg-gray-300'
-                  }`}
-                />
-              ))}
+              {(() => {
+                const windowSize = 3;
+                const half = Math.floor(windowSize / 2);
+                let start = Math.max(0, currentPage - half);
+                let end = Math.min(totalPages - 1, start + windowSize - 1);
+                // If we don't have enough at the end, shift start back
+                start = Math.max(0, end - windowSize + 1);
+                const pages = [] as number[];
+                for (let i = start; i <= end; i += 1) pages.push(i);
+                return pages.map((index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentPage(index)}
+                    className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full transition-colors ${
+                      currentPage === index ? 'bg-gray-800' : 'bg-gray-300'
+                    }`}
+                    aria-label={`Go to page ${index + 1}`}
+                  />
+                ));
+              })()}
             </div>
           )}
         </div>
       </div>
 
       {/* Large Perfume Image Section */}
-      <div className="relative h-[600px] w-full overflow-hidden">
+      <div className="relative h-[360px] sm:h-[480px] md:h-[600px] w-full overflow-hidden">
         <Image
           src="/Home/Home-center.jpg"
           alt="Luxury Perfume"
@@ -323,7 +381,7 @@ export default function FeaturedProducts() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-4xl md:text-5xl font-light mb-4"
+            className="text-2xl sm:text-3xl md:text-5xl font-light mb-2 sm:mb-4 text-center px-4"
             style={{ fontFamily: 'Didot, serif' }}
           >
             Discover Your Signature Scent
@@ -333,7 +391,7 @@ export default function FeaturedProducts() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
-            className="text-lg md:text-xl mb-8"
+            className="text-sm sm:text-base md:text-xl mb-4 sm:mb-8 px-4 text-center"
           >
             Explore our collection of luxury fragrances
           </motion.p>
@@ -342,7 +400,7 @@ export default function FeaturedProducts() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.4 }}
-            className="bg-white text-black px-8 py-3 rounded-full hover:bg-gray-100 transition-colors"
+            className="bg-white text-black px-6 sm:px-8 py-2.5 sm:py-3 rounded-full hover:bg-gray-100 transition-colors text-sm"
           >
             Shop Now
           </motion.button>
@@ -350,12 +408,12 @@ export default function FeaturedProducts() {
       </div>
 
       {/* Features Banner */}
-      <div className="py-8 bg-gray-50 overflow-hidden">
+      <div className="py-6 sm:py-8 bg-gray-50 overflow-hidden">
         <div className="flex items-center justify-start gap-4 animate-scroll">
           {features.concat(features).map((feature, index) => (
             <span
               key={index}
-              className="text-gray-600 whitespace-nowrap text-sm"
+              className="text-gray-600 whitespace-nowrap text-xs sm:text-sm"
             >
               {feature} <span className="mx-4">·</span>
             </span>
@@ -433,6 +491,8 @@ export default function FeaturedProducts() {
         open={showQuickView}
         onClose={() => setShowQuickView(false)}
         product={quickViewProduct}
+        onPrev={handleModalPrev}
+        onNext={handleModalNext}
       />
 
       <style jsx>{`
