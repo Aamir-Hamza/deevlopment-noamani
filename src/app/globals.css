@@ -1,0 +1,410 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Didot:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap');
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-rgb: 255, 255, 255;
+  --background-end-rgb: 255, 255, 255;
+}
+
+body {
+  background: rgb(var(--background-rgb));
+} 
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+    --accent: 0 0% 96.1%;
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 0 0% 3.9%;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+    --radius: 0.5rem;
+  }
+  .dark {
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 9%;
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 83.1%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
+}
+@layer base {
+ 
+  @layer base {
+    body {
+      @apply bg-background text-foreground;
+    }
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+.bulb-glow-animation {
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, #fffbe6 0%, rgba(255, 255, 200, 0.7) 10%, #ffe066 20%, #ffd700 35%, rgba(255, 215, 0, 0.7) 55%, rgba(255, 215, 0, 0.3) 75%, transparent 100%),
+    radial-gradient(circle, #ffd700 0%, transparent 80%);
+  filter: blur(10px) brightness(1.2) saturate(1.3);
+  box-shadow:
+    0 0 60px 30px #ffd70099,
+    0 0 120px 60px #fffbe699,
+    0 0 200px 100px #ffd70044;
+  animation: bulb-pulse 2.2s ease-in-out infinite, bulb-shimmer 1.8s linear infinite;
+}
+
+@keyframes bulb-pulse {
+  0%, 100% { opacity: 0.92; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
+@keyframes bulb-shimmer {
+  0%, 100% { filter: blur(10px) brightness(1.2) saturate(1.3); }
+  20% { filter: blur(12px) brightness(1.3) saturate(1.5); }
+  40% { filter: blur(9px) brightness(1.1) saturate(1.2); }
+  60% { filter: blur(13px) brightness(1.4) saturate(1.6); }
+  80% { filter: blur(10px) brightness(1.2) saturate(1.3); }
+}
+
+.text-shadow-gold {
+  text-shadow: 0 0 16px #FFD700, 0 2px 8px #FFA500, 0 1px 0 #fff;
+}
+
+@keyframes text-float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-text-float {
+  animation: text-float 4s ease-in-out infinite;
+}
+
+.font-playfair {
+  font-family: 'Playfair Display', serif;
+}
+
+.font-orbitron {
+  font-family: 'Orbitron', sans-serif;
+}
+
+/* Luxury gold gradient and shimmer for hero text */
+.luxury-shimmer {
+  background: linear-gradient(90deg, #bfa14a 10%, #fffbe6 40%, #bfa14a 60%, #fffbe6 90%);
+  background-size: 200% auto;
+  color: transparent;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmerGold 2.5s linear infinite;
+  text-shadow: 0 2px 16px rgba(191,161,74,0.25), 0 1px 2px #fffbe6;
+}
+@keyframes shimmerGold {
+  0% { background-position: 200% center; }
+  100% { background-position: 0% center; }
+}
+.subtitle-shimmer {
+  background: linear-gradient(90deg, #fffbe6 30%, #bfa14a 70%);
+  background-size: 200% auto;
+  color: transparent;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmerGold 4s linear infinite;
+  font-family: 'Playfair Display', serif;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+.text-gold-200\/90 {
+  color: #fffbe6;
+}
+
+@keyframes buttonShimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.button-shimmer {
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.button-shimmer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 200%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  animation: buttonShimmer 3s infinite;
+  z-index: -1;
+}
+
+/* Golden glow animation for the modal box */
+@keyframes modal-glow {
+  0% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.4), inset 0 0 5px rgba(255, 215, 0, 0.2); }
+  50% { box-shadow: 0 0 40px rgba(255, 215, 0, 0.9), inset 0 0 15px rgba(255, 215, 0, 0.5); }
+  100% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.4), inset 0 0 5px rgba(255, 215, 0, 0.2); }
+}
+
+.glow-animation {
+  animation: modal-glow 2.8s ease-in-out infinite;
+}
+
+@keyframes text-shimmer-admin {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes admin-panel-float {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-5px) scale(1.05); }
+}
+
+/* New keyframes for glitch and flicker */
+@keyframes admin-text-flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+@keyframes glitch-effect {
+  0% {
+    text-shadow: 0.05em 0 0 #00ffff, -0.05em -0.025em 0 #ff00ff;
+    transform: translate(0.01em, 0.01em);
+  }
+  15% {
+    text-shadow: -0.05em -0.025em 0 #00ffff, 0.025em 0.025em 0 #ff00ff;
+    transform: translate(0.01em, -0.01em);
+  }
+  30% {
+    text-shadow: 0.025em 0.05em 0 #00ffff, -0.05em -0.025em 0 #ff00ff;
+    transform: translate(-0.01em, 0.01em);
+  }
+  45% {
+    text-shadow: -0.025em -0.025em 0 #00ffff, 0.05em 0 0 #ff00ff;
+    transform: translate(0.01em, 0.01em);
+  }
+  60% {
+    text-shadow: 0.05em 0 0 #00ffff, -0.025em 0.05em 0 #ff00ff;
+    transform: translate(0.01em, -0.01em);
+  }
+  75% {
+    text-shadow: -0.05em 0.025em 0 #00ffff, 0.025em -0.05em 0 #ff00ff;
+    transform: translate(-0.01em, 0.01em);
+  }
+  90% {
+    text-shadow: 0.025em -0.05em 0 #00ffff, -0.05em 0 0 #ff00ff;
+    transform: translate(0.01em, 0.01em);
+  }
+  100% {
+    text-shadow: 0 0 0 #00ffff, 0 0 0 #ff00ff;
+    transform: translate(0, 0);
+  }
+}
+
+.admin-text-shimmer {
+  background: none; /* Remove previous gradient background */
+  color: #00ffff; /* Base text color */
+  -webkit-text-fill-color: #00ffff; /* For webkit browsers */
+  background-clip: text; /* Retain for potential future use or fallback */
+  -webkit-background-clip: text; /* Retain for potential future use or fallback */
+  animation: admin-text-flicker 0.1s infinite alternate, glitch-effect 1.5s steps(10, start) infinite;
+  text-shadow:
+    0 0 10px rgba(0, 255, 255, 0.8),  /* Soft cyan glow */
+    0 0 20px rgba(0, 255, 255, 0.6),
+    0 0 30px rgba(255, 0, 255, 0.7),  /* Soft magenta glow */
+    0 0 40px rgba(255, 0, 255, 0.5);
+  position: relative;
+  display: inline-block;
+}
+
+.all-products-navbar-black .navbar, 
+.all-products-navbar-black .navbar * {
+  color: #111 !important;
+}
+
+@keyframes gold-shimmer {
+  0% { box-shadow: 0 0 0 0 #FFD70044; border-color: #FFD700; }
+  50% { box-shadow: 0 0 24px 8px #FFD70088; border-color: #fffbe6; }
+  100% { box-shadow: 0 0 0 0 #FFD70044; border-color: #FFD700; }
+}
+.animate-gold-shimmer {
+  animation: gold-shimmer 2.5s infinite;
+}
+.button-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.button-shimmer::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 200%; height: 100%;
+  background: linear-gradient(90deg, transparent, #FFD70055, transparent);
+  animation: buttonShimmer 2.5s infinite;
+  z-index: 0;
+}
+@keyframes buttonShimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+.text-shadow-gold {
+  text-shadow: 0 0 16px #FFD700, 0 2px 8px #FFA500, 0 1px 0 #fff;
+}
+
+/* --- LUXURY ENHANCEMENT CLASSES FOR PERFUME SECTIONS --- */
+
+.shimmer-underline {
+  background: linear-gradient(90deg, #bfa14a 25%, #fffbe6 50%, #bfa14a 75%);
+  background-size: 400px 100%;
+  animation: shimmer 2s infinite linear;
+}
+@keyframes shimmer {
+  0% { background-position: -200px 0; }
+  100% { background-position: 200px 0; }
+}
+
+.glassmorphism-strong {
+  background: rgba(255,255,255,0.65)!important;
+  box-shadow: 0 12px 48px 0 rgba(191,161,74,0.12), 0 2px 8px 0 #fffbe6cc;
+  backdrop-filter: blur(18px)!important;
+  border-radius: 28px!important;
+  border: 2.5px solid rgba(191,161,74,0.18);
+}
+
+.gold-animated-border {
+  border: 3px solid;
+  border-image: linear-gradient(90deg, #bfa14a, #fffbe6, #bfa14a) 1;
+  animation: border-move 3s linear infinite;
+}
+@keyframes border-move {
+  0% { border-image-source: linear-gradient(90deg, #bfa14a, #fffbe6, #bfa14a); }
+  100% { border-image-source: linear-gradient(270deg, #bfa14a, #fffbe6, #bfa14a); }
+}
+
+.luxury-frame {
+  border: 4px solid #bfa14a;
+  box-shadow: 0 4px 32px 0 #bfa14a33, 0 1.5px 8px 0 #fffbe6aa;
+  border-radius: 20px;
+  transition: transform 0.3s;
+}
+.luxury-frame:hover {
+  transform: scale(1.04) rotate(-1deg);
+}
+
+.btn-gold-shine {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(90deg, #bfa14a 0%, #fffbe6 100%);
+  color: #fffbe6;
+  border: 2px solid #bfa14a;
+  font-weight: bold;
+  letter-spacing: 2px;
+  box-shadow: 0 2px 16px #bfa14a33;
+}
+.btn-gold-shine::after {
+  content: '';
+  position: absolute;
+  left: -75%;
+  top: 0;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(120deg, transparent, #fffbe6aa, transparent);
+  transform: skewX(-20deg);
+  transition: left 0.5s;
+}
+.btn-gold-shine:hover::after {
+  left: 120%;
+  transition: left 0.5s;
+}
+
+.glow-icon {
+  text-shadow: 0 0 12px #fffbe6, 0 0 24px #bfa14a;
+  animation: glow 2s infinite alternate;
+}
+@keyframes glow {
+  0% { filter: drop-shadow(0 0 8px #fffbe6) drop-shadow(0 0 16px #bfa14a); }
+  100% { filter: drop-shadow(0 0 24px #fffbe6) drop-shadow(0 0 32px #bfa14a); }
+}
+
+.fade-slide-in {
+  opacity: 0;
+  transform: translateY(40px);
+  animation: fadeSlideIn 1s cubic-bezier(.4,0,.2,1) forwards;
+}
+@keyframes fadeSlideIn {
+  0% { opacity: 0; transform: translateY(40px);}
+  100% { opacity: 1; transform: translateY(0);}
+}
+
+/* --- END LUXURY ENHANCEMENT CLASSES --- */
+
+/* Animated divider icon motion */
+@keyframes divider-move {
+  0% { left: 0; }
+  100% { left: 95%; }
+}
+.animate-divider-move {
+  animation: divider-move 2.5s linear infinite alternate;
+  position: absolute;
+}

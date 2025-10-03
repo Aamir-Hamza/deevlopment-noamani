@@ -1,0 +1,87 @@
+@import url('https://fonts.googleapis.com/css2?family=Abril+Fatface&display=swap');
+
+.logo-animated {
+  transition: box-shadow 0.4s cubic-bezier(.4,2,.6,1), filter 0.4s cubic-bezier(.4,2,.6,1), transform 0.4s cubic-bezier(.4,2,.6,1);
+  box-shadow: 0 0 24px 0 rgba(255, 221, 51, 0.4);
+  position: relative;
+  z-index: 1;
+}
+.logo-animated:hover {
+  box-shadow: 0 0 60px 10px rgba(255, 221, 51, 0.8), 0 0 0 8px rgba(255, 221, 51, 0.2);
+  filter: brightness(1.2) drop-shadow(0 0 10px #FFD700);
+  transform: scale(1.08) translateY(-6px);
+}
+.logo-animated::before {
+  content: '';
+  position: absolute;
+  inset: -12px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #FFD70055 60%, transparent 100%);
+  box-shadow: 0 0 40px 10px #FFD70088, 0 0 0 0 #FFD70044;
+  animation: gold-pulse 2.5s ease-in-out infinite, gold-rotate 6s linear infinite;
+  z-index: -1;
+  pointer-events: none;
+}
+.input-animated {
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+.input-animated:focus, .input-animated:hover {
+  border-color: #FFD700 !important;
+  box-shadow: 0 0 0 2px #FFD70033;
+}
+@keyframes gold-pulse {
+  0%, 100% { box-shadow: 0 0 40px 10px #FFD70088, 0 0 0 0 #FFD70044; }
+  50% { box-shadow: 0 0 80px 24px #FFD700cc, 0 0 0 12px #FFD70066; }
+}
+@keyframes gold-rotate {
+  0% { transform: rotate(0deg) scale(1); }
+  100% { transform: rotate(360deg) scale(1.04); }
+}
+@keyframes float-premium {
+  0%, 100% { transform: translateY(0) scale(1.04) rotate(-1deg); }
+  20% { transform: translateY(-10px) scale(1.07) rotate(1deg); }
+  50% { transform: translateY(8px) scale(1.03) rotate(-2deg); }
+  70% { transform: translateY(-6px) scale(1.06) rotate(2deg); }
+}
+.animate-float-premium {
+  animation: float-premium 4.5s ease-in-out infinite;
+}
+
+.noamani-heading {
+  font-family: 'Abril Fatface', serif !important;
+  font-size: 5rem !important;
+  font-weight: 900 !important;
+  background: linear-gradient(90deg, #FFD700, #FF9900, #FFD700, #FF9900) !important;
+  background-size: 200% auto !important;
+  color: transparent !important;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  text-fill-color: transparent !important;
+  text-shadow: 0 4px 32px #ffb30088, 0 1px 1px #00000055 !important;
+  opacity: 0 !important;
+  transform: scale(0.8) !important;
+  animation: fadeZoomIn 1.2s cubic-bezier(0.23, 1, 0.32, 1) forwards, gradientMove 3s linear infinite !important;
+  z-index: 50 !important;
+  position: relative !important;
+}
+
+@keyframes fadeZoomIn {
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+.animate-glow {
+  animation: glow 2s infinite alternate;
+}
+@keyframes glow {
+  0% { filter: drop-shadow(0 0 6px #00eaff) drop-shadow(0 0 12px #00eaff); }
+  100% { filter: drop-shadow(0 0 18px #00eaff) drop-shadow(0 0 32px #00eaff); }
+} 

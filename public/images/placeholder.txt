@@ -1,0 +1,11 @@
+This directory contains product images. Please add the following images:
+- dior-sauvage.jpg
+- chanel-5.jpg
+- bleu-chanel.jpg
+- jo-malone.jpg
+- tom-ford.jpg
+- ysl-libre.jpg
+- versace-eros.jpg
+- marc-jacobs.jpg
+- creed-aventus.jpg
+- byredo.jpg 
