@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { UserCircleIcon, PencilIcon, LockClosedIcon, EyeIcon, EyeSlashIcon, CheckIcon, XMarkIcon } from "@heroicons/react/24/solid";
-import { User, Mail, Phone, MapPin, Calendar, ShieldCheck, ShoppingBag, Heart, Settings, Logout } from "lucide-react";
+import { User, Mail, Phone, MapPin, Calendar, ShieldCheck, ShoppingBag, Heart, Settings, LogOut } from "lucide-react";
 import Image from "next/image";
 import LazyLoader from '@/components/ui/LazyLoader';
 import { Button } from '@/components/ui/button';

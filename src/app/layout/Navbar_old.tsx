@@ -66,6 +66,7 @@ export default function Navbar() {
   const [adminInfo, setAdminInfo] = useState<AdminInfo | null>(null);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showCountryDropdown, setShowCountryDropdown] = useState(false);
   const [cartItemsCount, setCartItemsCount] = useState(0);
   const [isMounted, setIsMounted] = useState(false);
   const [profileImg, setProfileImg] = useState<string | null>(null);
@@ -84,6 +85,14 @@ export default function Navbar() {
 
 
   const radius = 48; // px, distance from globe
+
+  type CountryInfo = { code: string; flag: string; label: string };
+  const countryList: CountryInfo[] = [
+    { code: 'IN', flag: 'https://flagcdn.com/w20/in.png', label: 'India' },
+    { code: 'US', flag: 'https://flagcdn.com/w20/us.png', label: 'United States' },
+    { code: 'GB', flag: 'https://flagcdn.com/w20/gb.png', label: 'United Kingdom' },
+    { code: 'AE', flag: 'https://flagcdn.com/w20/ae.png', label: 'UAE' },
+  ];
 
   useEffect(() => {
     setIsMounted(true);
@@ -730,7 +739,7 @@ export default function Navbar() {
                             className="relative flex items-center justify-center"
                             style={{ width: 60, height: 60 }}
                           >
-                            {[].map((country, i) => {
+                            {countryList.map((country, i) => {
                               const angle =
                                 (i / countryList.length) * 2 * Math.PI -
                                 Math.PI / 2;
@@ -764,7 +773,7 @@ export default function Navbar() {
                                     damping: 20,
                                     delay: 0.05 * i,
                                   }}
-                                  onClick={() => {}}
+                                  onClick={() => setShowCountryDropdown(false)}
                                   whileHover={{
                                     scale: 1.2,
                                     boxShadow: "0 0 20px #FFD700",
@@ -1166,7 +1175,7 @@ export default function Navbar() {
                               className="relative flex items-center justify-center"
                               style={{ width: 60, height: 60 }}
                             >
-                              {[].map((country, i) => {
+                              {countryList.map((country, i) => {
                                 const angle =
                                   (i / countryList.length) * 2 * Math.PI -
                                   Math.PI / 2;
@@ -1200,7 +1209,7 @@ export default function Navbar() {
                                       damping: 20,
                                       delay: 0.05 * i,
                                     }}
-                                    onClick={() => {}}
+                                  onClick={() => setShowCountryDropdown(false)}
                                     whileHover={{
                                       scale: 1.2,
                                       boxShadow: "0 0 20px #FFD700",
@@ -1415,7 +1424,7 @@ export default function Navbar() {
                               className="relative flex items-center justify-center"
                               style={{ width: 60, height: 60 }}
                             >
-                              {[].map((country, i) => {
+                              {countryList.map((country, i) => {
                                 const angle =
                                   (i / countryList.length) * 2 * Math.PI -
                                   Math.PI / 2;
@@ -1449,7 +1458,7 @@ export default function Navbar() {
                                       damping: 20,
                                       delay: 0.05 * i,
                                     }}
-                                    onClick={() => {}}
+                                  onClick={() => setShowCountryDropdown(false)}
                                     whileHover={{
                                       scale: 1.2,
                                       boxShadow: "0 0 20px #FFD700",
@@ -1652,7 +1661,7 @@ export default function Navbar() {
                               className="relative flex items-center justify-center"
                               style={{ width: 60, height: 60 }}
                             >
-                              {[].map((country, i) => {
+                              {countryList.map((country: CountryInfo, i) => {
                                 const angle =
                                   (i / countryList.length) * 2 * Math.PI -
                                   Math.PI / 2;
@@ -1686,7 +1695,7 @@ export default function Navbar() {
                                       damping: 20,
                                       delay: 0.05 * i,
                                     }}
-                                    onClick={() => {}}
+                                      onClick={() => setShowCountryDropdown(false)}
                                     whileHover={{
                                       scale: 1.2,
                                       boxShadow: "0 0 20px #FFD700",
