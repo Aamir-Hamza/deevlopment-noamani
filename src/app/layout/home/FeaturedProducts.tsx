@@ -52,7 +52,7 @@ export default function FeaturedProducts() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const allProductsScrollRef = useRef<HTMLDivElement>(null);
 
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { country, setCountry } = useCountry();
   const [quickViewProduct, setQuickViewProduct] = useState<any>(null);
