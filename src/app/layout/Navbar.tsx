@@ -88,11 +88,12 @@ export default function Navbar() {
 
   useEffect(() => {
     const handleScroll = () => {
-      // Always scrolled style for /about/shipping, /product/recreations, and /shop
+      // Always scrolled style for /about/shipping, /product/recreations, /shop, and all product pages
       if (
         pathname === '/about/shipping' ||
         pathname === '/product/recreations' ||
-        pathname === '/shop'
+        pathname === '/shop' ||
+        (pathname && pathname.startsWith("/product/"))
       ) {
         setIsScrolled(true);
       } else {
@@ -300,13 +301,13 @@ export default function Navbar() {
       <header
         className={cn(
           pathname === "/about/shipping" || pathname === "/about/returns"
-            ? "fixed top-0 left-0 right-0 z-50 bg-white"
+            ? "fixed top-0 left-0 right-0 z-50 bg-white shadow-sm"
             : pathname && pathname.startsWith("/product/")
-              ? "fixed top-0 left-0 right-0 z-50 bg-white"
+              ? "fixed top-0 left-0 right-0 z-50 bg-white shadow-md"
               : "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
-          // On product details page, always use white background
+          // On product details page, always use white background with shadow
           pathname?.startsWith("/product/")
-            ? "bg-white"
+            ? "bg-white shadow-md"
             : (isScrolled || isMobileMenuOpen)
               ? "bg-white shadow-sm"
               : "bg-black/30 backdrop-blur-md" // <-- light black + blur for luxury look
@@ -327,10 +328,15 @@ export default function Navbar() {
           pathname === "/about/returns" ||
           pathname === "/about/faqs" ? (
             <div
-              className="relative flex items-center justify-between h-16 md:h-20 items-center hidden md:flex"
+              className={cn(
+                "relative flex items-center justify-between hidden md:flex",
+                pathname && pathname.startsWith("/product/")
+                  ? "h-16 md:h-18 py-2"
+                  : "h-16 md:h-20"
+              )}
               style={{
                 transition: "height 0.5s",
-                height: "64px",
+                minHeight: pathname && pathname.startsWith("/product/") ? "64px" : "64px",
                 alignItems: "center",
               }}
             >
@@ -341,7 +347,14 @@ export default function Navbar() {
               >
                 <Link
                   href="/"
-                  className={`transition-all duration-500 font-extrabold tracking-wider select-none ${italianno.className} ${pathname === '/shop' ? 'text-lg md:text-xl' : 'text-2xl md:text-3xl'}`}
+                  className={cn(
+                    `transition-all duration-500 font-extrabold tracking-wider select-none ${italianno.className}`,
+                    pathname === '/shop' 
+                      ? 'text-lg md:text-xl' 
+                      : pathname && pathname.startsWith("/product/")
+                        ? 'text-xl md:text-2xl'
+                        : 'text-2xl md:text-3xl'
+                  )}
                   style={{
                     letterSpacing: "0.08em",
                     color: "#000",
@@ -351,12 +364,12 @@ export default function Navbar() {
                 </Link>
               </div>
               {/* Nav Links (center, less space when scrolled) */}
-              <nav className="hidden md:flex flex-1 justify-center">
+              <nav className="hidden md:flex flex-1 justify-center px-4">
                 <ul
                   className={cn(
-                    "flex items-center justify-between",
+                    "flex items-center justify-between gap-6",
                     pathname && pathname.startsWith("/product/")
-                      ? "w-full max-w-3xl"
+                      ? "w-full max-w-3xl gap-4"
                       : (isFixedNavPage || !isScrolled)
                         ? "w-full max-w-3xl"
                         : "w-full max-w-2xl"
@@ -380,13 +393,16 @@ export default function Navbar() {
                       <Link
                         href={item.href}
                         className={cn(
-                          "text-lg tracking-wider py-2 transition-colors duration-200 flex items-center font-semibold",
+                          "tracking-wider py-2 transition-colors duration-200 flex items-center font-semibold",
+                          pathname && pathname.startsWith("/product/")
+                            ? "text-base"
+                            : "text-lg",
                           pathname &&
                             (pathname.startsWith("/product/") ||
                               pathname === "/about/shipping" ||
                               pathname === "/about/returns" ||
                               pathname === "/about/faqs")
-                            ? "text-black"
+                            ? "text-black hover:text-gray-600"
                               : isWhite
                                 ? "text-white"
                             : "text-black",
@@ -433,7 +449,12 @@ export default function Navbar() {
               </nav>
               {/* Right side icons (less space when scrolled) */}
               <div
-                className="flex flex-row items-center space-x-4 ml-auto items-center"
+                className={cn(
+                  "flex flex-row items-center ml-auto",
+                  pathname && pathname.startsWith("/product/")
+                    ? "space-x-3"
+                    : "space-x-4"
+                )}
                 style={{ alignItems: "center", height: "100%" }}
               >
                 <button
@@ -968,7 +989,12 @@ export default function Navbar() {
             </div>
           )}
           {/* MOBILE NAVBAR: Only this should remain for mobile (md:hidden) */}
-          <div className="flex md:hidden w-full flex-row items-center justify-between h-14 px-2 gap-4">
+          <div className={cn(
+            "flex md:hidden w-full flex-row items-center justify-between px-2 gap-4",
+            pathname && pathname.startsWith("/product/")
+              ? "h-14 bg-white shadow-md"
+              : "h-14"
+          )}>
             {isScrolled ? (
               // SCROLLED: ONLY NEW NAVBAR
               <>

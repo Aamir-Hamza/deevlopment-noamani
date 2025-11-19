@@ -14,6 +14,7 @@ export default function RecreationsPage() {
   const PRODUCTS_PER_PAGE = 16;
   const [page, setPage] = useState(1);
   const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
+  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const sortDropdownRef = useRef<HTMLDivElement>(null);
 
   // Close sort dropdown on outside click
@@ -98,8 +99,18 @@ export default function RecreationsPage() {
       <div className="max-w-7xl mx-auto px-2 md:px-6 mt-16 flex-1">
         {/* Top Bar */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
-          <div className="text-gray-700 text-sm md:text-base font-medium">
-            {sortedProducts.length} PRODUCTS
+          <div className="flex items-center justify-between">
+            <div className="text-gray-700 text-sm md:text-base font-medium">
+              {sortedProducts.length} PRODUCTS
+            </div>
+            {/* Mobile Filter Button */}
+            <button
+              onClick={() => setMobileFilterOpen(true)}
+              className="md:hidden flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 bg-white shadow-md font-semibold text-gray-900 text-sm transition-all hover:border-blue-400 hover:shadow-lg"
+            >
+              <FaFilter className="text-blue-400" />
+              Filters
+            </button>
           </div>
           <div className="flex items-center gap-4">
             {/* Sort dropdown (modern minimal floating card) */}
@@ -151,6 +162,41 @@ export default function RecreationsPage() {
               </label>
             </div>
           </aside>
+          {/* Mobile Filter Drawer */}
+          {mobileFilterOpen && (
+            <>
+              <div 
+                className="fixed inset-0 bg-black/50 z-40 md:hidden"
+                onClick={() => setMobileFilterOpen(false)}
+              ></div>
+              <aside className="fixed top-0 right-0 h-full w-64 bg-white shadow-2xl z-50 md:hidden overflow-y-auto transform transition-transform duration-300">
+                <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+                  <h3 className="font-semibold text-gray-800">Filters</h3>
+                  <button
+                    onClick={() => setMobileFilterOpen(false)}
+                    className="text-gray-500 hover:text-gray-900 text-2xl"
+                  >
+                    ×
+                  </button>
+                </div>
+                <div className="p-4">
+                  <div className="font-semibold text-gray-800 mb-2">AVAILABILITY</div>
+                  <label className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      className="accent-pink-600"
+                      checked={inStockOnly}
+                      onChange={e => {
+                        setInStockOnly(e.target.checked);
+                        setPage(1);
+                        setMobileFilterOpen(false);
+                      }}
+                    /> In stock only
+                  </label>
+                </div>
+              </aside>
+            </>
+          )}
           {/* Product Grid */}
           <section className="flex-1">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-8 lg:gap-12">
