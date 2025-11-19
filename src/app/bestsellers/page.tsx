@@ -8,8 +8,21 @@ import { Star, ShoppingCart } from 'lucide-react';
 import { useCountry } from '@/hooks/useCountry';
 import { formatPrice } from '@/lib/priceUtils';
 import { useCart } from '@/context/CartContext';
+
 import LazyLoader from '@/components/ui/LazyLoader';
+
 import Footer from '@/components/Footer';
+
+// Format price in Indian Rupee format (raw database price, no conversion)
+const formatIndianRupee = (price: number) => {
+  if (!price || isNaN(price)) return '₹0';
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(price);
+};
 
 export default function BestsellersPage() {
   const [products, setProducts] = useState<any[]>([]);
@@ -135,7 +148,7 @@ export default function BestsellersPage() {
                   <p className="text-xs text-gray-500 mb-2">{product.subtext}</p>
                   <p className="text-xl font-extrabold text-pink-600 mb-2">
                     {typeof product.price === 'number'
-                      ? formatPrice(product.price, country)
+                      ? formatIndianRupee(product.price)
                       : product.price}
                   </p>
                   <div className="flex items-center justify-center gap-2 mb-2">

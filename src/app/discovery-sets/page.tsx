@@ -9,6 +9,17 @@ import { useState } from 'react';
 import { useCountry } from '@/hooks/useCountry';
 import { formatPrice } from '@/lib/priceUtils';
 
+// Format price in Indian Rupee format (raw database price, no conversion)
+const formatIndianRupee = (price: number) => {
+  if (!price || isNaN(price)) return '₹0';
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(price);
+};
+
 const discoverySets = [
   {
     id: 1,
@@ -191,7 +202,7 @@ export default function DiscoverySetsPage() {
                   </span>
                 </div>
 
-                <p className="text-sm font-medium mb-4">{formatPrice(product.price, country)}</p>
+                <p className="text-sm font-medium mb-4">{formatIndianRupee(product.price)}</p>
 
                 <motion.button
                   whileHover={{ scale: 1.05 }}

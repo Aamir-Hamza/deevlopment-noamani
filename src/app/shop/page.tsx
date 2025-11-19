@@ -8,11 +8,25 @@ import { Filter, Star, ChevronDown, ShoppingCart } from "lucide-react";
 import { useCountry } from "@/hooks/useCountry";
 import { formatPrice } from "@/lib/priceUtils";
 import { useCart } from "@/context/CartContext";
+
 import ProductQuickViewModal from "@/app/components/ProductQuickViewModal";
+
 import { toast } from "react-hot-toast";
+
 import { Product } from "@/types/product";
 import LazyLoader from "@/components/ui/LazyLoader";
 import Footer from '@/components/Footer';
+
+// Format price in Indian Rupee format (raw database price, no conversion)
+const formatIndianRupee = (price: number) => {
+  if (!price || isNaN(price)) return '₹0';
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(price);
+};
 
 const categories = ["All", "Floral", "Fresh", "Oriental", "Sets"];
 const sortOptions = [
@@ -244,7 +258,7 @@ export default function ShopPage() {
                     ({(product.reviews || 0).toLocaleString()} reviews)
                   </span>
                 </div>
-                <p className="text-xl font-extrabold text-pink-600 mb-4">{formatPrice(product.price, country)}</p>
+                <p className="text-xl font-extrabold text-pink-600 mb-4">{formatIndianRupee(product.price)}</p>
                 <div className="flex justify-center mt-4">
                   <button
                     onClick={(e) => handleAddToCart(e, product)}

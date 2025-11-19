@@ -129,18 +129,15 @@ export default function FeaturedProducts() {
     setCountry(selected);
   }, [setCountry]);
 
-  const getPrice = (basePrice: number) => {
-    switch (country) {
-      case "EU":
-        return { symbol: "€", value: Math.round(basePrice * 0.012) };
-      case "US":
-        return { symbol: "$", value: Math.round(basePrice * 0.013) };
-      case "ME":
-        return { symbol: "د.إ", value: Math.round(basePrice * 0.048) };
-      case "IN":
-      default:
-        return { symbol: "₹", value: basePrice };
-    }
+  // Format price in Indian Rupee format (raw database price, no conversion)
+  const formatIndianRupee = (price: number) => {
+    if (!price || isNaN(price)) return '₹0';
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(price);
   };
 
   const coercePriceToNumber = (value?: number | string): number => {
@@ -357,9 +354,7 @@ export default function FeaturedProducts() {
                       </p>
                       <p className="text-lg sm:text-xl font-extrabold text-pink-600 mb-2">
                         {isClient && typeof product.price === "number"
-                          ? `${getPrice(product.price).symbol}${
-                              getPrice(product.price).value
-                            }`
+                          ? formatIndianRupee(product.price)
                           : "..."}
                       </p>
                     </div>

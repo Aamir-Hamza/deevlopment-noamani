@@ -26,11 +26,10 @@ const demo = {
 };
 
 export default function RecreationProductPage({ params }: { params: { slug: string } }) {
-  const product = recreationsCatalogue.find(p => p.slug === params.slug);
-  if (!product) return notFound();
-
-  const images = (product.images && product.images.length > 0) ? product.images : ['/boxs.png'];
-
+  const [product, setProduct] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
   const defaultSizes = [
     { label: '25 mL', value: 25, priceFactor: 0.25 },
     { label: '50 mL', value: 50, priceFactor: 0.5 },
@@ -43,11 +42,115 @@ export default function RecreationProductPage({ params }: { params: { slug: stri
 
   const { addToCart } = useCart();
 
+  // Fetch product from API
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch(`/api/recreations/${params.slug}`);
+        if (!res.ok) {
+          throw new Error('Product not found');
+        }
+        const data = await res.json();
+        console.log('Fetched product data from API:', {
+          name: data.name,
+          price: data.price,
+          priceType: typeof data.price,
+          rawPrice: data.price,
+          fromDatabase: data._id ? true : false,
+          _id: data._id
+        });
+        // Ensure price is set correctly - use raw database price
+        if (data.price !== undefined && data.price !== null) {
+          data.price = Number(data.price);
+        }
+        setProduct(data);
+        setError(null);
+      } catch (err: any) {
+        console.error('Error fetching product:', err);
+        // Fallback to catalogue
+        const catalogueProduct = recreationsCatalogue.find(p => p.slug === params.slug);
+        if (catalogueProduct) {
+          console.log('Using catalogue product with price:', catalogueProduct.price);
+          setProduct(catalogueProduct);
+          setError(null);
+        } else {
+          setError('Product not found');
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProduct();
+  }, [params.slug]);
+
   useEffect(() => {
     setSelectedImageIndex(selectedSizeIndex);
   }, [selectedSizeIndex]);
 
-  const getPrice = () => Math.round(product.price * defaultSizes[selectedSizeIndex].priceFactor);
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#faf9f6] flex items-center justify-center">
+        <div className="text-xl">Loading...</div>
+      </div>
+    );
+  }
+
+  if (error || !product) {
+    return notFound();
+  }
+
+  const images = (product.images && product.images.length > 0) ? product.images : ['/boxs.png'];
+
+  const getPrice = () => {
+    // Use price from API/database if available, otherwise fallback to catalogue price
+    // CRITICAL: Use the RAW database price - NO currency conversion
+    let basePrice = 99; // default fallback (catalogue price)
+    
+    // Get the raw price from product - this should be the exact price from database (e.g., 1200)
+    if (product?.price !== undefined && product?.price !== null) {
+      const rawPrice = product.price;
+      // Convert to number if it's a string
+      basePrice = typeof rawPrice === 'number' ? rawPrice : Number(rawPrice);
+      
+      // Validate the price
+      if (isNaN(basePrice) || basePrice <= 0) {
+        console.warn('Invalid price from product, using fallback:', rawPrice);
+        basePrice = 99; // fallback to catalogue price
+      }
+    } else {
+      console.warn('No price found in product data, using fallback');
+    }
+    
+    // Calculate price based on selected size (only multiply by size factor, NO currency conversion)
+    // The basePrice is already in INR (e.g., 1200), so we just multiply by size factor
+    const calculatedPrice = Math.round(basePrice * defaultSizes[selectedSizeIndex].priceFactor);
+    
+    console.log('=== PRICE CALCULATION ===');
+    console.log('Raw Product Price:', product?.price);
+    console.log('Price Type:', typeof product?.price);
+    console.log('Base Price (INR):', basePrice);
+    console.log('Size Factor:', defaultSizes[selectedSizeIndex].priceFactor);
+    console.log('Calculated Price (INR):', calculatedPrice);
+    console.log('Product from DB:', product?._id ? 'YES' : 'NO (using catalogue)');
+    console.log('Product Name:', product?.name);
+    console.log('Product Category:', product?.category);
+    console.log('========================');
+    
+    return calculatedPrice;
+  };
+
+  // Format price in Indian Rupee format with commas
+  const formatIndianRupee = (price: number) => {
+    if (!price || isNaN(price)) return '₹0';
+    // Use Indian number format: ₹1,200 or ₹1,20,000
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(price);
+  };
 
   const mainImage = images[selectedImageIndex] || images[0];
 
@@ -131,7 +234,7 @@ export default function RecreationProductPage({ params }: { params: { slug: stri
               </button>
             ))}
           </div>
-          <div className="text-xl sm:text-2xl font-bold text-[#b07a5a] mb-6 md:mb-10">₹{getPrice()}</div>
+          <div className="text-xl sm:text-2xl font-bold text-[#b07a5a] mb-6 md:mb-10">{formatIndianRupee(getPrice())}</div>
           {/* Tabs */}
           <div className="mb-6 md:mb-8">
             <div className="flex space-x-4 sm:space-x-6 md:space-x-10 border-b border-gray-200 mb-4 overflow-x-auto scrollbar-hide pb-2">

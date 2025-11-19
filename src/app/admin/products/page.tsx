@@ -10,6 +10,17 @@ import { AdminSidebar } from "@/components/AdminSidebar";
 import { useCountry } from "@/hooks/useCountry";
 import { formatPrice } from "@/lib/priceUtils";
 
+// Format price in Indian Rupee format (raw database price, no conversion)
+const formatIndianRupee = (price: number) => {
+  if (!price || isNaN(price)) return '₹0';
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(price);
+};
+
 interface Product {
   _id: string;
   name: string;
@@ -1054,7 +1065,7 @@ export default function ProductsManagement() {
                       {product.category}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
-                      {formatPrice(product.price, country)}
+                      {formatIndianRupee(product.price)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                       {product.stock}
