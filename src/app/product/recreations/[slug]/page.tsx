@@ -37,8 +37,9 @@ export default function RecreationProductPage({ params }: { params: { slug: stri
   ];
 
   const [selectedSizeIndex, setSelectedSizeIndex] = useState(2);
-  const [selectedImageIndex, setSelectedImageIndex] = useState(selectedSizeIndex);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(2);
   const [isAdding, setIsAdding] = useState(false);
+  const [activeTab, setActiveTab] = useState('description');
 
   const { addToCart } = useCart();
 
@@ -169,8 +170,6 @@ export default function RecreationProductPage({ params }: { params: { slug: stri
     { label: 'Know How', key: 'knowHow' },
     { label: 'Application Tips', key: 'applicationTips' },
   ];
-
-  const [activeTab, setActiveTab] = useState('description');
 
   const gridImages = images.length === 4 ? images : [...images, ...images].slice(0, 4);
 
