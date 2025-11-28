@@ -1375,29 +1375,137 @@ export default function Navbar() {
           </div>
         )}
 
-        {/* Mobile Hamburger Sidebar */}
-        {showMobileMenu && (
-          <div className="fixed inset-0 z-[120] bg-black/40 flex md:hidden" onClick={() => setShowMobileMenu(false)}>
-            <div
-              className="bg-white w-64 h-full p-6 flex flex-col gap-6 shadow-lg animate-slide-in-left"
-              onClick={e => e.stopPropagation()}
-            >
-              <button
-                className="self-end mb-4 text-gray-500 hover:text-black"
+        {/* Modern Mobile Menu with Glassmorphism */}
+        <AnimatePresence>
+          {showMobileMenu && (
+            <>
+              {/* Backdrop */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="fixed inset-0 z-[120] bg-black/50 backdrop-blur-sm md:hidden"
                 onClick={() => setShowMobileMenu(false)}
-                aria-label="Close menu"
+              />
+              {/* Sidebar Menu */}
+              <motion.div
+                initial={{ x: '-100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '-100%' }}
+                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                className={cn(
+                  "fixed left-0 top-0 h-full w-80 max-w-[85vw] z-[121] md:hidden flex flex-col shadow-2xl",
+                  // Glassmorphism effect - adapts based on scroll state
+                  isScrolled || pathname?.startsWith("/product/")
+                    ? "glass bg-white/95 backdrop-blur-xl border-r border-gray-200/50"
+                    : "glass-dark bg-white/10 backdrop-blur-2xl border-r border-white/20"
+                )}
+                onClick={e => e.stopPropagation()}
               >
-                <X className="w-6 h-6" />
-              </button>
-              <nav className="flex flex-col gap-4">
-                <Link href="/bestsellers" className="text-lg font-medium text-gray-900 hover:text-pink-600" onClick={() => setShowMobileMenu(false)}>Bestsellers</Link>
-                <Link href="/fragrance" className="text-lg font-medium text-gray-900 hover:text-pink-600" onClick={() => setShowMobileMenu(false)}>Fragrance</Link>
-                <Link href="/product/recreations" className="text-lg font-medium text-gray-900 hover:text-pink-600" onClick={() => setShowMobileMenu(false)}>Recreations</Link>
-                <Link href="/about" className="text-lg font-medium text-gray-900 hover:text-pink-600" onClick={() => setShowMobileMenu(false)}>About Us</Link>
-              </nav>
-            </div>
-          </div>
-        )}
+                {/* Header with Close Button */}
+                <div className="flex items-center justify-between p-6 border-b border-gray-200/50">
+                  <h2 className={cn(
+                    "text-xl font-bold font-display",
+                    isScrolled || pathname?.startsWith("/product/") ? "text-gray-900" : "text-white"
+                  )}>
+                    Menu
+                  </h2>
+                  <button
+                    className={cn(
+                      "p-2 rounded-lg transition-colors hover:bg-black/10",
+                      isScrolled || pathname?.startsWith("/product/") 
+                        ? "text-gray-700 hover:text-gray-900" 
+                        : "text-white/80 hover:text-white hover:bg-white/20"
+                    )}
+                    onClick={() => setShowMobileMenu(false)}
+                    aria-label="Close menu"
+                  >
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
+
+                {/* Navigation Links */}
+                <nav className="flex-1 p-6 flex flex-col gap-2">
+                  {navItems.map((item, index) => (
+                    <motion.div
+                      key={item.name}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.1, duration: 0.3 }}
+                    >
+                      <Link
+                        href={item.href}
+                        className={cn(
+                          "block px-4 py-3 rounded-xl text-lg font-medium transition-all duration-200",
+                          isScrolled || pathname?.startsWith("/product/")
+                            ? "text-gray-700 hover:text-primary-400 hover:bg-gray-100/50"
+                            : "text-white/90 hover:text-white hover:bg-white/10"
+                        )}
+                        onClick={() => setShowMobileMenu(false)}
+                      >
+                        {item.name}
+                      </Link>
+                    </motion.div>
+                  ))}
+                </nav>
+
+                {/* Footer Actions */}
+                <div className={cn(
+                  "p-6 border-t",
+                  isScrolled || pathname?.startsWith("/product/") 
+                    ? "border-gray-200/50" 
+                    : "border-white/20"
+                )}>
+                  <div className="flex flex-col gap-3">
+                    {userInfo ? (
+                      <Link
+                        href="/profile"
+                        className={cn(
+                          "px-4 py-2 rounded-lg text-sm font-medium transition-all",
+                          isScrolled || pathname?.startsWith("/product/")
+                            ? "text-gray-700 hover:bg-gray-100/50"
+                            : "text-white/90 hover:bg-white/10"
+                        )}
+                        onClick={() => setShowMobileMenu(false)}
+                      >
+                        My Account
+                      </Link>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          setShowMobileMenu(false);
+                          setShowLoginModal(true);
+                        }}
+                        className={cn(
+                          "px-4 py-2 rounded-lg text-sm font-medium transition-all text-left",
+                          isScrolled || pathname?.startsWith("/product/")
+                            ? "text-gray-700 hover:bg-gray-100/50"
+                            : "text-white/90 hover:bg-white/10"
+                        )}
+                      >
+                        Login
+                      </button>
+                    )}
+                    <Link
+                      href="/cart"
+                      className={cn(
+                        "px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2",
+                        isScrolled || pathname?.startsWith("/product/")
+                          ? "text-gray-700 hover:bg-gray-100/50"
+                          : "text-white/90 hover:bg-white/10"
+                      )}
+                      onClick={() => setShowMobileMenu(false)}
+                    >
+                      <ShoppingBag className="w-4 h-4" />
+                      Cart {cartItemsCount > 0 && `(${cartItemsCount})`}
+                    </Link>
+                  </div>
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
       </header>
       <style jsx>{`
         @keyframes fadeInDown {
