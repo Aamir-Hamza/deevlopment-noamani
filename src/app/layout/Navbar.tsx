@@ -588,7 +588,7 @@ export default function Navbar() {
                   <button
                     onClick={() => setShowLoginModal(true)}
                     className={cn(
-                      'text-lg font-bold hover:opacity-70 transition-opacity',
+                      'hover:opacity-70 transition-opacity',
                       !isScrolled &&
                         (pathname === "/shop/all" || pathname === "/shop/new")
                         ? "text-black"
@@ -605,9 +605,9 @@ export default function Navbar() {
                         ? "text-white"
                         : "text-black"
                     )}
-                    style={{ fontFamily: 'Didot, serif', fontWeight: 'bold' }}
+                    aria-label="Login"
                   >
-                    Login
+                    <User className="h-5 w-5" />
                   </button>
                 )}
 
@@ -929,7 +929,7 @@ export default function Navbar() {
                     <button
                       onClick={() => setShowLoginModal(true)}
                       className={cn(
-                        'text-lg font-bold hover:opacity-70 transition-opacity',
+                        'hover:opacity-70 transition-opacity',
                         !isScrolled &&
                           (pathname === "/shop/all" || pathname === "/shop/new")
                           ? "text-black"
@@ -946,9 +946,9 @@ export default function Navbar() {
                         ? "text-white"
                         : "text-black"
                       )}
-                      style={{ fontFamily: 'Didot, serif', fontWeight: 'bold' }}
+                      aria-label="Login"
                     >
-                      Login
+                      <User className="h-5 w-5" />
                     </button>
                   )}
 
@@ -1116,9 +1116,13 @@ export default function Navbar() {
                   ) : (
                     <button
                       onClick={() => setShowLoginModal(true)}
-                      className="text-sm font-medium hover:opacity-70 transition-opacity text-brand-dark"
+                      className={cn(
+                        "hover:opacity-70 transition-opacity",
+                        (!isScrolled && !showMobileMenu) ? 'text-white' : 'text-brand-dark'
+                      )}
+                      aria-label="Login"
                     >
-                      Login
+                      <User className="h-5 w-5" />
                     </button>
                   )}
                   {/* Cart icon */}
@@ -1241,7 +1245,7 @@ export default function Navbar() {
                     <button
                       onClick={() => setShowLoginModal(true)}
                       className={cn(
-                        'text-lg font-bold hover:opacity-70 transition-opacity',
+                        'hover:opacity-70 transition-opacity',
                         !isScrolled &&
                           (pathname === "/shop/all" || pathname === "/shop/new")
                           ? "text-black"
@@ -1258,9 +1262,9 @@ export default function Navbar() {
                         ? "text-white"
                         : "text-black"
                       )}
-                      style={{ fontFamily: 'Didot, serif', fontWeight: 'bold' }}
+                      aria-label="Login"
                     >
-                      Login
+                      <User className="h-5 w-5" />
                     </button>
                   )}
                   {/* Cart icon */}
@@ -1462,14 +1466,15 @@ export default function Navbar() {
                       <Link
                         href="/profile"
                         className={cn(
-                          "px-4 py-2 rounded-lg text-sm font-medium transition-all",
+                          "px-4 py-3 rounded-lg transition-all flex items-center justify-center",
                           isScrolled || pathname?.startsWith("/product/")
                             ? "text-gray-700 hover:bg-gray-100/50"
                             : "text-white/90 hover:bg-white/10"
                         )}
                         onClick={() => setShowMobileMenu(false)}
+                        aria-label="My Account"
                       >
-                        My Account
+                        <User className="w-5 h-5" />
                       </Link>
                     ) : (
                       <button
@@ -1478,13 +1483,14 @@ export default function Navbar() {
                           setShowLoginModal(true);
                         }}
                         className={cn(
-                          "px-4 py-2 rounded-lg text-sm font-medium transition-all text-left",
+                          "px-4 py-3 rounded-lg transition-all flex items-center justify-center",
                           isScrolled || pathname?.startsWith("/product/")
                             ? "text-gray-700 hover:bg-gray-100/50"
                             : "text-white/90 hover:bg-white/10"
                         )}
+                        aria-label="Login"
                       >
-                        Login
+                        <User className="w-5 h-5" />
                       </button>
                     )}
                     <Link
