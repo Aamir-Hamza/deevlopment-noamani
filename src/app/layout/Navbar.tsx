@@ -1038,7 +1038,10 @@ export default function Navbar() {
                 </Link>
                 </motion.div>
                 {/* Rest of the icons */}
-                <div className="flex flex-row items-center gap-3 ml-auto">
+                <div className={cn(
+                  "flex flex-row items-center gap-3 ml-auto",
+                  showMobileMenu && "hidden"
+                )}>
                   {/* Search button */}
                   <button
                     className="hover:opacity-70 transition-opacity text-brand-dark"
@@ -1175,7 +1178,10 @@ export default function Navbar() {
                 >
                   <Search className="h-5 w-5" />
                 </button>
-                <div className="flex flex-row items-center gap-4 ml-auto">
+                <div className={cn(
+                  "flex flex-row items-center gap-4 ml-auto",
+                  showMobileMenu && "hidden"
+                )}>
                   {/* User name (with avatar if available) */}
                   {userInfo ? (
                     <div className="relative flex items-center space-x-2">
@@ -1453,61 +1459,7 @@ export default function Navbar() {
                     </motion.div>
                   ))}
                 </nav>
-
-                {/* Footer Actions */}
-                <div className={cn(
-                  "p-6 border-t",
-                  isScrolled || pathname?.startsWith("/product/") 
-                    ? "border-gray-200/50" 
-                    : "border-white/20"
-                )}>
-                  <div className="flex flex-col gap-3">
-                    {userInfo ? (
-                      <Link
-                        href="/profile"
-                        className={cn(
-                          "px-4 py-3 rounded-lg transition-all flex items-center justify-center",
-                          isScrolled || pathname?.startsWith("/product/")
-                            ? "text-gray-700 hover:bg-gray-100/50"
-                            : "text-white/90 hover:bg-white/10"
-                        )}
-                        onClick={() => setShowMobileMenu(false)}
-                        aria-label="My Account"
-                      >
-                        <User className="w-5 h-5" />
-                      </Link>
-                    ) : (
-                      <button
-                        onClick={() => {
-                          setShowMobileMenu(false);
-                          setShowLoginModal(true);
-                        }}
-                        className={cn(
-                          "px-4 py-3 rounded-lg transition-all flex items-center justify-center",
-                          isScrolled || pathname?.startsWith("/product/")
-                            ? "text-gray-700 hover:bg-gray-100/50"
-                            : "text-white/90 hover:bg-white/10"
-                        )}
-                        aria-label="Login"
-                      >
-                        <User className="w-5 h-5" />
-                      </button>
-                    )}
-                    <Link
-                      href="/cart"
-                      className={cn(
-                        "px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2",
-                        isScrolled || pathname?.startsWith("/product/")
-                          ? "text-gray-700 hover:bg-gray-100/50"
-                          : "text-white/90 hover:bg-white/10"
-                      )}
-                      onClick={() => setShowMobileMenu(false)}
-                    >
-                      <ShoppingBag className="w-4 h-4" />
-                      Cart {cartItemsCount > 0 && `(${cartItemsCount})`}
-                    </Link>
-                  </div>
-                </div>
+                {/* Footer Actions removed - login and cart icons not shown in mobile menu */}
               </motion.div>
             </>
           )}
