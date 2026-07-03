@@ -22,6 +22,26 @@ const productSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    subtitle: {
+      type: String,
+      default: '',
+    },
+    olfactoryNotes: {
+      type: String,
+      default: '',
+    },
+    perfumersWord: {
+      type: String,
+      default: '',
+    },
+    knowHow: {
+      type: String,
+      default: '',
+    },
+    applicationTips: {
+      type: String,
+      default: '',
+    },
     category: {
       type: String,
       required: true,

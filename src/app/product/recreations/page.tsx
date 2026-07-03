@@ -1,49 +1,51 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import Image from "next/image";
-import Footer from "@/components/Footer";
 import Link from "next/link";
+import { motion } from "framer-motion";
+import { ChevronDown, Filter, Check, SlidersHorizontal, X } from "lucide-react";
+import Footer from "@/components/Footer";
 import { recreationsCatalogue } from "@/data/recreationsCatalogue";
-import { useRef } from 'react';
-import { FaRegStar, FaFilter, FaSortAlphaDown, FaSortAlphaUp, FaRupeeSign, FaCheck } from 'react-icons/fa';
+
+const PRODUCTS_PER_PAGE = 16;
+
+const sortOptions = [
+  { value: "", label: "Featured" },
+  { value: "name-asc", label: "Name: A-Z" },
+  { value: "name-desc", label: "Name: Z-A" },
+  { value: "price-asc", label: "Price: Low to High" },
+  { value: "price-desc", label: "Price: High to Low" },
+];
 
 export default function RecreationsPage() {
   const [sort, setSort] = useState("");
   const [inStockOnly, setInStockOnly] = useState(false);
-  // Pagination state
-  const PRODUCTS_PER_PAGE = 16;
   const [page, setPage] = useState(1);
   const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const sortDropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close sort dropdown on outside click
   React.useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (sortDropdownRef.current && !sortDropdownRef.current.contains(event.target as Node)) {
         setSortDropdownOpen(false);
       }
     }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  let filteredProducts = recreationsCatalogue.filter(p => inStockOnly ? p.inStock : true);
-  let sortedProducts = [...filteredProducts];
+  const filteredProducts = recreationsCatalogue.filter((p) => (inStockOnly ? p.inStock : true));
+  const sortedProducts = [...filteredProducts];
 
-  if (sort === "name-asc") {
-    sortedProducts.sort((a, b) => a.name.localeCompare(b.name));
-  } else if (sort === "name-desc") {
-    sortedProducts.sort((a, b) => b.name.localeCompare(a.name));
-  } else if (sort === "price-asc") {
-    sortedProducts.sort((a, b) => a.price - b.price);
-  } else if (sort === "price-desc") {
-    sortedProducts.sort((a, b) => b.price - a.price);
-  }
+  if (sort === "name-asc") sortedProducts.sort((a, b) => a.name.localeCompare(b.name));
+  else if (sort === "name-desc") sortedProducts.sort((a, b) => b.name.localeCompare(a.name));
+  else if (sort === "price-asc") sortedProducts.sort((a, b) => a.price - b.price);
+  else if (sort === "price-desc") sortedProducts.sort((a, b) => b.price - a.price);
 
-  // Filter to unique brands only (first product per brand)
-  const uniqueBrandProducts = [];
-  const seenBrands = new Set();
+  // Unique brands only (first product per brand)
+  const uniqueBrandProducts: typeof sortedProducts = [];
+  const seenBrands = new Set<string>();
   for (const product of sortedProducts) {
     if (!seenBrands.has(product.brand)) {
       uniqueBrandProducts.push(product);
@@ -51,92 +53,101 @@ export default function RecreationsPage() {
     }
   }
 
-  // Pagination logic (update to use uniqueBrandProducts)
   const totalPages = Math.ceil(uniqueBrandProducts.length / PRODUCTS_PER_PAGE);
   const paginatedProducts = uniqueBrandProducts.slice(
     (page - 1) * PRODUCTS_PER_PAGE,
     page * PRODUCTS_PER_PAGE
   );
 
-  const sortOptions = [
-    { value: '', label: 'Sort By', icon: <FaFilter className="text-gray-400" /> },
-    { value: 'name-asc', label: 'Name: A-Z', icon: <FaSortAlphaDown className="text-blue-400" /> },
-    { value: 'name-desc', label: 'Name: Z-A', icon: <FaSortAlphaUp className="text-blue-400" /> },
-    { value: 'price-asc', label: 'Price: Low to High', icon: <FaRupeeSign className="text-green-500" /> },
-    { value: 'price-desc', label: 'Price: High to Low', icon: <FaRupeeSign className="text-red-500" /> },
-  ];
+  const FilterPanel = () => (
+    <div>
+      <p className="text-xs font-semibold uppercase tracking-widest text-gray-500 mb-3">Availability</p>
+      <label className="flex items-center gap-2.5 text-sm text-gray-700 cursor-pointer">
+        <input
+          type="checkbox"
+          className="w-4 h-4 accent-[#bfa14a]"
+          checked={inStockOnly}
+          onChange={(e) => {
+            setInStockOnly(e.target.checked);
+            setPage(1);
+          }}
+        />
+        In stock only
+      </label>
+    </div>
+  );
 
   return (
-    <div className="bg-[#f5f5f5] min-h-screen pb-16 flex flex-col">
-      {/* Hero Section */}
-      <div className="w-full min-h-[360px] sm:min-h-[440px] md:min-h-[480px] flex flex-col md:flex-row justify-center items-stretch mt-28 px-4">
-        {/* Left: Image */}
-        <div className="md:w-1/2 w-full flex items-center justify-center bg-white">
-          <div className="relative w-full h-[200px] sm:h-[260px] md:h-[400px] max-w-[480px] mx-auto">
-            <Image
-              src="/boxs.png"
-              alt="Recreations"
-              fill
-              className="object-contain object-center"
-              priority
-            />
-          </div>
-        </div>
-        {/* Right: Text */}
-        <div className="md:w-1/2 w-full flex flex-col justify-center items-center bg-white px-6 sm:px-8 md:px-16 py-10 md:py-0">
-          <div className="max-w-lg">
-            <h1 className="text-2xl sm:text-3xl md:text-3xl font-serif tracking-[0.2em] font-semibold mb-4 sm:mb-6 text-gray-900 uppercase text-center md:text-left">
-              Recreations
-            </h1>
-            <p className="text-gray-700 text-sm sm:text-base md:text-lg leading-relaxed text-center md:text-left">
-              Dive into a world of fragrance nostalgia with our collection of meticulously crafted recreations, paying homage to iconic scents. From the allure of timeless classics to the intrigue of modern favourites, each bottle encapsulates a unique blend of familiarity and innovation. Immerse yourself in the artistry of scent as you explore a range of captivating aromas, meticulously formulated to evoke emotions and memories. Elevate your fragrance experience with our collection, where every scent tells a story of sophistication, elegance, and timeless beauty.
-            </p>
-          </div>
+    <div className="min-h-screen bg-white flex flex-col">
+      {/* Hero */}
+      <div className="relative h-[45vh] bg-black text-white flex items-center justify-center">
+        <Image
+          src="https://images.pexels.com/photos/3059609/pexels-photo-3059609.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+          alt="Recreations"
+          fill
+          className="object-cover opacity-40"
+        />
+        <div className="relative z-10 text-center max-w-2xl px-4">
+          <motion.h1
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.8 }}
+            className="text-5xl font-light mb-4"
+            style={{ fontFamily: "Didot, serif" }}
+          >
+            RECREATIONS
+          </motion.h1>
+          <motion.p
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.4, duration: 0.8 }}
+            className="text-lg font-light"
+          >
+            Iconic scents, reimagined with Noamani craftsmanship
+          </motion.p>
         </div>
       </div>
 
-      {/* Product Grid Section */}
-      <div className="max-w-7xl mx-auto px-2 md:px-6 mt-16 flex-1">
-        {/* Top Bar */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
-          <div className="flex items-center justify-between">
-            <div className="text-gray-700 text-sm md:text-base font-medium">
-              {sortedProducts.length} PRODUCTS
-            </div>
-            {/* Mobile Filter Button */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 flex-1 w-full">
+        {/* Top bar */}
+        <div className="flex items-center justify-between mb-10 gap-4">
+          <p className="text-sm text-gray-500">
+            {uniqueBrandProducts.length} brand{uniqueBrandProducts.length === 1 ? "" : "s"}
+          </p>
+
+          <div className="flex items-center gap-3">
             <button
               onClick={() => setMobileFilterOpen(true)}
-              className="md:hidden flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 bg-white shadow-md font-semibold text-gray-900 text-sm transition-all hover:border-blue-400 hover:shadow-lg"
+              className="md:hidden flex items-center gap-2 px-4 py-2 rounded-full border border-gray-300 text-sm font-medium text-gray-700 hover:border-gray-900 transition-colors"
             >
-              <FaFilter className="text-blue-400" />
+              <SlidersHorizontal className="w-3.5 h-3.5" />
               Filters
             </button>
-          </div>
-          <div className="flex items-center gap-4">
-            {/* Sort dropdown (modern minimal floating card) */}
-            <div className="relative min-w-[180px]" ref={sortDropdownRef}>
+
+            <div className="relative" ref={sortDropdownRef}>
               <button
-                type="button"
-                className="w-full flex justify-between items-center px-4 py-2 rounded-xl border border-gray-200 bg-white shadow-md font-semibold text-gray-900 text-base transition-all focus:ring-2 focus:ring-blue-300 outline-none hover:border-blue-400 hover:shadow-lg group"
-                onClick={() => setSortDropdownOpen((open) => !open)}
+                onClick={() => setSortDropdownOpen((o) => !o)}
+                className="flex items-center gap-2 px-4 py-2 rounded-full border border-gray-300 text-sm font-medium text-gray-700 hover:border-gray-900 transition-colors"
               >
-                <span className="flex items-center gap-2">
-                  <FaFilter className="text-blue-400 text-lg" />
-                  {sortOptions.find(opt => opt.value === sort)?.label || 'Sort By'}
-                </span>
-                <svg className={`ml-2 w-5 h-5 transition-transform ${sortDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                <Filter className="w-3.5 h-3.5" />
+                {sortOptions.find((o) => o.value === sort)?.label || "Sort"}
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform ${sortDropdownOpen ? "rotate-180" : ""}`} />
               </button>
               {sortDropdownOpen && (
-                <div className="absolute left-0 mt-2 w-full z-30 bg-white border border-gray-200 rounded-xl shadow-2xl max-h-72 overflow-y-auto animate-popIn origin-top transition-all duration-200">
-                  {sortOptions.map(opt => (
+                <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden z-30">
+                  {sortOptions.map((opt) => (
                     <button
                       key={opt.value}
-                      className={`w-full flex items-center gap-3 text-left px-4 py-2 font-medium text-base transition-all duration-100 rounded-lg ${sort === opt.value ? 'bg-blue-50 text-blue-700' : 'text-gray-900'} hover:bg-gradient-to-r hover:from-blue-50 hover:to-gray-50`}
-                      onClick={() => { setSort(opt.value); setSortDropdownOpen(false); }}
+                      onClick={() => {
+                        setSort(opt.value);
+                        setSortDropdownOpen(false);
+                      }}
+                      className={`w-full flex items-center justify-between text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors ${
+                        sort === opt.value ? "text-gray-900 font-medium" : "text-gray-600"
+                      }`}
                     >
-                      {opt.icon}
-                      <span className="flex-1">{opt.label}</span>
-                      {sort === opt.value && <FaCheck className="text-blue-500 ml-auto" />}
+                      {opt.label}
+                      {sort === opt.value && <Check className="w-3.5 h-3.5 text-[#bfa14a]" />}
                     </button>
                   ))}
                 </div>
@@ -144,97 +155,81 @@ export default function RecreationsPage() {
             </div>
           </div>
         </div>
-        <div className="flex gap-6 sm:gap-8">
-          {/* Sidebar */}
-          <aside className="hidden md:block w-56 flex-shrink-0">
-            <div className="bg-white rounded-lg border border-gray-200 p-4 mb-6">
-              <div className="font-semibold text-gray-800 mb-2">AVAILABILITY</div>
-              <label className="flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  className="accent-pink-600"
-                  checked={inStockOnly}
-                  onChange={e => {
-                    setInStockOnly(e.target.checked);
-                    setPage(1); // Reset to page 1 when filter changes
-                  }}
-                /> In stock only
-              </label>
-            </div>
+
+        <div className="flex gap-10">
+          {/* Sidebar (desktop) */}
+          <aside className="hidden md:block w-48 flex-shrink-0">
+            <FilterPanel />
           </aside>
-          {/* Mobile Filter Drawer */}
+
+          {/* Mobile filter drawer */}
           {mobileFilterOpen && (
             <>
-              <div 
-                className="fixed inset-0 bg-black/50 z-40 md:hidden"
+              <div
+                className="fixed inset-0 bg-black/40 z-40 md:hidden"
                 onClick={() => setMobileFilterOpen(false)}
-              ></div>
-              <aside className="fixed top-0 right-0 h-full w-64 bg-white shadow-2xl z-50 md:hidden overflow-y-auto transform transition-transform duration-300">
-                <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-                  <h3 className="font-semibold text-gray-800">Filters</h3>
+              />
+              <aside className="fixed top-0 right-0 h-full w-72 bg-white shadow-2xl z-50 md:hidden overflow-y-auto">
+                <div className="p-5 border-b border-gray-100 flex items-center justify-between">
+                  <h3 className="font-semibold text-gray-900">Filters</h3>
                   <button
                     onClick={() => setMobileFilterOpen(false)}
-                    className="text-gray-500 hover:text-gray-900 text-2xl"
+                    className="text-gray-400 hover:text-gray-900"
+                    aria-label="Close filters"
                   >
-                    ×
+                    <X className="w-5 h-5" />
                   </button>
                 </div>
-                <div className="p-4">
-                  <div className="font-semibold text-gray-800 mb-2">AVAILABILITY</div>
-                  <label className="flex items-center gap-2 text-sm">
-                    <input
-                      type="checkbox"
-                      className="accent-pink-600"
-                      checked={inStockOnly}
-                      onChange={e => {
-                        setInStockOnly(e.target.checked);
-                        setPage(1);
-                        setMobileFilterOpen(false);
-                      }}
-                    /> In stock only
-                  </label>
+                <div className="p-5">
+                  <FilterPanel />
                 </div>
               </aside>
             </>
           )}
-          {/* Product Grid */}
+
+          {/* Product grid */}
           <section className="flex-1">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-8 lg:gap-12">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-6">
               {paginatedProducts.map((product, idx) => (
-                <Link
+                <motion.div
                   key={product.slug}
-                  href={`/product/recreations/${product.slug}`}
-                  className="bg-gradient-to-b from-neutral-900 to-black rounded-2xl flex flex-col items-center justify-center aspect-square min-h-[200px] w-full max-w-[320px] sm:max-w-[260px] md:max-w-[220px] mx-auto relative group shadow-xl hover:shadow-2xl hover:scale-105 hover:ring-2 hover:ring-pink-400/40 transition-all duration-300 p-4"
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: (idx % PRODUCTS_PER_PAGE) * 0.03 }}
                 >
-                  <span className="absolute left-3 top-3 bg-black/80 text-[11px] text-white px-2 py-1 rounded uppercase tracking-widest font-semibold">Inspired By</span>
-                  <div className="flex-1 flex flex-col items-center justify-center w-full px-2">
-                    <div className="text-center w-full flex-1 flex flex-col justify-center items-center">
-                      <span
-                        className="text-xl sm:text-2xl md:text-2xl font-serif text-gray-100 tracking-[0.18em] font-bold uppercase leading-tight break-words whitespace-pre-line drop-shadow overflow-hidden max-h-[4.5em] block"
-                        style={{ wordBreak: 'break-word', display: 'block' }}
-                        title={product.brand}
-                      >
-                        {product.brand}
+                  <Link
+                    href={`/product/recreations/${product.slug}`}
+                    className="group relative flex flex-col items-center justify-center aspect-square rounded-2xl bg-black overflow-hidden border border-black hover:border-[#bfa14a] transition-colors p-5"
+                  >
+                    {!product.inStock && (
+                      <span className="absolute right-3 top-3 bg-white/10 text-[10px] text-white/70 px-2 py-1 rounded-full uppercase tracking-widest font-medium">
+                        Sold Out
                       </span>
-                    </div>
-                    <div className="text-center w-full mt-4">
-                      {/* Price removed as per request */}
-                    </div>
-                  </div>
-                </Link>
+                    )}
+                    <span className="absolute left-3 top-3 text-[10px] text-[#bfa14a] px-0 py-0 uppercase tracking-widest font-semibold">
+                      Inspired By
+                    </span>
+                    <span
+                      className="text-lg sm:text-xl font-serif text-white tracking-wide font-semibold uppercase text-center leading-snug group-hover:text-[#bfa14a] transition-colors"
+                      style={{ fontFamily: "Didot, serif" }}
+                    >
+                      {product.brand}
+                    </span>
+                  </Link>
+                </motion.div>
               ))}
             </div>
-            {/* Pagination */}
+
             {totalPages > 1 && (
-              <div className="flex justify-center mt-10 gap-2">
+              <div className="flex justify-center mt-14 gap-2">
                 {Array.from({ length: totalPages }, (_, i) => (
                   <button
                     key={i}
                     onClick={() => setPage(i + 1)}
-                    className={`px-4 py-2 rounded border text-sm font-semibold transition-all duration-150 ${
+                    className={`w-9 h-9 rounded-full text-sm font-medium transition-colors ${
                       page === i + 1
-                        ? "bg-black text-white border-black"
-                        : "bg-white text-black border-gray-300 hover:bg-gray-100"
+                        ? "bg-black text-white"
+                        : "bg-white text-gray-600 border border-gray-300 hover:border-gray-900"
                     }`}
                   >
                     {i + 1}
@@ -245,7 +240,8 @@ export default function RecreationsPage() {
           </section>
         </div>
       </div>
+
       <Footer />
     </div>
   );
-} 
+}
