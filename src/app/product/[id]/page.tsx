@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -20,6 +19,7 @@ import { useCart } from "@/context/CartContext";
 import { useCountry } from "@/hooks/useCountry";
 import { getPrice } from "@/lib/priceUtils";
 import LazyLoader from "@/components/ui/LazyLoader";
+import ProductImage from "@/components/ui/ProductImage";
 import NotFound from "../../not-found";
 import Footer from "@/components/Footer";
 import ProductReviews from "@/components/ProductReviews";
@@ -184,7 +184,7 @@ export default function ProductDetailPage({
                   transition={{ duration: 0.25 }}
                   className="absolute inset-0"
                 >
-                  <Image
+                  <ProductImage
                     src={mainImage}
                     alt={product.name}
                     fill
@@ -206,7 +206,7 @@ export default function ProductDetailPage({
                     }`}
                     aria-label={`Show image ${idx + 1}`}
                   >
-                    <Image src={img} alt="" fill className="object-contain p-2" />
+                    <ProductImage src={img} alt="" fill className="object-contain p-2" />
                   </button>
                 ))}
               </div>
@@ -388,7 +388,7 @@ export default function ProductDetailPage({
                   className="group"
                 >
                   <div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-gray-50 border border-gray-100 mb-3">
-                    <Image
+                    <ProductImage
                       src={p.image}
                       alt={p.name}
                       fill

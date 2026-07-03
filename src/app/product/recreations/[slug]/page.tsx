@@ -1,7 +1,6 @@
 'use client';
 import { recreationsCatalogue } from '@/data/recreationsCatalogue';
 import { notFound } from 'next/navigation';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -11,6 +10,7 @@ import ProductReviews from '@/components/ProductReviews';
 import { useCart } from '@/context/CartContext';
 import confetti from 'canvas-confetti';
 import LazyLoader from '@/components/ui/LazyLoader';
+import ProductImage from '@/components/ui/ProductImage';
 
 const DEFAULT_SIZES = [
   { label: '25 mL', value: 25, priceFactor: 0.25 },
@@ -159,7 +159,7 @@ export default function RecreationProductPage({ params }: { params: { slug: stri
                   transition={{ duration: 0.25 }}
                   className="absolute inset-0"
                 >
-                  <Image src={mainImage} alt={product.name} fill className="object-contain p-8" priority />
+                  <ProductImage src={mainImage} alt={product.name} fill className="object-contain p-8" priority />
                 </motion.div>
               </AnimatePresence>
             </div>
@@ -175,7 +175,7 @@ export default function RecreationProductPage({ params }: { params: { slug: stri
                     }`}
                     aria-label={`Show image ${idx + 1}`}
                   >
-                    <Image src={img} alt="" fill className="object-contain p-2" />
+                    <ProductImage src={img} alt="" fill className="object-contain p-2" />
                   </button>
                 ))}
               </div>

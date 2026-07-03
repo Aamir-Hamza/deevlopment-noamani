@@ -10,6 +10,8 @@ import {
   Menu,
   X,
   ChevronRight,
+  ChevronDown,
+  LayoutDashboard,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import MegaMenu from "./MegaMenu";
@@ -386,32 +388,46 @@ export default function Navbar() {
             >
               <UserCircleIcon className={iconSize} />
               {!isCompact && <span className="tracking-wide">Admin</span>}
+              <ChevronDown className={cn("h-3.5 w-3.5 transition-transform duration-200", showDropdown && "rotate-180")} />
             </button>
             <AnimatePresence>
               {showDropdown && (
                 <motion.div
                   key="admin-dropdown"
-                  className="absolute right-0 top-full mt-3 w-52 rounded-2xl glass-dropdown py-2 z-[60]"
+                  className="absolute right-0 top-full mt-3 w-60 rounded-2xl glass-dropdown overflow-hidden z-[60]"
                   initial={{ opacity: 0, y: -8, scale: 0.96 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -6, scale: 0.97 }}
                   transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
                 >
-                  <Link
-                    href="/admin/dashboard"
-                    className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors"
-                    onClick={() => setShowDropdown(false)}
-                  >
-                    Dashboard
-                  </Link>
-                  <div className="mx-3 my-1 h-px bg-gray-100" />
-                  <button
-                    onClick={handleLogout}
-                    className="flex items-center gap-2 w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors"
-                  >
-                    <ArrowRightOnRectangleIcon className="h-4 w-4" />
-                    Logout
-                  </button>
+                  {/* Header */}
+                  <div className="flex items-center gap-3 px-4 py-3.5 bg-gradient-to-b from-gray-50/80 to-transparent border-b border-gray-100/80">
+                    <div className="h-9 w-9 rounded-full bg-gray-900 flex items-center justify-center flex-shrink-0">
+                      <UserCircleIcon className="h-6 w-6 text-white/90" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[11px] uppercase tracking-widest text-gray-400 font-medium">Signed in as</p>
+                      <p className="text-sm font-semibold text-gray-900 truncate">Admin</p>
+                    </div>
+                  </div>
+                  <div className="py-1.5">
+                    <Link
+                      href="/admin/dashboard"
+                      className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+                      onClick={() => setShowDropdown(false)}
+                    >
+                      <LayoutDashboard className="h-4 w-4 text-gray-400" />
+                      Dashboard
+                    </Link>
+                    <div className="mx-3 my-1 h-px bg-gray-100" />
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center gap-2.5 w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors"
+                    >
+                      <ArrowRightOnRectangleIcon className="h-4 w-4" />
+                      Logout
+                    </button>
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -443,26 +459,41 @@ export default function Navbar() {
                   {getTruncatedName(userInfo.name)}
                 </span>
               )}
+              <ChevronDown className={cn("h-3.5 w-3.5 transition-transform duration-200", iconColor, showDropdown && "rotate-180")} />
             </button>
             <AnimatePresence>
               {showDropdown && (
                 <motion.div
                   key="user-dropdown"
-                  className={cn(
-                    "absolute top-full mt-3 w-56 rounded-2xl glass-dropdown overflow-hidden z-[60]",
-                    isCompact ? "right-0" : "left-1/2 -translate-x-1/2"
-                  )}
+                  className="absolute right-0 top-full mt-3 w-64 rounded-2xl glass-dropdown overflow-hidden z-[60]"
                   initial={{ opacity: 0, y: -8, scale: 0.96 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -6, scale: 0.97 }}
                   transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
                 >
                   {/* User info header */}
-                  <div className="px-4 py-3 bg-gradient-to-b from-gray-50/80 to-transparent border-b border-gray-100/80">
-                    <p className="text-[11px] uppercase tracking-widest text-gray-400 font-medium">Signed in as</p>
-                    <p className="text-sm font-semibold text-gray-900 truncate mt-0.5">
-                      {userInfo.email}
-                    </p>
+                  <div className="flex items-center gap-3 px-4 py-3.5 bg-gradient-to-b from-gray-50/80 to-transparent border-b border-gray-100/80">
+                    {profileImg ? (
+                      <Image
+                        src={profileImg}
+                        alt="Profile"
+                        width={36}
+                        height={36}
+                        className="rounded-full object-cover border-2 border-amber-400/40 flex-shrink-0"
+                      />
+                    ) : (
+                      <div className="h-9 w-9 rounded-full bg-gray-900 flex items-center justify-center flex-shrink-0">
+                        <UserCircleIcon className="h-6 w-6 text-white/90" />
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-gray-900 truncate">
+                        {userInfo.name || "Welcome back"}
+                      </p>
+                      <p className="text-xs text-gray-500 truncate">
+                        {userInfo.email}
+                      </p>
+                    </div>
                   </div>
                   <div className="py-1.5">
                     <Link

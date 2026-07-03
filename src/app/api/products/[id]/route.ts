@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import mongoose from 'mongoose';
 import connectDB from '@/lib/db';
 import Product from '@/models/Product';
 import { products } from '@/data/products';
@@ -13,8 +14,12 @@ export async function GET(
   try {
     await connectDB();
 
-    // Try by MongoDB _id
-    product = await Product.findById(id);
+    // Try by MongoDB _id — `id` may be a slug (e.g. "pimento"), which isn't
+    // a valid ObjectId and would otherwise throw a CastError and skip the
+    // slug lookup below entirely.
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      product = await Product.findById(id);
+    }
 
     // If not found, try by slug
     if (!product) {

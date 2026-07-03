@@ -3,10 +3,16 @@ import connectDB from '@/lib/db';
 import Order from '@/models/Order';
 import mongoose from 'mongoose';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     await connectDB();
-    const orders = await Order.find({}).populate('items.productId');
+    const { searchParams } = new URL(request.url);
+    const userEmail = searchParams.get('userEmail');
+
+    // Customer-facing requests pass userEmail and must only see their own
+    // orders. Admin views omit it and intentionally get everything.
+    const query = userEmail ? { 'paymentInfo.email': userEmail } : {};
+    const orders = await Order.find(query).populate('items.productId');
     return NextResponse.json(orders);
   } catch (error) {
     return NextResponse.json(
