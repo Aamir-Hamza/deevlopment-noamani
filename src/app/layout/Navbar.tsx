@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import {
   Search,
@@ -708,13 +709,20 @@ export default function Navbar() {
         </div>
 
         {/* ═══ LOGIN MODAL ═══ */}
-        <AnimatePresence>
-          {showLoginModal && (
-            <LoginModal onClose={() => setShowLoginModal(false)} />
-          )}
-        </AnimatePresence>
+        {/* Portaled to document.body: the header's backdrop-blur creates a
+            CSS containing block for fixed-position descendants, which would
+            otherwise clip this full-screen modal to the header's box. */}
+        {createPortal(
+          <AnimatePresence>
+            {showLoginModal && (
+              <LoginModal onClose={() => setShowLoginModal(false)} />
+            )}
+          </AnimatePresence>,
+          document.body
+        )}
 
         {/* ═══ SEARCH MODAL ═══ */}
+        {createPortal(
         <AnimatePresence>
           {showSearchModal && (
             <motion.div
@@ -821,9 +829,12 @@ export default function Navbar() {
               </motion.div>
             </motion.div>
           )}
-        </AnimatePresence>
+        </AnimatePresence>,
+        document.body
+        )}
 
         {/* ═══ MOBILE FULL-SCREEN OVERLAY MENU ═══ */}
+        {createPortal(
         <AnimatePresence>
           {showMobileMenu && (
             <>
@@ -952,7 +963,9 @@ export default function Navbar() {
               </motion.div>
             </>
           )}
-        </AnimatePresence>
+        </AnimatePresence>,
+        document.body
+        )}
       </header>
     </CartProvider>
   );

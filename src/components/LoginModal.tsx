@@ -15,6 +15,7 @@ import confetti from 'canvas-confetti';
 import { useCart } from "@/context/CartContext";
 import { Italianno, Great_Vibes, Playfair_Display } from 'next/font/google';
 import { AdminLogin } from "@/components/AdminLogin";
+import Link from "next/link";
 
 const italianno = Italianno({ weight: '400', subsets: ['latin'] });
 const greatVibes = Great_Vibes({ weight: '400', subsets: ['latin'] });
@@ -156,41 +157,32 @@ export function LoginModal({ onClose, onLoginSuccess }: LoginModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-      {/* Dark backdrop blur */}
+    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-[#060504]">
+      {/* Full-Screen Modal Container */}
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="absolute inset-0 bg-black/70 backdrop-blur-md"
-        onClick={onClose}
-      />
-
-      {/* Modal Container */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 15 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 10 }}
-        transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-        className="relative z-10 w-full max-w-4xl h-[min(640px,90vh)] bg-[#090807] border border-amber-600/10 rounded-3xl overflow-hidden flex shadow-2xl"
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 10 }}
+        transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+        className="w-full h-full flex overflow-hidden relative"
       >
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-20 p-2 rounded-full border border-white/10 text-white/50 hover:text-white hover:border-white/30 hover:bg-white/5 transition-all duration-200"
+          className="absolute top-6 right-6 sm:top-8 sm:right-8 z-30 p-2.5 rounded-full border border-white/10 text-white/50 hover:text-white hover:border-white/30 hover:bg-white/5 transition-all duration-200"
           aria-label="Close modal"
         >
-          <X className="w-5 h-5" />
+          <X className="w-6 h-6" />
         </button>
 
-        {/* Left Column: Visual Showcase (hidden on small screens) */}
-        <div className="hidden md:flex md:w-1/2 relative bg-[#0e0c0a] items-center justify-center overflow-hidden">
+        {/* Left Column: Visual Showcase (hidden on small/medium screens) */}
+        <div className="hidden lg:flex lg:w-1/2 relative bg-[#0e0c0a] items-center justify-center overflow-hidden h-full">
           {/* Background image zoom animation */}
           <motion.div 
-            className="absolute inset-0 z-0 opacity-40"
-            initial={{ scale: 1.12 }}
+            className="absolute inset-0 z-0 opacity-45"
+            initial={{ scale: 1.15 }}
             animate={{ scale: 1 }}
-            transition={{ duration: 8, ease: "easeOut" }}
+            transition={{ duration: 10, ease: "easeOut" }}
           >
             <Image
               src="/Home/Home-center.jpg"
@@ -202,60 +194,74 @@ export function LoginModal({ onClose, onLoginSuccess }: LoginModalProps) {
           </motion.div>
 
           <div className="absolute inset-0 bg-gradient-to-tr from-[#060504] via-transparent to-transparent z-1" />
-          <div className="absolute inset-0 bg-black/30 z-1" />
+          <div className="absolute inset-0 bg-black/40 z-1" />
 
           {/* Branding Info */}
-          <div className="relative z-10 p-10 text-center flex flex-col items-center">
-            <div className="mb-6">
+          <div className="relative z-10 p-12 text-center flex flex-col items-center max-w-lg">
+            <div className="mb-8">
               <Image
                 src="/Brand_logo/nlogo.png"
                 alt="Noamani Logo"
-                width={100}
-                height={100}
-                className="object-contain filter drop-shadow-[0_4px_12px_rgba(191,161,74,0.35)]"
+                width={130}
+                height={130}
+                className="object-contain filter drop-shadow-[0_4px_12px_rgba(191,161,74,0.4)]"
               />
             </div>
 
-            <h2 className={`text-3xl text-[#fffbe6] tracking-wider mb-4 font-semibold ${playfair.className}`}>
+            <h2 className={`text-4xl text-[#fffbe6] tracking-wider mb-6 font-semibold ${playfair.className}`}>
               {isLogin ? "Artistry in Scent" : "Discover the Scent"}
             </h2>
 
-            <div className="w-16 h-[1px] bg-[#bfa14a] mb-5" />
+            <div className="w-20 h-[1.5px] bg-[#bfa14a] mb-6" />
 
-            <p className="text-gray-300 font-serif leading-relaxed text-sm italic max-w-sm">
+            <p className="text-gray-300 font-serif leading-relaxed text-base italic">
               {isLogin 
-                ? "&ldquo;Each bottle is a masterpiece, crafted with the rarest ingredients and a passion for perfection.&rdquo;"
-                : "&ldquo;Crafted with care, designed to evoke emotions and leave an unforgettable signature impression.&rdquo;"}
+                ? "“Each bottle is a masterpiece, crafted with the rarest ingredients and a passion for perfection.”"
+                : "“Crafted with care, designed to evoke emotions and leave an unforgettable signature impression.”"}
             </p>
           </div>
         </div>
 
         {/* Right Column: Clean transparent form with NO card container */}
-        <div className="w-full md:w-1/2 p-8 sm:p-12 flex flex-col justify-center relative bg-gradient-to-b from-[#0e0c0a] to-[#090807] overflow-y-auto">
+        <div className="w-full lg:w-1/2 p-6 sm:p-12 md:p-16 flex items-center justify-center relative bg-[#090807] h-full overflow-y-auto">
           {/* Decorative background glows */}
-          <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-amber-500/5 blur-[80px] pointer-events-none" />
-          <div className="absolute bottom-0 left-0 w-72 h-72 rounded-full bg-[#bfa14a]/5 blur-[80px] pointer-events-none" />
+          <div className="absolute top-0 right-0 w-[400px] h-[400px] rounded-full bg-amber-500/5 blur-[120px] pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-[300px] h-[300px] rounded-full bg-[#bfa14a]/5 blur-[100px] pointer-events-none" />
 
-          <div className="w-full relative z-10">
-            {/* Header / Brand text */}
-            <div className="text-center mb-6">
-              <h1 className={`text-4xl font-normal text-white select-none ${greatVibes.className}`} style={{ letterSpacing: "0.02em" }}>
+          <div className="w-full max-w-md relative z-10 py-8">
+            {/* Logo on top of form for small screens */}
+            <div className="text-center lg:hidden mb-8 flex flex-col items-center">
+              <Image
+                src="/Brand_logo/nlogo.png"
+                alt="Noamani Logo"
+                width={70}
+                height={70}
+                className="object-contain mb-3 filter drop-shadow-[0_2px_8px_rgba(191,161,74,0.3)]"
+              />
+              <h1 className={`text-4xl font-normal text-white ${greatVibes.className}`}>
                 Noamani
               </h1>
             </div>
 
-            <div className="mb-5 text-center md:text-left">
-              <h2 className="text-xl font-bold text-[#fffbe6] tracking-wide font-sans">
+            {/* Header / Brand text for desktop */}
+            <div className="hidden lg:block mb-8 text-center">
+              <h1 className={`text-5xl font-normal text-white select-none ${greatVibes.className}`} style={{ letterSpacing: "0.02em" }}>
+                Noamani
+              </h1>
+            </div>
+
+            <div className="mb-6 text-center lg:text-left">
+              <h2 className="text-2xl font-bold text-[#fffbe6] tracking-wide font-sans">
                 {isLogin ? "Sign in" : "Sign up"}
               </h2>
-              <p className="text-gray-400 text-xs mt-1 leading-relaxed">
+              <p className="text-gray-400 text-sm mt-1.5 leading-relaxed">
                 {isLogin 
                   ? "Welcome back. Enter your credentials to access your account." 
                   : "Create an account to start your luxury fragrance journey."}
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-5">
               <AnimatePresence mode="wait">
                 {!isLogin && (
                   <motion.div
@@ -265,7 +271,7 @@ export function LoginModal({ onClose, onLoginSuccess }: LoginModalProps) {
                     transition={{ duration: 0.25 }}
                     className="space-y-1.5"
                   >
-                    <Label htmlFor="modal-name" className="text-gray-300 text-[10px] font-semibold uppercase tracking-wider">
+                    <Label htmlFor="modal-name" className="text-gray-300 text-xs font-semibold uppercase tracking-wider">
                       Full Name
                     </Label>
                     <div className="relative">
@@ -277,7 +283,7 @@ export function LoginModal({ onClose, onLoginSuccess }: LoginModalProps) {
                         placeholder="John Doe"
                         value={formData.name}
                         onChange={handleInputChange}
-                        className="pl-10 bg-[#0d0b0a]/90 border border-amber-600/10 text-white placeholder:text-gray-600 focus:ring-1 focus:ring-[#bfa14a] focus:border-[#bfa14a] focus:bg-black rounded-lg h-10 transition-all text-sm"
+                        className="pl-10 bg-[#0d0b0a]/90 border border-amber-600/10 text-white placeholder:text-gray-600 focus:ring-1 focus:ring-[#bfa14a] focus:border-[#bfa14a] focus:bg-black rounded-lg h-11 transition-all"
                         required
                       />
                     </div>
@@ -286,7 +292,7 @@ export function LoginModal({ onClose, onLoginSuccess }: LoginModalProps) {
               </AnimatePresence>
 
               <div className="space-y-1.5">
-                <Label htmlFor="modal-email" className="text-gray-300 text-[10px] font-semibold uppercase tracking-wider">
+                <Label htmlFor="modal-email" className="text-gray-300 text-xs font-semibold uppercase tracking-wider">
                   Email Address
                 </Label>
                 <div className="relative">
@@ -298,7 +304,7 @@ export function LoginModal({ onClose, onLoginSuccess }: LoginModalProps) {
                     placeholder="name@example.com"
                     value={formData.email}
                     onChange={handleInputChange}
-                    className="pl-10 bg-[#0d0b0a]/90 border border-amber-600/10 text-white placeholder:text-gray-600 focus:ring-1 focus:ring-[#bfa14a] focus:border-[#bfa14a] focus:bg-black rounded-lg h-10 transition-all text-sm"
+                    className="pl-10 bg-[#0d0b0a]/90 border border-amber-600/10 text-white placeholder:text-gray-600 focus:ring-1 focus:ring-[#bfa14a] focus:border-[#bfa14a] focus:bg-black rounded-lg h-11 transition-all"
                     required
                   />
                 </div>
@@ -306,11 +312,11 @@ export function LoginModal({ onClose, onLoginSuccess }: LoginModalProps) {
 
               <div className="space-y-1.5">
                 <div className="flex justify-between items-center">
-                  <Label htmlFor="modal-password" className="text-gray-300 text-[10px] font-semibold uppercase tracking-wider">
+                  <Label htmlFor="modal-password" className="text-gray-300 text-xs font-semibold uppercase tracking-wider">
                     Password
                   </Label>
                   {isLogin && (
-                    <Link href="/forgot-password" onClick={onClose} className="text-[10px] text-[#bfa14a] hover:text-[#fffbe6] transition-colors">
+                    <Link href="/forgot-password" onClick={onClose} className="text-xs text-[#bfa14a] hover:text-[#fffbe6] transition-colors">
                       Forgot password?
                     </Link>
                   )}
@@ -324,7 +330,7 @@ export function LoginModal({ onClose, onLoginSuccess }: LoginModalProps) {
                     placeholder="Password"
                     value={formData.password}
                     onChange={handleInputChange}
-                    className="pl-10 pr-10 bg-[#0d0b0a]/90 border border-amber-600/10 text-white placeholder:text-gray-600 focus:ring-1 focus:ring-[#bfa14a] focus:border-[#bfa14a] focus:bg-black rounded-lg h-10 transition-all text-sm"
+                    className="pl-10 pr-10 bg-[#0d0b0a]/90 border border-amber-600/10 text-white placeholder:text-gray-600 focus:ring-1 focus:ring-[#bfa14a] focus:border-[#bfa14a] focus:bg-black rounded-lg h-11 transition-all"
                     required
                   />
                   <button
@@ -350,7 +356,7 @@ export function LoginModal({ onClose, onLoginSuccess }: LoginModalProps) {
                     transition={{ duration: 0.25 }}
                     className="space-y-1.5"
                   >
-                    <Label htmlFor="modal-confirmPassword" className="text-gray-300 text-[10px] font-semibold uppercase tracking-wider">
+                    <Label htmlFor="modal-confirmPassword" className="text-gray-300 text-xs font-semibold uppercase tracking-wider">
                       Confirm Password
                     </Label>
                     <div className="relative">
@@ -362,7 +368,7 @@ export function LoginModal({ onClose, onLoginSuccess }: LoginModalProps) {
                         placeholder="Confirm password"
                         value={formData.confirmPassword}
                         onChange={handleInputChange}
-                        className="pl-10 pr-10 bg-[#0d0b0a]/90 border border-amber-600/10 text-white placeholder:text-gray-600 focus:ring-1 focus:ring-[#bfa14a] focus:border-[#bfa14a] focus:bg-black rounded-lg h-10 transition-all text-sm"
+                        className="pl-10 pr-10 bg-[#0d0b0a]/90 border border-amber-600/10 text-white placeholder:text-gray-600 focus:ring-1 focus:ring-[#bfa14a] focus:border-[#bfa14a] focus:bg-black rounded-lg h-11 transition-all"
                         required
                       />
                       <button
@@ -383,7 +389,7 @@ export function LoginModal({ onClose, onLoginSuccess }: LoginModalProps) {
 
               <Button
                 type="submit"
-                className="w-full bg-gradient-to-r from-[#bfa14a] to-[#9c7e33] hover:from-[#cfb25a] hover:to-[#bfa14a] text-black font-semibold rounded-lg h-10 shadow-lg shadow-[#bfa14a]/10 hover:shadow-[#bfa14a]/20 hover:scale-[1.01] transition-all duration-200 mt-2 text-sm"
+                className="w-full bg-gradient-to-r from-[#bfa14a] to-[#9c7e33] hover:from-[#cfb25a] hover:to-[#bfa14a] text-black font-semibold rounded-lg h-11 shadow-lg shadow-[#bfa14a]/10 hover:shadow-[#bfa14a]/20 hover:scale-[1.01] transition-all duration-200 mt-2"
                 disabled={loading}
               >
                 {loading ? (
@@ -400,9 +406,9 @@ export function LoginModal({ onClose, onLoginSuccess }: LoginModalProps) {
             </form>
 
             {/* Divider */}
-            <div className="my-5 flex items-center">
+            <div className="my-6 flex items-center">
               <div className="flex-1 border-t border-amber-600/10"></div>
-              <span className="px-3 text-[10px] text-gray-600 uppercase tracking-widest font-semibold">or</span>
+              <span className="px-3 text-xs text-gray-600 uppercase tracking-widest font-semibold">or</span>
               <div className="flex-1 border-t border-amber-600/10"></div>
             </div>
 
@@ -410,21 +416,21 @@ export function LoginModal({ onClose, onLoginSuccess }: LoginModalProps) {
             <Button
               variant="outline"
               type="button"
-              className="w-full flex items-center justify-center gap-2 bg-black border border-amber-600/10 hover:bg-[#12100e] text-white hover:text-[#fffbe6] hover:border-amber-600/20 rounded-lg h-10 transition-all duration-200"
+              className="w-full flex items-center justify-center gap-2.5 bg-black border border-amber-600/10 hover:bg-[#12100e] text-white hover:text-[#fffbe6] hover:border-amber-600/20 rounded-lg h-11 transition-all duration-200"
               onClick={handleLoginWithGoogle}
               disabled={socialLoading}
             >
               {socialLoading ? (
                 <Loader2 className="animate-spin w-4 h-4 text-[#bfa14a]" />
               ) : (
-                <Image src="/button_icon/google.png" alt="Google Logo" width={16} height={16} />
+                <Image src="/button_icon/google.png" alt="Google Logo" width={18} height={18} />
               )}
-              <span className="text-xs font-medium">Continue with Google</span>
+              <span className="text-sm font-medium">Continue with Google</span>
             </Button>
 
             {/* Toggle switch between Login / Signup */}
-            <div className="mt-5 text-center border-t border-amber-600/5 pt-3">
-              <p className="text-gray-400 text-xs">
+            <div className="mt-6 text-center border-t border-amber-600/5 pt-4">
+              <p className="text-gray-400 text-sm">
                 {isLogin ? "Don't have an account? " : "Already have an account? "}
                 <button
                   type="button"
@@ -438,12 +444,12 @@ export function LoginModal({ onClose, onLoginSuccess }: LoginModalProps) {
 
             {/* Admin trigger button for Login */}
             {isLogin && (
-              <div className="mt-3">
+              <div className="mt-4">
                 <Button
                   onClick={() => setShowAdminLogin(true)}
-                  className="w-full bg-[#181614] border border-[#262320] text-gray-400 hover:text-white hover:bg-[#201d1a] rounded-lg h-9 transition-all flex items-center justify-center gap-2 text-[10px] font-semibold uppercase tracking-wider"
+                  className="w-full bg-[#181614] border border-[#262320] text-gray-400 hover:text-white hover:bg-[#201d1a] rounded-lg h-10 transition-all flex items-center justify-center gap-2 text-xs font-semibold uppercase tracking-wider"
                 >
-                  <ShieldAlert className="w-3 h-3 text-[#bfa14a]" />
+                  <ShieldAlert className="w-3.5 h-3.5 text-[#bfa14a]" />
                   Admin Access Only
                 </Button>
               </div>
