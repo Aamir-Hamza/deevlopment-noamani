@@ -183,13 +183,13 @@ export default function LoginPage() {
           </motion.p>
         </div>
 
-        {/* Back to website shortcut */}
+        {/* Back shortcut */}
         <Link 
           href="/"
           className="absolute top-8 left-8 z-10 flex items-center gap-2 text-white/60 hover:text-white transition-colors text-sm uppercase tracking-widest font-medium"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back to website
+          Back
         </Link>
       </div>
 

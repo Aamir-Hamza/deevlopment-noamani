@@ -31,7 +31,8 @@ export default function ClientRootLayout({ children }: { children: React.ReactNo
       '/maison-noamani',
       '/legal/general-sales-conditions',
       '/login',
-      '/signup'
+      '/signup',
+      '/forgot-password'
     ];
     const hideNavbar = hideNavbarRoutes.includes(pathname ?? "");
     return (
