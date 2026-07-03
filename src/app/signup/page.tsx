@@ -1,20 +1,23 @@
 "use client";
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Mail, Lock, User, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Mail, Lock, User, Eye, EyeOff, Loader2, ArrowLeft } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
+import Image from 'next/image';
 import confetti from 'canvas-confetti';
-import { Italianno, Dancing_Script, Great_Vibes, Allura } from 'next/font/google';
+import { Italianno, Great_Vibes, Playfair_Display } from 'next/font/google';
+import { auth } from '@/lib/firebase';
+import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import axios from 'axios';
 
 const italianno = Italianno({ weight: '400', subsets: ['latin'] });
-const dancingScript = Dancing_Script({ weight: '400', subsets: ['latin'] });
 const greatVibes = Great_Vibes({ weight: '400', subsets: ['latin'] });
-const allura = Allura({ weight: '400', subsets: ['latin'] });
+const playfair = Playfair_Display({ weight: ['400', '600', '700'], subsets: ['latin'] });
 
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -26,6 +29,7 @@ export default function SignupPage() {
     confirmPassword: "",
   });
   const [loading, setLoading] = useState(false);
+  const [socialLoading, setSocialLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,18 +58,63 @@ export default function SignupPage() {
       
       localStorage.setItem("userInfo", JSON.stringify(data.user));
       toast.success("Welcome to Noamani!", { icon: "🎉" });
+      
       confetti({
         particleCount: 80,
         spread: 70,
-        origin: { y: 0.7 },
+        origin: { y: 0.6 },
         colors: ['#bfa14a', '#fffbe6', '#f7e7b4', '#111']
       });
+      
       window.dispatchEvent(new Event("userLogin"));
       window.location.href = "/";
     } catch (err: any) {
       toast.error(err.message || "Something went wrong");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleLoginWithGoogle = async () => {
+    setSocialLoading(true);
+    try {
+      const provider = new GoogleAuthProvider();
+      const res = await signInWithPopup(auth, provider);
+
+      if (!res?.user) {
+        toast.error("Google authentication failed");
+        return;
+      }
+
+      const { displayName, email, photoURL, providerId, uid } = res.user;
+
+      const response = await axios.post("/api/auth/google", {
+        name: displayName,
+        email,
+        photoURL,
+        providerId,
+        uid,
+      });
+
+      if (response.data?.user) {
+        localStorage.setItem("userInfo", JSON.stringify(response.data.user));
+        toast.success("Welcome to Noamani Perfumes! 🎉");
+        confetti({
+          particleCount: 80,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ['#bfa14a', '#fffbe6', '#f7e7b4', '#111']
+        });
+        window.dispatchEvent(new Event("userLogin"));
+        window.location.href = "/";
+      } else {
+        toast.error("Google login failed");
+      }
+    } catch (error) {
+      console.error("Google login error:", error);
+      toast.error("Something went wrong during Google login");
+    } finally {
+      setSocialLoading(false);
     }
   };
 
@@ -77,85 +126,190 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center px-4 py-8">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="w-full max-w-md"
-      >
-        {/* Sign Up Form */}
-        <div className="bg-black border border-gray-800 rounded-lg p-8">
-          {/* Brand Header inside the form */}
-          <div className="text-center mb-8">
-            <h1 className={`text-5xl font-normal text-white mb-2 select-none ${greatVibes.className}`} style={{ letterSpacing: "0.05em" }}>
+    <div className="min-h-screen bg-[#060504] flex font-sans overflow-x-hidden">
+      {/* Left Column: Visual Showcase (hidden on mobile) */}
+      <div className="hidden lg:flex lg:w-1/2 relative bg-[#0e0c0a] items-center justify-center overflow-hidden">
+        {/* Background Image with slow Ken Burns effect */}
+        <motion.div 
+          className="absolute inset-0 z-0 opacity-45"
+          initial={{ scale: 1.15 }}
+          animate={{ scale: 1 }}
+          transition={{ duration: 10, ease: "easeOut" }}
+        >
+          <Image
+            src="/Home/Home-center.jpg"
+            alt="Noamani Luxury Scent Showcase"
+            fill
+            className="object-cover"
+            priority
+          />
+        </motion.div>
+
+        {/* Ambient overlay shadows */}
+        <div className="absolute inset-0 bg-gradient-to-tr from-[#060504] via-transparent to-transparent z-1" />
+        <div className="absolute inset-0 bg-black/40 z-1" />
+
+        {/* Branding Info */}
+        <div className="relative z-10 max-w-lg p-12 text-center flex flex-col items-center">
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="mb-8"
+          >
+            <Image
+              src="/Brand_logo/nlogo.png"
+              alt="Noamani Logo"
+              width={140}
+              height={140}
+              className="object-contain filter drop-shadow-[0_4px_12px_rgba(191,161,74,0.4)]"
+            />
+          </motion.div>
+
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className={`text-4xl text-[#fffbe6] tracking-wider mb-6 font-semibold ${playfair.className}`}
+          >
+            Discover the Scent
+          </motion.h2>
+
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1.2, delay: 0.4 }}
+            className="w-20 h-[1.5px] bg-[#bfa14a] mb-6"
+          />
+
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.5 }}
+            className="text-gray-300 font-serif leading-relaxed text-base italic"
+          >
+            &ldquo;Crafted with care, designed to evoke emotions and leave an unforgettable signature impression.&rdquo;
+          </motion.p>
+        </div>
+
+        {/* Back to website shortcut */}
+        <Link 
+          href="/"
+          className="absolute top-8 left-8 z-10 flex items-center gap-2 text-white/60 hover:text-white transition-colors text-sm uppercase tracking-widest font-medium"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to website
+        </Link>
+      </div>
+
+      {/* Right Column: Form (No container border or box) */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 md:p-16 relative bg-[#090807]">
+        {/* Decorative corner background glows */}
+        <div className="absolute top-0 right-0 w-[400px] h-[400px] rounded-full bg-amber-500/5 blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] rounded-full bg-[#bfa14a]/5 blur-[100px] pointer-events-none" />
+
+        {/* Return to website button for mobile view */}
+        <Link 
+          href="/"
+          className="lg:hidden absolute top-6 left-6 z-10 flex items-center gap-2 text-white/50 hover:text-white transition-colors text-xs uppercase tracking-widest"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          Home
+        </Link>
+
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6 }}
+          className="w-full max-w-md relative z-10"
+        >
+          {/* Logo on top of form for small screens */}
+          <div className="text-center lg:hidden mb-8 flex flex-col items-center">
+            <Image
+              src="/Brand_logo/nlogo.png"
+              alt="Noamani Logo"
+              width={70}
+              height={70}
+              className="object-contain mb-3 filter drop-shadow-[0_2px_8px_rgba(191,161,74,0.3)]"
+            />
+            <h1 className={`text-4xl font-normal text-white ${greatVibes.className}`}>
               Noamani
             </h1>
           </div>
-          <h2 className="text-2xl font-semibold text-white mb-2">Sign up</h2>
-          <p className="text-gray-400 text-sm mb-6">
-            Create your account to get started
-          </p>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="name" className="text-white text-sm">
+          {/* Title / Brand header inside form for desktop */}
+          <div className="hidden lg:block mb-8">
+            <h1 className={`text-5xl font-normal text-center text-white select-none ${greatVibes.className}`} style={{ letterSpacing: "0.02em" }}>
+              Noamani
+            </h1>
+          </div>
+
+          <div className="mb-6 text-center lg:text-left">
+            <h2 className="text-2xl font-bold text-[#fffbe6] tracking-wide font-sans">Sign up</h2>
+            <p className="text-gray-400 text-sm mt-1.5 leading-relaxed">
+              Create an account to start your luxury fragrance journey.
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="name" className="text-gray-300 text-xs font-semibold uppercase tracking-wider">
                 Full Name
               </Label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-4 h-4" />
                 <Input
                   id="name"
                   name="name"
                   type="text"
-                  placeholder="Full Name"
+                  placeholder="John Doe"
                   value={formData.name}
                   onChange={handleInputChange}
-                  className="pl-10 bg-black border border-gray-600 text-white placeholder:text-gray-500 focus:ring-2 focus:ring-gray-500 focus:border-gray-500 rounded-md"
+                  className="pl-10 bg-[#0d0b0a]/90 border border-amber-600/10 text-white placeholder:text-gray-600 focus:ring-1 focus:ring-[#bfa14a] focus:border-[#bfa14a] focus:bg-black rounded-lg h-11 transition-all"
                   required
                 />
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-white text-sm">
+            <div className="space-y-1.5">
+              <Label htmlFor="email" className="text-gray-300 text-xs font-semibold uppercase tracking-wider">
                 Email Address
               </Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-4 h-4" />
                 <Input
                   id="email"
                   name="email"
                   type="email"
-                  placeholder="Email"
+                  placeholder="name@example.com"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className="pl-10 bg-black border border-gray-600 text-white placeholder:text-gray-500 focus:ring-2 focus:ring-gray-500 focus:border-gray-500 rounded-md"
+                  className="pl-10 bg-[#0d0b0a]/90 border border-amber-600/10 text-white placeholder:text-gray-600 focus:ring-1 focus:ring-[#bfa14a] focus:border-[#bfa14a] focus:bg-black rounded-lg h-11 transition-all"
                   required
                 />
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-white text-sm">
+            <div className="space-y-1.5">
+              <Label htmlFor="password" className="text-gray-300 text-xs font-semibold uppercase tracking-wider">
                 Password
               </Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-4 h-4" />
                 <Input
                   id="password"
                   name="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="Password"
+                  placeholder="Create a strong password"
                   value={formData.password}
                   onChange={handleInputChange}
-                  className="pl-10 pr-10 bg-black border border-gray-600 text-white placeholder:text-gray-500 focus:ring-2 focus:ring-gray-500 focus:border-gray-500 rounded-md"
+                  className="pl-10 pr-10 bg-[#0d0b0a]/90 border border-amber-600/10 text-white placeholder:text-gray-600 focus:ring-1 focus:ring-[#bfa14a] focus:border-[#bfa14a] focus:bg-black rounded-lg h-11 transition-all"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300 transition-colors"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors"
                 >
                   {showPassword ? (
                     <EyeOff className="w-4 h-4" />
@@ -166,26 +320,26 @@ export default function SignupPage() {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword" className="text-white text-sm">
+            <div className="space-y-1.5">
+              <Label htmlFor="confirmPassword" className="text-gray-300 text-xs font-semibold uppercase tracking-wider">
                 Confirm Password
               </Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-4 h-4" />
                 <Input
                   id="confirmPassword"
                   name="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
-                  placeholder="Confirm Password"
+                  placeholder="Confirm password"
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
-                  className="pl-10 pr-10 bg-black border border-gray-600 text-white placeholder:text-gray-500 focus:ring-2 focus:ring-gray-500 focus:border-gray-500 rounded-md"
+                  className="pl-10 pr-10 bg-[#0d0b0a]/90 border border-amber-600/10 text-white placeholder:text-gray-600 focus:ring-1 focus:ring-[#bfa14a] focus:border-[#bfa14a] focus:bg-black rounded-lg h-11 transition-all"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300 transition-colors"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors"
                 >
                   {showConfirmPassword ? (
                     <EyeOff className="w-4 h-4" />
@@ -198,51 +352,74 @@ export default function SignupPage() {
 
             <Button
               type="submit"
-              className="w-full bg-black border border-gray-600 text-white hover:bg-gray-900 hover:border-gray-500 rounded-md py-3 font-medium transition-all duration-200"
+              className="w-full bg-gradient-to-r from-[#bfa14a] to-[#9c7e33] hover:from-[#cfb25a] hover:to-[#bfa14a] text-black font-semibold rounded-lg h-11 shadow-lg shadow-[#bfa14a]/10 hover:shadow-[#bfa14a]/20 hover:scale-[1.01] transition-all duration-200 mt-2"
               disabled={loading}
             >
               {loading ? (
                 <>
                   <Loader2 className="animate-spin w-4 h-4 mr-2" />
-                  Please wait
+                  Creating account...
                 </>
               ) : (
-                "Continue"
+                "Create Account"
               )}
             </Button>
           </form>
 
+          {/* Divider */}
+          <div className="my-6 flex items-center">
+            <div className="flex-1 border-t border-amber-600/10"></div>
+            <span className="px-3 text-xs text-gray-600 uppercase tracking-widest font-semibold">or</span>
+            <div className="flex-1 border-t border-amber-600/10"></div>
+          </div>
+
+          {/* Google Authentication */}
+          <Button
+            variant="outline"
+            type="button"
+            className="w-full flex items-center justify-center gap-2.5 bg-black border border-amber-600/10 hover:bg-[#12100e] text-white hover:text-[#fffbe6] hover:border-amber-600/20 rounded-lg h-11 transition-all duration-200"
+            onClick={handleLoginWithGoogle}
+            disabled={socialLoading}
+          >
+            {socialLoading ? (
+              <Loader2 className="animate-spin w-4 h-4 text-[#bfa14a]" />
+            ) : (
+              <Image src="/button_icon/google.png" alt="Google Logo" width={18} height={18} />
+            )}
+            <span className="text-sm font-medium">Continue with Google</span>
+          </Button>
+
           {/* Sign In Link */}
-          <div className="mt-6 text-center">
+          <div className="mt-6 text-center border-t border-amber-600/5 pt-4">
             <p className="text-gray-400 text-sm">
               Already have an account?{" "}
               <Link 
                 href="/login" 
-                className="text-white hover:text-gray-300 transition-colors font-medium"
+                className="text-[#bfa14a] hover:text-[#fffbe6] transition-colors font-semibold"
               >
                 Sign in
               </Link>
             </p>
           </div>
 
-          {/* Footer Links - moved inside the form container */}
-          <div className="mt-8 text-center space-x-4">
+          {/* Footer Links */}
+          <div className="mt-8 flex justify-center gap-4 text-xs text-gray-600">
             <Link 
               href="/legal/privacy" 
-              className="text-gray-500 hover:text-gray-400 text-sm transition-colors"
+              className="hover:text-gray-400 transition-colors"
             >
-              Privacy policy
+              Privacy Policy
             </Link>
-            <span className="text-gray-500">•</span>
+            <span>&bull;</span>
             <Link 
               href="/legal/terms" 
-              className="text-gray-500 hover:text-gray-400 text-sm transition-colors"
+              className="hover:text-gray-400 transition-colors"
             >
-              Terms of service
+              Terms of Service
             </Link>
           </div>
-        </div>
-      </motion.div>
+        </motion.div>
+      </div>
     </div>
   );
 }

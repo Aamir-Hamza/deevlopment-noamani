@@ -390,7 +390,7 @@ export default function MegaMenu({
 
   return (
     <motion.div
-      className={`absolute top-full left-0 right-0 transition-colors duration-300 z-50 ${isNavbarWhite ? 'bg-white' : 'bg-black/30 backdrop-blur-md'}`}
+      className={`absolute top-full left-0 right-0 transition-colors duration-300 z-50 border-t-2 border-amber-600/30 ${isNavbarWhite ? 'bg-white shadow-[0_8px_30px_rgba(0,0,0,0.06)]' : 'bg-black/40 backdrop-blur-xl'}`}
       initial="hidden"
       animate="visible"
       exit="exit"

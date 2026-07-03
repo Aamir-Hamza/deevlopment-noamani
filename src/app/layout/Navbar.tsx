@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import {
   Search,
@@ -8,10 +8,7 @@ import {
   ShoppingBag,
   Menu,
   X,
-  Droplets,
-  Star,
-  Sparkles,
-  Info
+  ChevronRight,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import MegaMenu from "./MegaMenu";
@@ -54,14 +51,13 @@ interface AdminInfo {
 }
 
 export default function Navbar() {
-  // All hooks at the top
+  // ─── STATE ───────────────────────────────────────────────
   const { cart, clearCart } = useCart();
   const router = useRouter();
   const pathname = usePathname();
-  const isFixedNavPage = ["/shop", "/bestsellers", "/fragrance", "/about"].includes(pathname ?? "");
+
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [adminInfo, setAdminInfo] = useState<AdminInfo | null>(null);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -75,46 +71,62 @@ export default function Navbar() {
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
-  // Keep the local catalogue available immediately; the API refreshes it in the
-  // background so opening search never waits on MongoDB/network startup.
   const [allProducts, setAllProducts] = useState<any[]>(products);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const userDropdownRef = useRef<HTMLDivElement>(null);
+  const [announcementDismissed, setAnnouncementDismissed] = useState(false);
 
+  // ─── DERIVED STATE ───────────────────────────────────────
+  const forcesSolid =
+    pathname?.startsWith("/product/") ||
+    pathname === "/about/shipping" ||
+    pathname === "/about/returns" ||
+    pathname === "/about/faqs" ||
+    pathname === "/shop";
 
+  const isSolid = isScrolled || !!forcesSolid;
+  const isHomepage = pathname === "/";
 
+  // Unified color tokens — one place for all color logic
+  const textColor = isSolid ? "text-gray-900" : "text-white";
+  const iconColor = isSolid ? "text-gray-800" : "text-white";
+  const underlineColor = isSolid ? "bg-gray-900" : "bg-white";
+  const showAnnouncementBar = !announcementDismissed && !isScrolled;
+
+  // Country data with safe fallback
+  const safeCountryData = countryData || {
+    country: 'India',
+    countryCode: 'IN',
+    flag: '🇮🇳',
+    currency: 'INR',
+    timezone: 'Asia/Kolkata',
+  };
+
+  // ─── EFFECTS ─────────────────────────────────────────────
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
+  // Scroll handler
   useEffect(() => {
     const handleScroll = () => {
-      // Always scrolled style for /about/shipping, /product/recreations, /shop, and all product pages
-      if (
-        pathname === '/about/shipping' ||
-        pathname === '/product/recreations' ||
-        pathname === '/shop' ||
-        (pathname && pathname.startsWith("/product/"))
-      ) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(window.scrollY > 0);
-      }
+      setIsScrolled(window.scrollY > 10);
     };
-    window.addEventListener("scroll", handleScroll);
-    // Call once on mount to set initial state
+    window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [pathname]);
+  }, []);
 
-  const handleProfileImgUpdate = () => {
+  // Profile image update
+  const handleProfileImgUpdate = useCallback(() => {
     const userEmail = userEmailRef.current;
     if (userEmail) {
       const updatedImg = localStorage.getItem(`profileImg_${userEmail}`);
       setProfileImg(updatedImg || null);
     }
-  };
+  }, []);
 
+  // Load user/admin info from localStorage
   useEffect(() => {
     if (typeof window !== "undefined") {
       const storedAdminInfo = localStorage.getItem("adminInfo");
@@ -139,18 +151,19 @@ export default function Navbar() {
     }
   }, []);
 
+  // Profile image event listener
   useEffect(() => {
     window.addEventListener("profileImgUpdated", handleProfileImgUpdate);
-    return () =>
-      window.removeEventListener("profileImgUpdated", handleProfileImgUpdate);
-  }, []);
+    return () => window.removeEventListener("profileImgUpdated", handleProfileImgUpdate);
+  }, [handleProfileImgUpdate]);
 
+  // Cart count sync
   useEffect(() => {
     const count = cart.reduce((total, item) => total + item.quantity, 0);
     setCartItemsCount(count);
   }, [cart]);
 
-
+  // Admin logout event
   useEffect(() => {
     const handleAdminLogout = () => {
       setAdminInfo(null);
@@ -160,6 +173,7 @@ export default function Navbar() {
     return () => window.removeEventListener("adminLogout", handleAdminLogout);
   }, []);
 
+  // User login event
   useEffect(() => {
     const handleUserLogin = () => {
       if (typeof window !== "undefined") {
@@ -188,6 +202,7 @@ export default function Navbar() {
     return () => window.removeEventListener("userLogin", handleUserLogin);
   }, []);
 
+  // Product catalogue background refresh
   useEffect(() => {
     const controller = new AbortController();
     const refreshCatalogue = () => {
@@ -220,13 +235,13 @@ export default function Navbar() {
     };
   }, []);
 
+  // Search filtering
   useEffect(() => {
     const normalizedQuery = searchQuery.trim().toLowerCase();
     if (!normalizedQuery) {
       setSearchResults([]);
       return;
     }
-
     setSearchResults(
       allProducts
         .filter(
@@ -239,22 +254,41 @@ export default function Navbar() {
     );
   }, [allProducts, searchQuery]);
 
+  // Search modal body scroll lock
   useEffect(() => {
     if (!showSearchModal) return;
-
     const previousOverflow = document.body.style.overflow;
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") setShowSearchModal(false);
     };
     document.body.style.overflow = "hidden";
     window.addEventListener("keydown", closeOnEscape);
-
     return () => {
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", closeOnEscape);
     };
   }, [showSearchModal]);
 
+  // Mobile menu body scroll lock
+  useEffect(() => {
+    if (showMobileMenu) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [showMobileMenu]);
+
+  // Close mobile menu on desktop resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) setShowMobileMenu(false);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Click outside user dropdown
   useEffect(() => {
     function handleClickOutsideUserDropdown(event: MouseEvent) {
       if (
@@ -266,31 +300,22 @@ export default function Navbar() {
     }
     if (showDropdown) {
       document.addEventListener("mousedown", handleClickOutsideUserDropdown);
-    } else {
-      document.removeEventListener("mousedown", handleClickOutsideUserDropdown);
     }
     return () => {
       if (typeof document !== 'undefined') {
-      document.removeEventListener("mousedown", handleClickOutsideUserDropdown);
+        document.removeEventListener("mousedown", handleClickOutsideUserDropdown);
       }
     };
   }, [showDropdown]);
 
-  // Function to truncate username
+  // ─── HANDLERS ────────────────────────────────────────────
   const getTruncatedName = (name: string) => {
-    if (name.length > 12) {
-      return name.substring(0, 12) + "...";
-    }
-    return name;
+    return name.length > 12 ? name.substring(0, 12) + "..." : name;
   };
 
-  // Early returns after all hooks
+  // Early returns (after all hooks)
   if (!isMounted) return null;
-  if (
-    (pathname && pathname.startsWith("/admin")) ||
-    (pathname && pathname.startsWith("/auth"))
-  )
-    return null;
+  if (pathname?.startsWith("/admin") || pathname?.startsWith("/auth")) return null;
 
   const handleLogout = async () => {
     if (typeof window !== "undefined") {
@@ -299,10 +324,7 @@ export default function Navbar() {
       setAdminInfo(null);
       setShowDropdown(false);
       router.push("/");
-      toast.success("Logged out successfully", {
-        icon: "👋",
-        duration: 3000,
-      });
+      toast.success("Logged out successfully", { icon: "👋", duration: 3000 });
     }
   };
 
@@ -312,15 +334,10 @@ export default function Navbar() {
       localStorage.removeItem("userInfo");
       setUserInfo(null);
       setShowDropdown(false);
-      toast.success("Logged out successfully", {
-        icon: "👋",
-        duration: 3000,
-      });
+      toast.success("Logged out successfully", { icon: "👋", duration: 3000 });
     }
   };
 
-
-  // Add this function to handle requiring login for cart
   const handleRequireLogin = (item: any) => {
     setPendingCartItem(item);
     setShowLoginModal(true);
@@ -341,1015 +358,342 @@ export default function Navbar() {
     router.push(`/product/${productId}`);
   };
 
-  // Determine nav text color for submenu
-  const navTextColor = (!isScrolled && !isMobileMenuOpen) ? 'text-white' : 'text-black';
+  // Mega menu text color for MegaMenu component
+  const navTextColor = isSolid ? 'text-black' : 'text-white';
 
+  // ─── SHARED RENDER HELPERS ───────────────────────────────
+
+  /** Renders search, user/admin dropdown, cart, and country icons.
+   *  Used in both desktop and mobile layouts — written once, zero duplication. */
+  const renderRightIcons = (mode: 'desktop' | 'mobile') => {
+    const isCompact = mode === 'mobile';
+    const iconSize = isCompact ? "h-[18px] w-[18px]" : "h-5 w-5";
+    const gap = isCompact ? "gap-2.5" : "gap-4";
+
+    return (
+      <div className={cn("flex items-center", gap)}>
+        {/* Search */}
+        <button
+          className={cn("transition-all duration-200 hover:opacity-70 hover:scale-110", iconColor)}
+          onClick={() => setShowSearchModal(true)}
+          aria-label="Search"
+          type="button"
+        >
+          <Search className={iconSize} />
+        </button>
+
+        {/* User / Admin */}
+        {adminInfo ? (
+          <div className="relative" ref={userDropdownRef}>
+            <button
+              onClick={() => setShowDropdown(!showDropdown)}
+              className={cn(
+                "flex items-center gap-1.5 text-sm font-medium transition-all duration-200 hover:opacity-70",
+                textColor
+              )}
+            >
+              <UserCircleIcon className={iconSize} />
+              {!isCompact && <span className="tracking-wide">Admin</span>}
+            </button>
+            <AnimatePresence>
+              {showDropdown && (
+                <motion.div
+                  key="admin-dropdown"
+                  className="absolute right-0 top-full mt-3 w-52 rounded-2xl glass-dropdown py-2 z-[60]"
+                  initial={{ opacity: 0, y: -8, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -6, scale: 0.97 }}
+                  transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  <Link
+                    href="/admin/dashboard"
+                    className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+                    onClick={() => setShowDropdown(false)}
+                  >
+                    Dashboard
+                  </Link>
+                  <div className="mx-3 my-1 h-px bg-gray-100" />
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-2 w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+                  >
+                    <ArrowRightOnRectangleIcon className="h-4 w-4" />
+                    Logout
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        ) : userInfo ? (
+          <div className="relative" ref={userDropdownRef}>
+            <button
+              onClick={() => setShowDropdown(!showDropdown)}
+              className="flex items-center gap-1.5 focus:outline-none group"
+              aria-label="User menu"
+              type="button"
+            >
+              {profileImg ? (
+                <Image
+                  src={profileImg}
+                  alt="Profile"
+                  width={isCompact ? 24 : 28}
+                  height={isCompact ? 24 : 28}
+                  className="rounded-full object-cover border-2 border-amber-400/40 transition-all duration-200 group-hover:border-amber-400/80"
+                />
+              ) : (
+                <UserCircleIcon className={cn(iconSize, iconColor, "transition-colors")} />
+              )}
+              {!isCompact && (
+                <span className={cn(
+                  "max-w-[80px] truncate text-sm font-medium transition-colors",
+                  textColor
+                )}>
+                  {getTruncatedName(userInfo.name)}
+                </span>
+              )}
+            </button>
+            <AnimatePresence>
+              {showDropdown && (
+                <motion.div
+                  key="user-dropdown"
+                  className={cn(
+                    "absolute top-full mt-3 w-56 rounded-2xl glass-dropdown overflow-hidden z-[60]",
+                    isCompact ? "right-0" : "left-1/2 -translate-x-1/2"
+                  )}
+                  initial={{ opacity: 0, y: -8, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -6, scale: 0.97 }}
+                  transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  {/* User info header */}
+                  <div className="px-4 py-3 bg-gradient-to-b from-gray-50/80 to-transparent border-b border-gray-100/80">
+                    <p className="text-[11px] uppercase tracking-widest text-gray-400 font-medium">Signed in as</p>
+                    <p className="text-sm font-semibold text-gray-900 truncate mt-0.5">
+                      {userInfo.email}
+                    </p>
+                  </div>
+                  <div className="py-1.5">
+                    <Link
+                      href="/profile"
+                      className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+                      onClick={() => setShowDropdown(false)}
+                    >
+                      <UserCircleIcon className="h-4 w-4 text-gray-400" />
+                      Profile
+                    </Link>
+                    <Link
+                      href="/orders"
+                      className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+                      onClick={() => setShowDropdown(false)}
+                    >
+                      <ShoppingBagIcon className="h-4 w-4 text-gray-400" />
+                      Orders
+                    </Link>
+                    <div className="mx-3 my-1 h-px bg-gray-100" />
+                    <button
+                      onClick={handleUserLogout}
+                      className="flex items-center gap-2.5 w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors"
+                    >
+                      <ArrowRightOnRectangleIcon className="h-4 w-4" />
+                      Logout
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        ) : (
+          <button
+            onClick={() => setShowLoginModal(true)}
+            className={cn("transition-all duration-200 hover:opacity-70 hover:scale-110", iconColor)}
+            aria-label="Login"
+          >
+            <User className={iconSize} />
+          </button>
+        )}
+
+        {/* Cart */}
+        <Link
+          href="/cart"
+          className={cn("relative transition-all duration-200 hover:opacity-70 hover:scale-110", iconColor)}
+        >
+          <ShoppingBagIcon className={iconSize} />
+          {cartItemsCount > 0 && (
+            <motion.span
+              key={cartItemsCount}
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="absolute -top-2 -right-2.5 bg-gradient-to-br from-amber-700 to-amber-900 text-white text-[10px] font-bold rounded-full h-[18px] w-[18px] flex items-center justify-center shadow-sm"
+            >
+              {cartItemsCount}
+            </motion.span>
+          )}
+        </Link>
+
+        {/* Country Display — desktop only */}
+        {!isCompact && (
+          <CountryDisplay
+            isScrolled={isSolid}
+            isMobileMenuOpen={false}
+          />
+        )}
+      </div>
+    );
+  };
+
+  /** Desktop navigation links with CSS underline animation */
+  const renderDesktopNav = () => (
+    <nav className="hidden md:flex flex-1 justify-center">
+      <ul className="flex items-center gap-7 lg:gap-9">
+        {navItems.map((item) => {
+          const isActive = pathname === item.href;
+          return (
+            <li
+              key={item.name}
+              className="relative"
+              onMouseEnter={() => {
+                if (item.name !== "About Us" && item.name !== "Recreations") {
+                  setActiveMenu(item.name);
+                } else {
+                  setActiveMenu(null);
+                }
+              }}
+            >
+              <Link
+                href={item.href}
+                className={cn(
+                  "relative text-[14px] lg:text-[15px] tracking-[0.1em] py-2 transition-all duration-300 font-semibold uppercase",
+                  textColor,
+                  "hover:opacity-80",
+                  item.name === "About Us" && pathname === "/about" && "pointer-events-none opacity-50"
+                )}
+                style={{ fontFamily: 'Didot, serif', fontWeight: 600 }}
+              >
+                {item.name}
+
+                {/* CSS underline */}
+                <span
+                  className={cn(
+                    "navbar-link-underline",
+                    underlineColor,
+                    activeMenu === item.name && "active"
+                  )}
+                />
+              </Link>
+
+              {/* Active page gold dot */}
+              {isActive && (
+                <motion.span
+                  layoutId="nav-active-dot"
+                  className="nav-active-dot"
+                  transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                />
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
+  );
+
+  // ─── MAIN RENDER ─────────────────────────────────────────
   return (
     <CartProvider onRequireLogin={handleRequireLogin}>
       <header
         className={cn(
-          pathname === "/about/shipping" || pathname === "/about/returns"
-            ? "fixed top-0 left-0 right-0 z-50 bg-white shadow-sm"
-            : pathname && pathname.startsWith("/product/")
-              ? "fixed top-0 left-0 right-0 z-50 bg-white shadow-md"
-              : "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
-          // On product details page, always use white background with shadow
-          pathname?.startsWith("/product/")
-            ? "bg-white shadow-md"
-            : (isScrolled || isMobileMenuOpen)
-              ? "bg-white shadow-sm"
-              : "bg-black/30 backdrop-blur-md" // <-- light black + blur for luxury look
+          "fixed top-0 left-0 right-0 z-50 navbar-transition",
+          isSolid
+            ? "bg-white/95 backdrop-blur-xl shadow-[0_1px_3px_rgba(0,0,0,0.06)]"
+            : "bg-black/20 backdrop-blur-md"
         )}
+        onMouseLeave={() => setActiveMenu(null)}
       >
+        {/* ═══ ANNOUNCEMENT BAR ═══ */}
         <div
           className={cn(
-            pathname === '/about/shipping'
-              ? 'w-full px-4 sm:px-6 lg:px-8 bg-white'
-              : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'
+            "overflow-hidden transition-all duration-500 ease-in-out",
+            showAnnouncementBar
+              ? "max-h-9 opacity-100"
+              : "max-h-0 opacity-0"
           )}
-          style={pathname === '/about/shipping' ? { backgroundColor: '#fff', maxWidth: '100%', margin: 0 } : {}}
         >
-          {/* Unscrolled: 2-row luxury hero, Scrolled: 1-row sticky */}
-          {isScrolled ||
-          (pathname && pathname.startsWith("/product/")) ||
-          pathname === "/about/shipping" ||
-          pathname === "/about/returns" ||
-          pathname === "/about/faqs" ? (
-            <div
-              className={cn(
-                "relative flex items-center justify-between hidden md:flex",
-                pathname && pathname.startsWith("/product/")
-                  ? "h-16 md:h-18 py-2"
-                  : "h-16 md:h-20"
-              )}
-              style={{
-                transition: "height 0.5s",
-                minHeight: pathname && pathname.startsWith("/product/") ? "64px" : "64px",
-                alignItems: "center",
-              }}
+          <div className="flex items-center justify-center h-9 announcement-bar-gradient px-4 relative">
+            <p className="text-[10px] sm:text-[11px] text-white/90 tracking-[0.18em] font-medium uppercase text-center">
+              Complimentary shipping on orders above ₹2,000 &middot; Free samples with every order
+            </p>
+            <button
+              onClick={() => setAnnouncementDismissed(true)}
+              className="absolute right-3 sm:right-5 text-white/40 hover:text-white/90 transition-colors p-1"
+              aria-label="Close announcement"
             >
-              {/* Brand Name (left) */}
-              <div
-                className="flex items-center flex-none w-auto pl-0 ml-0"
-                style={{ alignSelf: "center", height: "100%" }}
-              >
-                <Link
-                  href="/"
-                  className={cn(
-                    `transition-all duration-500 font-extrabold tracking-wider select-none ${italianno.className}`,
-                    pathname === '/shop' 
-                      ? 'text-lg md:text-xl' 
-                      : pathname && pathname.startsWith("/product/")
-                        ? 'text-xl md:text-2xl'
-                        : 'text-2xl md:text-3xl'
-                  )}
-                  style={{
-                    letterSpacing: "0.08em",
-                    color: "#000",
-                  }}
-                >
-                  Noamani
-                </Link>
-              </div>
-              {/* Nav Links (center, less space when scrolled) */}
-              <nav className="hidden md:flex flex-1 justify-center px-4">
-                <ul
-                  className={cn(
-                    "flex items-center justify-between gap-6",
-                    pathname && pathname.startsWith("/product/")
-                      ? "w-full max-w-3xl gap-4"
-                      : (isFixedNavPage || !isScrolled)
-                        ? "w-full max-w-3xl"
-                        : "w-full max-w-2xl"
-                  )}
-                >
-                  {navItems.map((item) => {
-                    // Determine if this nav item should be white or black (same as text)
-                    const isWhite = !isScrolled && !isMobileMenuOpen;
-                    return (
-                    <li
-                      key={item.name}
-                      className="relative group"
-                      onMouseEnter={() => {
-                        if (item.name !== "About Us" && item.name !== "Recreations") {
-                          setActiveMenu(item.name);
-                        } else {
-                          setActiveMenu(null);
-                        }
-                      }}
-                    >
-                      <Link
-                        href={item.href}
-                        className={cn(
-                          "tracking-wider py-2 transition-colors duration-200 flex items-center font-semibold",
-                          pathname && pathname.startsWith("/product/")
-                            ? "text-base"
-                            : "text-lg",
-                          pathname &&
-                            (pathname.startsWith("/product/") ||
-                              pathname === "/about/shipping" ||
-                              pathname === "/about/returns" ||
-                              pathname === "/about/faqs")
-                            ? "text-black hover:text-gray-600"
-                              : isWhite
-                                ? "text-white"
-                            : "text-black",
-                          activeMenu === item.name
-                            ? "font-bold"
-                            : "font-semibold",
-                          item.name === "About Us" &&
-                            pathname === "/about" &&
-                            "pointer-events-none opacity-70"
-                        )}
-                        style={{ fontFamily: 'Didot, serif', fontWeight: 'bold' }}
-                      >
-                          {/* Icon before nav text */}
-                          {/* {item.name === 'Shop All' && <ShoppingBag size={18} color={isWhite ? '#fff' : '#000'} className="mr-2 drop-shadow" />} */}
-                          {/* {item.name === 'Bestsellers' && <Star size={18} color={isWhite ? '#fff' : '#000'} className="mr-2 drop-shadow" />} */}
-                          {/* {item.name === 'Fragrance' && <Droplets size={18} color={isWhite ? '#fff' : '#000'} className="mr-2 drop-shadow" />} */}
-                          {/* {item.name === 'Recreations' && <Sparkles size={18} color={isWhite ? '#fff' : '#000'} className="mr-2 drop-shadow" />} */}
-                          {/* {item.name === 'About Us' && <Info size={18} color={isWhite ? '#fff' : '#000'} className="mr-2 drop-shadow" />} */}
-                        {item.name}
-                      </Link>
-                      {activeMenu === item.name && item.name !== "About Us" && (
-                        <motion.div
-                          className="absolute bottom-0 left-0 right-0 h-0.5"
-                          style={{
-                            background:
-                              pathname &&
-                              (pathname.startsWith("/product/") ||
-                                pathname === "/about/shipping" ||
-                                pathname === "/about/returns" ||
-                                pathname === "/about/faqs")
-                                ? "#000"
-                                : "#000",
-                          }}
-                          layoutId="underline"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                        />
-                      )}
-                    </li>
-                    );
-                  })}
-                </ul>
-              </nav>
-              {/* Right side icons (less space when scrolled) */}
-              <div
-                className={cn(
-                  "flex flex-row items-center ml-auto",
-                  pathname && pathname.startsWith("/product/")
-                    ? "space-x-3"
-                    : "space-x-4"
-                )}
-                style={{ alignItems: "center", height: "100%" }}
-              >
-                <button
-                  className={cn(
-                    "hover:opacity-70 transition-opacity",
-                    !isScrolled &&
-                      (pathname === "/shop/all" || pathname === "/shop/new")
-                      ? "text-black"
-                      : pathname &&
-                        (pathname.startsWith("/product/") ||
-                          pathname === "/about/shipping" ||
-                          pathname === "/about/returns" ||
-                          pathname === "/about/faqs")
-                      ? "text-black"
-                      : isScrolled || isMobileMenuOpen
-                      ? "text-brand-dark"
-                      : "text-white"
-                  )}
-                  onClick={() => setShowSearchModal(true)}
-                  aria-label="Search"
-                  type="button"
-                >
-                  <Search className="h-5 w-5" />
-                </button>
-                {adminInfo ? (
-                  <div className="relative">
-                    <button
-                      onClick={() => setShowDropdown(!showDropdown)}
-                      className={cn(
-                        "flex items-center space-x-2 text-sm font-medium hover:opacity-70 transition-opacity",
-                        isScrolled || isMobileMenuOpen
-                          ? "text-brand-dark"
-                          : "text-white"
-                      )}
-                    >
-                      <UserCircleIcon className="h-6 w-6" />
-                      <span>Admin</span>
-                    </button>
-                    {showDropdown && (
-                      <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 z-[60]">
-                        <Link
-                          href="/admin/dashboard"
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                          onClick={() => setShowDropdown(false)}
-                        >
-                          Dashboard
-                        </Link>
-                        <button
-                          onClick={handleLogout}
-                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        >
-                          Logout
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                ) : userInfo ? (
-                  <div className="relative">
-                    <button
-                      onClick={() => setShowDropdown(!showDropdown)}
-                      className={cn(
-                        "flex items-center space-x-2 text-sm font-medium hover:opacity-70 transition-opacity",
-                        (pathname && pathname.startsWith("/product/"))
-                          ? "text-black"
-                          : isScrolled || isMobileMenuOpen
-                          ? "text-brand-dark"
-                          : "text-white"
-                      )}
-                    >
-                      {profileImg && userInfo ? (
-                        <Image
-                          src={profileImg}
-                          alt="Profile"
-                          width={28}
-                          height={28}
-                          className="rounded-full object-cover border-2 border-gold-400"
-                        />
-                      ) : (
-                        <UserCircleIcon className="h-6 w-6" style={{ color: (pathname && pathname.startsWith("/product/")) ? '#000' : (isScrolled ? '#000' : '#fff') }} />
-                      )}
-                      <span
-                        className={`max-w-[80px] truncate text-sm font-medium ${(pathname && pathname.startsWith("/product/")) ? 'text-black' : (isScrolled ? 'text-brand-dark' : 'text-white')}`}
-                      >
-                        {getTruncatedName(userInfo.name)}
-                      </span>
-                    </button>
-                    {showDropdown && (
-                      <AnimatePresence>
-                        <motion.div
-                          key="user-dropdown"
-                          ref={userDropdownRef}
-                          className="absolute left-1/2 top-full mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 z-[60]"
-                          style={{ transform: 'translateX(-60%)' }}
-                          initial={{ opacity: 0, scale: 0.95 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.95 }}
-                          transition={{ duration: 0.18 }}
-                        >
-                          <div className="px-4 py-2 text-sm text-gray-500 border-b border-gray-200">
-                            Signed in as
-                            <br />
-                            <span className="font-medium text-gray-900 truncate block">
-                              {userInfo.email}
-                            </span>
-                          </div>
-                          <Link
-                            href="/profile"
-                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                            onClick={() => setShowDropdown(false)}
-                          >
-                            Profile
-                          </Link>
-                          <Link
-                            href="/orders"
-                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                            onClick={() => setShowDropdown(false)}
-                          >
-                            Orders
-                          </Link>
-                          <button
-                            onClick={handleUserLogout}
-                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                          >
-                            Logout
-                          </button>
-                        </motion.div>
-                      </AnimatePresence>
-                    )}
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => setShowLoginModal(true)}
-                    className={cn(
-                      'hover:opacity-70 transition-opacity',
-                      !isScrolled &&
-                        (pathname === "/shop/all" || pathname === "/shop/new")
-                        ? "text-black"
-                        : pathname &&
-                          (pathname.startsWith("/product/") ||
-                            pathname === "/about/shipping" ||
-                            pathname === "/about/returns" ||
-                            pathname === "/about/faqs")
-                        ? "text-black"
-                        : !isScrolled &&
-                          pathname &&
-                          !pathname.startsWith("/admin") &&
-                          !pathname.startsWith("/auth")
-                        ? "text-white"
-                        : "text-black"
-                    )}
-                    aria-label="Login"
-                  >
-                    <User className="h-5 w-5" />
-                  </button>
-                )}
-
-                <Link
-                  href="/cart"
-                  className={cn(
-                    "hover:opacity-70 transition-opacity relative",
-                    !isScrolled &&
-                      (pathname === "/shop/all" || pathname === "/shop/new")
-                      ? "text-black"
-                      : pathname &&
-                        (pathname.startsWith("/product/") ||
-                          pathname === "/about/shipping" ||
-                          pathname === "/about/returns" ||
-                          pathname === "/about/faqs")
-                      ? "text-black"
-                      : isScrolled || isMobileMenuOpen
-                      ? "text-brand-dark"
-                      : "text-white"
-                  )}
-                >
-                  <ShoppingBagIcon className="h-5 w-5" />
-                  {cartItemsCount > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-black text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                      {cartItemsCount}
-                    </span>
-                  )}
-                </Link>
-                
-                {/* Country Display - Auto-detected */}
-                <CountryDisplay
-                  isScrolled={isScrolled}
-                  isMobileMenuOpen={isMobileMenuOpen}
-                />
-                
-              </div>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center w-full pt-6 pb-2 relative">
-              {/* Brand Name (center, big) */}
-              <div className="flex items-center justify-center w-full">
-                {!isScrolled &&
-                !(
-                  pathname &&
-                  (pathname.startsWith("/admin") ||
-                    pathname.startsWith("/auth") ||
-                    pathname.startsWith("/product/"))
-                ) &&
-                pathname === "/" ? (
-                  <Link
-                    href="/"
-                    className={`transition-all duration-500 font-extrabold tracking-wider select-none text-7xl md:text-9xl text-white drop-shadow-[0_2px_8px_rgba(255,255,255,0.18)] ${italianno.className}`}
-                    style={{
-                      letterSpacing: "0.08em",
-                      color: "#fff",
-                    }}
-                  >
-                    Noamani
-                  </Link>
-                ) : !isScrolled &&
-                !(
-                  pathname &&
-                  (pathname.startsWith("/admin") ||
-                    pathname.startsWith("/auth") ||
-                    pathname.startsWith("/product/"))
-                ) ? (
-                  <Link
-                    href="/"
-                    className={`transition-all duration-500 font-extrabold tracking-wider select-none text-xl md:text-3xl text-white drop-shadow-[0_2px_8px_rgba(255,255,255,0.18)] ${italianno.className}`}
-                    style={{
-                      letterSpacing: "0.08em",
-                      color: "#fff",
-                    }}
-                  >
-                    Noamani
-                  </Link>
-                ) : (
-                  <div
-                    className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center"
-                    style={{ height: "100%" }}
-                  >
-                    <Link
-                      href="/"
-                      className={`font-extrabold tracking-wider select-none text-2xl md:text-3xl ${italianno.className}`}
-                    >
-                      Noamani
-                    </Link>
-                  </div>
-                )}
-              </div>
-              {/* Nav Links and Right Icons in one row */}
-              <div className="w-full flex flex-row items-center justify-between mt-5 relative hidden md:flex">
-                {/* Nav Links: Centered below big brand name when not scrolled, normal row when scrolled */}
-                <nav
-                  className={cn(
-                    "hidden md:flex flex-1",
-                    !isScrolled &&
-                      !(
-                        pathname &&
-                        (pathname.startsWith("/admin") ||
-                          pathname.startsWith("/auth") ||
-                          pathname.startsWith("/product/"))
-                      ) &&
-                      (pathname === "/shop/all" || pathname === "/shop/new")
-                      ? "justify-center animate-fade-in-down"
-                      : !isScrolled &&
-                        !(
-                          pathname &&
-                          (pathname.startsWith("/admin") ||
-                            pathname.startsWith("/auth") ||
-                            pathname.startsWith("/product/"))
-                        )
-                      ? "justify-center animate-fade-in-down"
-                      : "justify-start"
-                  )}
-                >
-                  <ul
-                    className={cn(
-                      "flex items-center justify-between gap-8",
-                      isScrolled ? "w-full max-w-2xl" : "w-full max-w-3xl"
-                    )}
-                  >
-                    {navItems.map((item) => {
-                      // Determine if this nav item should be white or black (same as text)
-                      const isWhite = !isScrolled && !isMobileMenuOpen;
-                      return (
-                      <li
-                        key={item.name}
-                        className="relative group"
-                        onMouseEnter={() => {
-                          if (item.name !== "About Us" && item.name !== "Recreations") {
-                            setActiveMenu(item.name);
-                          } else {
-                            setActiveMenu(null);
-                          }
-                        }}
-                      >
-                        <Link
-                          href={item.href}
-                          className={cn(
-                            "text-lg tracking-wider py-2 transition-colors duration-200 flex items-center font-semibold",
-                            !isScrolled &&
-                              (pathname === "/shop/all" ||
-                                pathname === "/shop/new")
-                              ? "text-black"
-                              : !isScrolled &&
-                                pathname &&
-                                !pathname.startsWith("/admin") &&
-                                !pathname.startsWith("/auth") &&
-                                !pathname.startsWith("/product/")
-                              ? "text-white"
-                              : "text-black",
-                            activeMenu === item.name
-                              ? "font-bold"
-                              : "font-semibold",
-                            item.name === "About Us" &&
-                              pathname === "/about" &&
-                              "pointer-events-none opacity-70"
-                          )}
-                          style={{ fontFamily: 'Didot, serif', fontWeight: 'bold' }}
-                        >
-                            {/* Icon before nav text */}
-                            {/* {item.name === 'Shop All' && <ShoppingBag size={18} color={isWhite ? '#fff' : '#000'} className="mr-2 drop-shadow" />} */}
-                            {/* {item.name === 'Bestsellers' && <Star size={18} color={isWhite ? '#fff' : '#000'} className="mr-2 drop-shadow" />} */}
-                            {/* {item.name === 'Fragrance' && <Droplets size={18} color={isWhite ? '#fff' : '#000'} className="mr-2 drop-shadow" />} */}
-                            {/* {item.name === 'Recreations' && <Sparkles size={18} color={isWhite ? '#fff' : '#000'} className="mr-2 drop-shadow" />} */}
-                            {/* {item.name === 'About Us' && <Info size={18} color={isWhite ? '#fff' : '#000'} className="mr-2 drop-shadow" />} */}
-                          {item.name}
-                        </Link>
-                        {activeMenu === item.name &&
-                          item.name !== "About Us" && (
-                            <motion.div
-                              className={cn(
-                                "absolute bottom-0 left-0 right-0 h-0.5",
-                                !isScrolled &&
-                                  (pathname === "/shop/all" ||
-                                    pathname === "/shop/new")
-                                  ? "bg-black"
-                                  : !isScrolled &&
-                                    pathname &&
-                                    !pathname.startsWith("/admin") &&
-                                    !pathname.startsWith("/auth") &&
-                                    !pathname.startsWith("/product/")
-                                  ? "bg-white"
-                                  : "bg-black"
-                              )}
-                              layoutId="underline"
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 1 }}
-                              exit={{ opacity: 0 }}
-                            />
-                          )}
-                      </li>
-                      );
-                    })}
-                  </ul>
-                </nav>
-                {/* Right side icons (aligned with nav links, spaced apart) */}
-                <div className="flex flex-row items-center space-x-4 ml-24">
-                  <button
-                    className={cn(
-                      "hover:opacity-70 transition-opacity",
-                      !isScrolled &&
-                        (pathname === "/shop/all" || pathname === "/shop/new")
-                        ? "text-black"
-                        : pathname &&
-                          (pathname.startsWith("/product/") ||
-                            pathname === "/about/shipping" ||
-                            pathname === "/about/returns" ||
-                            pathname === "/about/faqs")
-                        ? "text-black"
-                        : isScrolled || isMobileMenuOpen
-                        ? "text-brand-dark"
-                        : "text-white"
-                    )}
-                    onClick={() => setShowSearchModal(true)}
-                    aria-label="Search"
-                    type="button"
-                  >
-                    <Search className="h-5 w-5" />
-                  </button>
-                  {adminInfo ? (
-                    <div className="relative">
-                      <button
-                        onClick={() => setShowDropdown(!showDropdown)}
-                        className={cn(
-                          "flex items-center space-x-2 text-sm font-medium hover:opacity-70 transition-opacity",
-                          isScrolled || isMobileMenuOpen
-                            ? "text-brand-dark"
-                            : "text-white"
-                        )}
-                      >
-                        <UserCircleIcon className="h-6 w-6" />
-                        <span>Admin</span>
-                      </button>
-                      {showDropdown && (
-                        <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 z-[60]">
-                          <Link
-                            href="/admin/dashboard"
-                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                            onClick={() => setShowDropdown(false)}
-                          >
-                            Dashboard
-                          </Link>
-                          <button
-                            onClick={handleLogout}
-                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                          >
-                            Logout
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  ) : userInfo ? (
-                    <div className="relative flex items-center space-x-2">
-                      <button
-                        onClick={() => setShowDropdown(!showDropdown)}
-                        className="flex items-center space-x-2 focus:outline-none"
-                        aria-label="User menu"
-                        type="button"
-                      >
-                        {profileImg ? (
-                          <Image
-                            src={profileImg}
-                            alt="Profile"
-                            width={28}
-                            height={28}
-                            className="rounded-full object-cover border-2 border-gold-400"
-                          />
-                        ) : (
-                          <UserCircleIcon className="h-6 w-6" style={{ color: !isScrolled ? '#fff' : '#000' }} />
-                        )}
-                        <span className={`max-w-[80px] truncate text-sm font-medium ${!isScrolled ? 'text-white' : 'text-brand-dark'}`}>{getTruncatedName(userInfo.name)}</span>
-                      </button>
-                      <AnimatePresence>
-                        {showDropdown && (
-                          <motion.div
-                            key="user-dropdown"
-                            ref={userDropdownRef}
-                            className="absolute left-1/2 top-full mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 z-[60]"
-                            style={{ transform: 'translateX(-60%)' }}
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
-                            transition={{ duration: 0.18 }}
-                          >
-                            <div className="px-4 py-2 text-sm text-gray-500 border-b border-gray-200">
-                              Signed in as
-                              <br />
-                              <span className="font-medium text-gray-900 truncate block">
-                                {userInfo.email}
-                              </span>
-                            </div>
-                            <Link
-                              href="/profile"
-                              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                              onClick={() => setShowDropdown(false)}
-                            >
-                              Profile
-                            </Link>
-                            <Link
-                              href="/orders"
-                              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                              onClick={() => setShowDropdown(false)}
-                            >
-                              Orders
-                            </Link>
-                            <button
-                              onClick={handleUserLogout}
-                              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                            >
-                              Logout
-                            </button>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => setShowLoginModal(true)}
-                      className={cn(
-                        'hover:opacity-70 transition-opacity',
-                        !isScrolled &&
-                          (pathname === "/shop/all" || pathname === "/shop/new")
-                          ? "text-black"
-                          : pathname &&
-                            (pathname.startsWith("/product/") ||
-                              pathname === "/about/shipping" ||
-                              pathname === "/about/returns" ||
-                              pathname === "/about/faqs")
-                        ? "text-black"
-                        : !isScrolled &&
-                          pathname &&
-                          !pathname.startsWith("/admin") &&
-                          !pathname.startsWith("/auth")
-                        ? "text-white"
-                        : "text-black"
-                      )}
-                      aria-label="Login"
-                    >
-                      <User className="h-5 w-5" />
-                    </button>
-                  )}
-
-                  <Link
-                    href="/cart"
-                    className={cn(
-                      "hover:opacity-70 transition-opacity relative",
-                      !isScrolled &&
-                        (pathname === "/shop/all" || pathname === "/shop/new")
-                        ? "text-black"
-                        : pathname &&
-                          (pathname.startsWith("/product/") ||
-                            pathname === "/about/shipping" ||
-                            pathname === "/about/returns" ||
-                            pathname === "/about/faqs")
-                        ? "text-black"
-                        : isScrolled || isMobileMenuOpen
-                        ? "text-brand-dark"
-                        : "text-white"
-                    )}
-                  >
-                    <ShoppingBagIcon className="h-5 w-5" />
-                    {cartItemsCount > 0 && (
-                      <span className="absolute -top-2 -right-2 bg-black text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                        {cartItemsCount}
-                      </span>
-                    )}
-                  </Link>
-                  
-                  {/* Country Display - Auto-detected */}
-                  <CountryDisplay
-                    isScrolled={isScrolled}
-                    isMobileMenuOpen={isMobileMenuOpen}
-                  />
-                  
-                </div>
-              </div>
-            </div>
-          )}
-          {/* MOBILE NAVBAR: Only this should remain for mobile (md:hidden) */}
-          <div className={cn(
-            "flex md:hidden w-full flex-row items-center justify-between px-2 gap-4",
-            pathname && pathname.startsWith("/product/")
-              ? "h-14 bg-white shadow-md"
-              : "h-14"
-          )}>
-            {isScrolled ? (
-              // SCROLLED: ONLY NEW NAVBAR
-              <>
-                {/* Hamburger menu */}
-                <button
-                  onClick={() => setShowMobileMenu(true)}
-                  className={cn(
-                    'transition-colors flex items-center',
-                    'text-brand-dark'
-                  )}
-                  aria-label="Open menu"
-                >
-                  <Menu className="w-6 h-6" />
-                </button>
-                {/* Noamani brand */}
-                <motion.div
-                  initial={{ x: 0, scale: 1, filter: 'drop-shadow(0 8px 32px #FFD70099)' }}
-                  animate={isScrolled
-                    ? { x: 0, scale: 0.6, filter: 'drop-shadow(0 2px 8px #00000033)' }
-                    : { x: 0, scale: 1, filter: 'drop-shadow(0 8px 32px #FFD70099)' }
-                  }
-                  transition={{ type: 'spring', stiffness: 120, damping: 18 }}
-                  className="flex items-center"
-                  style={{ minWidth: 120 }}
-                >
-                <Link
-                  href="/"
-                    className={`select-none mx-2 ${italianno.className}`}
-                    style={{
-                      fontSize: isScrolled ? '2.2rem' : '5rem',
-                      color: isScrolled ? '#222' : '#fff',
-                      letterSpacing: '2px',
-                      lineHeight: 1.1,
-                      transition: 'font-size 0.4s cubic-bezier(0.23,1,0.32,1), color 0.4s',
-                      textShadow: isScrolled
-                        ? '0 1px 4px #fff8, 0 1px 1px #00000033'
-                        : '0 8px 32px #FFD70099, 0 1px 1px #00000055',
-                    }}
-                >
-                  Noamani
-                </Link>
-                </motion.div>
-                {/* Rest of the icons */}
-                <div className={cn(
-                  "flex flex-row items-center gap-3 ml-auto",
-                  showMobileMenu && "hidden"
-                )}>
-                  {/* Search button */}
-                  <button
-                    className="hover:opacity-70 transition-opacity text-brand-dark"
-                    onClick={() => setShowSearchModal(true)}
-                    aria-label="Search"
-                    type="button"
-                  >
-                    <Search className="h-5 w-5" />
-                  </button>
-                  {/* User name (with avatar if available) */}
-                  {userInfo ? (
-                    <div className="relative flex items-center space-x-2">
-                      <button
-                        onClick={() => setShowDropdown(!showDropdown)}
-                        className="flex items-center space-x-2 focus:outline-none"
-                        aria-label="User menu"
-                        type="button"
-                      >
-                        {profileImg ? (
-                          <Image
-                            src={profileImg}
-                            alt="Profile"
-                            width={28}
-                            height={28}
-                            className="rounded-full object-cover border-2 border-gold-400"
-                          />
-                        ) : (
-                          <UserCircleIcon className="h-6 w-6" style={{ color: !isScrolled ? '#fff' : '#000' }} />
-                        )}
-                        <span className={`max-w-[80px] truncate text-sm font-medium ${!isScrolled ? 'text-white' : 'text-brand-dark'}`}>{getTruncatedName(userInfo.name)}</span>
-                      </button>
-                      <AnimatePresence>
-                        {showDropdown && (
-                          <motion.div
-                            key="user-dropdown"
-                            ref={userDropdownRef}
-                            className="absolute left-1/2 top-full mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 z-[60]"
-                            style={{ transform: 'translateX(-60%)' }}
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
-                            transition={{ duration: 0.18 }}
-                          >
-                            <div className="px-4 py-2 text-sm text-gray-500 border-b border-gray-200">
-                              Signed in as
-                              <br />
-                              <span className="font-medium text-gray-900 truncate block">
-                                {userInfo.email}
-                              </span>
-                            </div>
-                            <Link
-                              href="/profile"
-                              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                              onClick={() => setShowDropdown(false)}
-                            >
-                              Profile
-                            </Link>
-                            <Link
-                              href="/orders"
-                              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                              onClick={() => setShowDropdown(false)}
-                            >
-                              Orders
-                            </Link>
-                            <button
-                              onClick={handleUserLogout}
-                              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                            >
-                              Logout
-                            </button>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => setShowLoginModal(true)}
-                      className={cn(
-                        "hover:opacity-70 transition-opacity",
-                        (!isScrolled && !showMobileMenu) ? 'text-white' : 'text-brand-dark'
-                      )}
-                      aria-label="Login"
-                    >
-                      <User className="h-5 w-5" />
-                    </button>
-                  )}
-                  {/* Cart icon */}
-                  <Link
-                    href="/cart"
-                    className={cn(
-                      'hover:opacity-70 transition-opacity relative',
-                      (!isScrolled && !showMobileMenu) ? 'text-white' : 'text-brand-dark'
-                    )}
-                  >
-                    <ShoppingBagIcon className="h-5 w-5" />
-                    {cartItemsCount > 0 && (
-                      <span className="absolute -top-2 -right-2 bg-black text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                        {cartItemsCount}
-                      </span>
-                    )}
-                  </Link>
-                  
-                  {/* Country Display - Auto-detected */}
-                  <CountryDisplay
-                    isScrolled={isScrolled}
-                    isMobileMenuOpen={isMobileMenuOpen}
-                  />
-                  
-                </div>
-              </>
-            ) : (
-              // NOT SCROLLED: ONLY OLD NAVBAR
-              <>
-                {/* Hamburger menu */}
-                <button
-                  onClick={() => setShowMobileMenu(true)}
-                  className={cn(
-                    'transition-colors flex items-center',
-                    (!isScrolled && !showMobileMenu) ? 'text-white' : 'text-brand-dark'
-                  )}
-                  aria-label="Open menu"
-                >
-                  <Menu className="w-6 h-6" />
-                </button>
-                {/* Search button - moved next to hamburger */}
-                <button
-                  className={cn(
-                    'hover:opacity-70 transition-opacity',
-                    (!isScrolled && !showMobileMenu) ? 'text-white' : 'text-brand-dark'
-                  )}
-                  onClick={() => setShowSearchModal(true)}
-                  aria-label="Search"
-                  type="button"
-                >
-                  <Search className="h-5 w-5" />
-                </button>
-                <div className={cn(
-                  "flex flex-row items-center gap-4 ml-auto",
-                  showMobileMenu && "hidden"
-                )}>
-                  {/* User name (with avatar if available) */}
-                  {userInfo ? (
-                    <div className="relative flex items-center space-x-2">
-                      <button
-                        onClick={() => setShowDropdown(!showDropdown)}
-                        className="flex items-center space-x-2 focus:outline-none"
-                        aria-label="User menu"
-                        type="button"
-                      >
-                        {profileImg ? (
-                          <Image
-                            src={profileImg}
-                            alt="Profile"
-                            width={28}
-                            height={28}
-                            className="rounded-full object-cover border-2 border-gold-400"
-                          />
-                        ) : (
-                          <UserCircleIcon className="h-6 w-6" style={{ color: !isScrolled ? '#fff' : '#000' }} />
-                        )}
-                        <span className={`max-w-[80px] truncate text-sm font-medium ${!isScrolled ? 'text-white' : 'text-brand-dark'}`}>{getTruncatedName(userInfo.name)}</span>
-                      </button>
-                      <AnimatePresence>
-                        {showDropdown && (
-                          <motion.div
-                            key="user-dropdown"
-                            ref={userDropdownRef}
-                            className="absolute left-1/2 top-full mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 z-[60]"
-                            style={{ transform: 'translateX(-60%)' }}
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
-                            transition={{ duration: 0.18 }}
-                          >
-                            <div className="px-4 py-2 text-sm text-gray-500 border-b border-gray-200">
-                              Signed in as
-                              <br />
-                              <span className="font-medium text-gray-900 truncate block">
-                                {userInfo.email}
-                              </span>
-                            </div>
-                            <Link
-                              href="/profile"
-                              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                              onClick={() => setShowDropdown(false)}
-                            >
-                              Profile
-                            </Link>
-                            <Link
-                              href="/orders"
-                              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                              onClick={() => setShowDropdown(false)}
-                            >
-                              Orders
-                            </Link>
-                            <button
-                              onClick={handleUserLogout}
-                              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                            >
-                              Logout
-                            </button>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => setShowLoginModal(true)}
-                      className={cn(
-                        'hover:opacity-70 transition-opacity',
-                        !isScrolled &&
-                          (pathname === "/shop/all" || pathname === "/shop/new")
-                          ? "text-black"
-                          : pathname &&
-                            (pathname.startsWith("/product/") ||
-                              pathname === "/about/shipping" ||
-                              pathname === "/about/returns" ||
-                              pathname === "/about/faqs")
-                        ? "text-black"
-                        : !isScrolled &&
-                          pathname &&
-                          !pathname.startsWith("/admin") &&
-                          !pathname.startsWith("/auth")
-                        ? "text-white"
-                        : "text-black"
-                      )}
-                      aria-label="Login"
-                    >
-                      <User className="h-5 w-5" />
-                    </button>
-                  )}
-                  {/* Cart icon */}
-                  <Link
-                    href="/cart"
-                    className={cn(
-                      'hover:opacity-70 transition-opacity relative',
-                      (!isScrolled && !showMobileMenu) ? 'text-white' : 'text-brand-dark'
-                    )}
-                  >
-                    <ShoppingBagIcon className="h-5 w-5" />
-                    {cartItemsCount > 0 && (
-                      <span className="absolute -top-2 -right-2 bg-black text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                        {cartItemsCount}
-                      </span>
-                    )}
-                  </Link>
-                  
-                  {/* Country Display - Auto-detected */}
-                  <CountryDisplay
-                    isScrolled={isScrolled}
-                    isMobileMenuOpen={isMobileMenuOpen}
-                  />
-                  
-                </div>
-              </>
-            )}
+              <X className="h-3 w-3" />
+            </button>
           </div>
         </div>
 
-        {/* Mega Menu */}
+        {/* ═══ MAIN NAVBAR ═══ */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* ─── Desktop (md+) ─── */}
+          <div className="hidden md:flex items-center justify-between h-[72px]">
+            {/* Brand */}
+            <Link
+              href="/"
+              className={cn(
+                italianno.className,
+                "font-extrabold tracking-wider select-none transition-all duration-500 origin-left flex-shrink-0",
+                textColor,
+                "hover:opacity-80"
+              )}
+              style={{
+                fontSize: isHomepage && !isSolid ? '2.6rem' : '1.85rem',
+                letterSpacing: '0.08em',
+                lineHeight: 1,
+              }}
+            >
+              Noamani
+            </Link>
+
+            {/* Nav Links */}
+            {renderDesktopNav()}
+
+            {/* Right Icons */}
+            {renderRightIcons('desktop')}
+          </div>
+
+          {/* ─── Mobile (<md) ─── */}
+          <div className="flex md:hidden items-center justify-between h-14 px-1">
+            {/* Hamburger */}
+            <button
+              onClick={() => setShowMobileMenu(true)}
+              className={cn("transition-all duration-200 hover:scale-110 p-1", iconColor)}
+              aria-label="Open menu"
+            >
+              <Menu className="w-[22px] h-[22px]" />
+            </button>
+
+            {/* Brand (centered) */}
+            <Link
+              href="/"
+              className={cn(
+                italianno.className,
+                "absolute left-1/2 -translate-x-1/2 font-extrabold tracking-wider select-none transition-all duration-500",
+                textColor
+              )}
+              style={{
+                fontSize: isHomepage && !isSolid ? '2rem' : '1.6rem',
+                letterSpacing: '0.06em',
+                lineHeight: 1,
+              }}
+            >
+              Noamani
+            </Link>
+
+            {/* Right Icons */}
+            {renderRightIcons('mobile')}
+          </div>
+        </div>
+
+        {/* ═══ MEGA MENU ═══ */}
         <div className="relative">
           {activeMenu && activeMenu !== "About Us" && (
             <MegaMenu
@@ -1358,19 +702,19 @@ export default function Navbar() {
               onMouseEnter={() => {}}
               onMouseLeave={() => setActiveMenu(null)}
               textColor={navTextColor}
-              isNavbarWhite={isScrolled || isMobileMenuOpen}
+              isNavbarWhite={isSolid}
             />
           )}
         </div>
 
-        {/* Login Modal */}
+        {/* ═══ LOGIN MODAL ═══ */}
         <AnimatePresence>
           {showLoginModal && (
             <LoginModal onClose={() => setShowLoginModal(false)} />
           )}
         </AnimatePresence>
 
-        {/* Search Modal */}
+        {/* ═══ SEARCH MODAL ═══ */}
         <AnimatePresence>
           {showSearchModal && (
             <motion.div
@@ -1430,7 +774,7 @@ export default function Navbar() {
                   {!searchQuery.trim() && (
                     <div className="px-2 py-8 text-center sm:py-10">
                       <p className="text-sm font-medium text-[#4f453d]">Discover your signature scent</p>
-                      <p className="mt-1 text-xs text-[#91867b]">Try “oud”, “floral”, or a fragrance name</p>
+                      <p className="mt-1 text-xs text-[#91867b]">Try &ldquo;oud&rdquo;, &ldquo;floral&rdquo;, or a fragrance name</p>
                     </div>
                   )}
 
@@ -1479,7 +823,7 @@ export default function Navbar() {
           )}
         </AnimatePresence>
 
-        {/* Modern Mobile Menu with Glassmorphism */}
+        {/* ═══ MOBILE FULL-SCREEN OVERLAY MENU ═══ */}
         <AnimatePresence>
           {showMobileMenu && (
             <>
@@ -1488,92 +832,128 @@ export default function Navbar() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                className="fixed inset-0 z-[120] bg-black/50 backdrop-blur-sm md:hidden"
+                transition={{ duration: 0.35 }}
+                className="fixed inset-0 z-[120] bg-black/60 md:hidden"
                 onClick={() => setShowMobileMenu(false)}
               />
-              {/* Sidebar Menu */}
+
+              {/* Full-screen menu content */}
               <motion.div
-                initial={{ x: '-100%' }}
-                animate={{ x: 0 }}
-                exit={{ x: '-100%' }}
-                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                className={cn(
-                  "fixed left-0 top-0 h-full w-80 max-w-[85vw] z-[121] md:hidden flex flex-col shadow-2xl",
-                  // Glassmorphism effect - adapts based on scroll state
-                  isScrolled || pathname?.startsWith("/product/")
-                    ? "glass bg-white/95 backdrop-blur-xl border-r border-gray-200/50"
-                    : "glass-dark bg-white/10 backdrop-blur-2xl border-r border-white/20"
-                )}
-                onClick={e => e.stopPropagation()}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                className="fixed inset-0 z-[121] md:hidden flex flex-col items-center justify-center mobile-menu-overlay"
               >
-                {/* Header with Close Button */}
-                <div className="flex items-center justify-between p-6 border-b border-gray-200/50">
-                  <h2 className={cn(
-                    "text-xl font-bold font-display",
-                    isScrolled || pathname?.startsWith("/product/") ? "text-gray-900" : "text-white"
-                  )}>
-                    Menu
-                  </h2>
-                  <button
-                    className={cn(
-                      "p-2 rounded-lg transition-colors hover:bg-black/10",
-                      isScrolled || pathname?.startsWith("/product/") 
-                        ? "text-gray-700 hover:text-gray-900" 
-                        : "text-white/80 hover:text-white hover:bg-white/20"
-                    )}
-                    onClick={() => setShowMobileMenu(false)}
-                    aria-label="Close menu"
-                  >
-                    <X className="w-6 h-6" />
-                  </button>
-                </div>
+                {/* Close Button */}
+                <motion.button
+                  initial={{ opacity: 0, rotate: -90 }}
+                  animate={{ opacity: 1, rotate: 0 }}
+                  transition={{ delay: 0.2, duration: 0.3 }}
+                  onClick={() => setShowMobileMenu(false)}
+                  className="absolute top-5 right-5 p-2.5 rounded-full border border-white/10 text-white/50 hover:text-white hover:border-white/30 hover:bg-white/5 transition-all duration-200"
+                  aria-label="Close menu"
+                >
+                  <X className="w-6 h-6" />
+                </motion.button>
+
+                {/* Brand watermark */}
+                <motion.div
+                  initial={{ opacity: 0, y: -15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1, duration: 0.5 }}
+                  className="mb-10"
+                >
+                  <span className={`${italianno.className} text-4xl text-white/20 tracking-[0.12em] select-none`}>
+                    Noamani
+                  </span>
+                  <div className="mt-3 w-16 h-[1px] bg-gradient-to-r from-transparent via-amber-500/40 to-transparent mx-auto" />
+                </motion.div>
 
                 {/* Navigation Links */}
-                <nav className="flex-1 p-6 flex flex-col gap-2">
+                <nav className="flex flex-col items-center gap-1">
                   {navItems.map((item, index) => (
                     <motion.div
                       key={item.name}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.1, duration: 0.3 }}
+                      initial={{ opacity: 0, y: 25 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{
+                        delay: 0.15 + index * 0.07,
+                        duration: 0.45,
+                        ease: [0.22, 1, 0.36, 1],
+                      }}
                     >
                       <Link
                         href={item.href}
-                        className={cn(
-                          "block px-4 py-3 rounded-xl text-lg font-medium transition-all duration-200",
-                          isScrolled || pathname?.startsWith("/product/")
-                            ? "text-gray-700 hover:text-primary-400 hover:bg-gray-100/50"
-                            : "text-white/90 hover:text-white hover:bg-white/10"
-                        )}
                         onClick={() => setShowMobileMenu(false)}
+                        className={cn(
+                          "block px-8 py-3.5 text-[22px] sm:text-[26px] font-light tracking-[0.16em] uppercase transition-all duration-200",
+                          pathname === item.href
+                            ? "text-amber-400"
+                            : "text-white/80 hover:text-white"
+                        )}
+                        style={{ fontFamily: 'Didot, serif' }}
                       >
                         {item.name}
                       </Link>
                     </motion.div>
                   ))}
                 </nav>
-                {/* Footer Actions removed - login and cart icons not shown in mobile menu */}
+
+                {/* Divider */}
+                <motion.div
+                  initial={{ opacity: 0, scaleX: 0 }}
+                  animate={{ opacity: 1, scaleX: 1 }}
+                  transition={{ delay: 0.45, duration: 0.4 }}
+                  className="mt-10 w-24 h-[1px] bg-gradient-to-r from-transparent via-white/15 to-transparent"
+                />
+
+                {/* Extra links */}
+                <motion.div
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5, duration: 0.4 }}
+                  className="mt-6 flex gap-6"
+                >
+                  <Link
+                    href="/cart"
+                    onClick={() => setShowMobileMenu(false)}
+                    className="flex items-center gap-2 text-sm text-white/40 hover:text-white/70 transition-colors tracking-widest uppercase"
+                  >
+                    <ShoppingBagIcon className="h-4 w-4" />
+                    Cart {cartItemsCount > 0 && `(${cartItemsCount})`}
+                  </Link>
+                  {userInfo && (
+                    <Link
+                      href="/profile"
+                      onClick={() => setShowMobileMenu(false)}
+                      className="flex items-center gap-2 text-sm text-white/40 hover:text-white/70 transition-colors tracking-widest uppercase"
+                    >
+                      <UserCircleIcon className="h-4 w-4" />
+                      Profile
+                    </Link>
+                  )}
+                </motion.div>
+
+                {/* Country at bottom */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.55, duration: 0.4 }}
+                  className="absolute bottom-8 flex flex-col items-center gap-2"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-xl">{safeCountryData.flag}</span>
+                    <span className="text-xs text-white/30 tracking-[0.2em] uppercase font-medium">
+                      {safeCountryData.country} &middot; {safeCountryData.currency}
+                    </span>
+                  </div>
+                </motion.div>
               </motion.div>
             </>
           )}
         </AnimatePresence>
       </header>
-      <style jsx>{`
-        @keyframes fadeInDown {
-          0% {
-            opacity: 0;
-            transform: translateY(-30px);
-          }
-          100% {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .animate-fade-in-down {
-          animation: fadeInDown 0.7s cubic-bezier(0.23, 1, 0.32, 1);
-        }
-      `}</style>
     </CartProvider>
   );
 }

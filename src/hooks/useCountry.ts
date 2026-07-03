@@ -1,8 +1,17 @@
 import { useState, useEffect } from 'react';
-import { useCountryDetection } from './useCountryDetection';
+import { useCountryDetection, LocationPermission } from './useCountryDetection';
 
 export const useCountry = () => {
-  const { countryData, loading, updateCountry: updateDetectedCountry } = useCountryDetection();
+  const {
+    countryData,
+    loading,
+    updateCountry: updateDetectedCountry,
+    permission,
+    requestPermission,
+    denyPermission,
+    resetPermission,
+  } = useCountryDetection();
+
   const [selectedCountry, setSelectedCountry] = useState<string>(() => {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('selectedCountry') || countryData?.countryCode || 'IN';
@@ -11,12 +20,12 @@ export const useCountry = () => {
   });
 
   useEffect(() => {
-    // Update selected country when detected country changes
-    if (countryData && !localStorage.getItem('selectedCountry')) {
+    // Update selected country when detected country changes (only if permission granted)
+    if (countryData && permission === 'granted' && !localStorage.getItem('selectedCountry')) {
       setSelectedCountry(countryData.countryCode);
       localStorage.setItem('selectedCountry', countryData.countryCode);
     }
-  }, [countryData]);
+  }, [countryData, permission]);
 
   useEffect(() => {
     const updateCountry = () => {
@@ -39,10 +48,14 @@ export const useCountry = () => {
     window.dispatchEvent(new Event('countryChange'));
   };
 
-  return { 
-    country: selectedCountry, 
+  return {
+    country: selectedCountry,
     setCountry: updateCountry,
     countryData,
-    loading
+    loading,
+    permission,
+    requestPermission,
+    denyPermission,
+    resetPermission,
   };
-}; 
+};

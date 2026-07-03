@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 interface CountryData {
   country: string;
@@ -420,143 +420,167 @@ const countryNames: { [key: string]: string } = {
   'ZW': 'Zimbabwe'
 };
 
+const DEFAULT_COUNTRY: CountryData = {
+  country: 'India',
+  countryCode: 'IN',
+  flag: '🇮🇳',
+  currency: 'INR',
+  timezone: 'Asia/Kolkata',
+};
+
+export type LocationPermission = 'prompt' | 'granted' | 'denied' | 'detecting';
+
 export const useCountryDetection = () => {
-  const [countryData, setCountryData] = useState<CountryData | null>({
-    country: 'India',
-    countryCode: 'IN',
-    flag: '🇮🇳',
-    currency: 'INR',
-    timezone: 'Asia/Kolkata'
-  });
+  const [countryData, setCountryData] = useState<CountryData>(DEFAULT_COUNTRY);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [permission, setPermission] = useState<LocationPermission>('prompt');
 
+  // On mount: check if user previously granted permission (stored in localStorage)
   useEffect(() => {
-    const detectCountry = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        // Try multiple IP geolocation services for better reliability
-        const services = [
-          'https://ipapi.co/json/',
-          'https://ip-api.com/json/',
-          'https://api.country.is/',
-          'https://ipinfo.io/json?token='
-        ];
-
-        let countryInfo = null;
-
-        // Try each service until one works
-        for (const service of services) {
-          try {
-            const response = await fetch(service, {
-              method: 'GET',
-              headers: {
-                'Accept': 'application/json',
-              },
-            });
-
-            if (response.ok) {
-              const data = await response.json();
-              
-              // Handle different response formats
-              if (data.country_code) {
-                countryInfo = {
-                  countryCode: data.country_code.toUpperCase(),
-                  country: data.country_name || data.country,
-                  currency: data.currency || 'USD',
-                  timezone: data.timezone || 'UTC'
-                };
-              } else if (data.country) {
-                countryInfo = {
-                  countryCode: data.country.toUpperCase(),
-                  country: data.country_name || data.country,
-                  currency: data.currency || 'USD',
-                  timezone: data.timezone || 'UTC'
-                };
-              }
-
-              if (countryInfo) break;
-            }
-          } catch (serviceError) {
-            console.log(`Service ${service} failed:`, serviceError);
-            continue;
-          }
-        }
-
-        // Fallback to a default country if all services fail
-        if (!countryInfo) {
-          console.log('All geolocation services failed, using default country');
-          countryInfo = {
-            countryCode: 'IN',
-            country: 'India',
-            currency: 'INR',
-            timezone: 'Asia/Kolkata'
-          };
-        }
-
-        // Get country name and flag
-        const countryName = countryNames[countryInfo.countryCode] || countryInfo.country;
-        const flag = countryFlags[countryInfo.countryCode] || '🌍';
-
-        const finalCountryData: CountryData = {
-          country: countryName,
-          countryCode: countryInfo.countryCode,
-          flag: flag,
-          currency: countryInfo.currency,
-          timezone: countryInfo.timezone
-        };
-
-        console.log('Country detected:', finalCountryData);
-        setCountryData(finalCountryData);
-        
-        // Store in localStorage for persistence
-        localStorage.setItem('detectedCountry', JSON.stringify(finalCountryData));
-        
-      } catch (err) {
-        console.error('Country detection error:', err);
-        setError('Failed to detect country');
-        
-        // Fallback to stored country or default
-        const storedCountry = localStorage.getItem('detectedCountry');
-        if (storedCountry) {
-          console.log('Using stored country:', JSON.parse(storedCountry));
-          setCountryData(JSON.parse(storedCountry));
-        } else {
-          console.log('No stored country, using default India');
-          setCountryData({
-            country: 'India',
-            countryCode: 'IN',
-            flag: '🇮🇳',
-            currency: 'INR',
-            timezone: 'Asia/Kolkata'
-          });
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    // Check if we have stored country data first
+    const storedPermission = localStorage.getItem('locationPermission');
     const storedCountry = localStorage.getItem('detectedCountry');
-    if (storedCountry) {
-      setCountryData(JSON.parse(storedCountry));
-      setLoading(false);
+
+    if (storedPermission === 'granted' && storedCountry) {
+      // User previously allowed — use cached data, re-detect in background
+      try {
+        setCountryData(JSON.parse(storedCountry));
+        setPermission('granted');
+      } catch {
+        setPermission('prompt');
+      }
+    } else if (storedPermission === 'denied') {
+      setPermission('denied');
     } else {
-      detectCountry();
+      // First visit or cleared storage — stay on 'prompt', show default
+      setPermission('prompt');
     }
   }, []);
 
-  const updateCountry = (newCountryData: CountryData) => {
+  /** Performs the actual IP-based country detection */
+  const detectCountry = useCallback(async () => {
+    try {
+      setLoading(true);
+      setPermission('detecting');
+      setError(null);
+
+      const services = [
+        'https://ipapi.co/json/',
+        'https://ip-api.com/json/',
+        'https://api.country.is/',
+      ];
+
+      let countryInfo = null;
+
+      for (const service of services) {
+        try {
+          const response = await fetch(service, {
+            method: 'GET',
+            headers: { 'Accept': 'application/json' },
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+
+            if (data.country_code) {
+              countryInfo = {
+                countryCode: data.country_code.toUpperCase(),
+                country: data.country_name || data.country,
+                currency: data.currency || 'USD',
+                timezone: data.timezone || 'UTC',
+              };
+            } else if (data.country) {
+              countryInfo = {
+                countryCode: data.country.toUpperCase(),
+                country: data.country_name || data.country,
+                currency: data.currency || 'USD',
+                timezone: data.timezone || 'UTC',
+              };
+            }
+
+            if (countryInfo) break;
+          }
+        } catch (serviceError) {
+          console.log(`Service ${service} failed:`, serviceError);
+          continue;
+        }
+      }
+
+      if (!countryInfo) {
+        countryInfo = {
+          countryCode: 'IN',
+          country: 'India',
+          currency: 'INR',
+          timezone: 'Asia/Kolkata',
+        };
+      }
+
+      const countryName = countryNames[countryInfo.countryCode] || countryInfo.country;
+      const flag = countryFlags[countryInfo.countryCode] || '🌍';
+
+      const finalCountryData: CountryData = {
+        country: countryName,
+        countryCode: countryInfo.countryCode,
+        flag: flag,
+        currency: countryInfo.currency,
+        timezone: countryInfo.timezone,
+      };
+
+      setCountryData(finalCountryData);
+      setPermission('granted');
+
+      // Persist for future visits
+      localStorage.setItem('detectedCountry', JSON.stringify(finalCountryData));
+      localStorage.setItem('locationPermission', 'granted');
+
+      // Notify all listeners
+      window.dispatchEvent(new Event('countryChange'));
+    } catch (err) {
+      console.error('Country detection error:', err);
+      setError('Failed to detect country');
+      setPermission('denied');
+      localStorage.setItem('locationPermission', 'denied');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  /** Called when user clicks "Allow" — triggers detection */
+  const requestPermission = useCallback(() => {
+    detectCountry();
+  }, [detectCountry]);
+
+  /** Called when user clicks "Deny" — stays on default */
+  const denyPermission = useCallback(() => {
+    setPermission('denied');
+    localStorage.setItem('locationPermission', 'denied');
+  }, []);
+
+  /** Reset permission (allow user to re-trigger from settings) */
+  const resetPermission = useCallback(() => {
+    localStorage.removeItem('locationPermission');
+    localStorage.removeItem('detectedCountry');
+    setCountryData(DEFAULT_COUNTRY);
+    setPermission('prompt');
+  }, []);
+
+  /** Manually update country data */
+  const updateCountry = useCallback((newCountryData: CountryData) => {
     setCountryData(newCountryData);
+    setPermission('granted');
     localStorage.setItem('detectedCountry', JSON.stringify(newCountryData));
-  };
+    localStorage.setItem('locationPermission', 'granted');
+    window.dispatchEvent(new Event('countryChange'));
+  }, []);
 
   return {
     countryData,
     loading,
     error,
-    updateCountry
+    permission,
+    updateCountry,
+    requestPermission,
+    denyPermission,
+    resetPermission,
   };
 };
