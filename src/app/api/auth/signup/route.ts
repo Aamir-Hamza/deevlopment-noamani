@@ -34,6 +34,20 @@ export async function POST(req: Request) {
 
     const { name, email, password } = await req.json();
 
+    if (
+      typeof name !== 'string' ||
+      typeof email !== 'string' ||
+      typeof password !== 'string' ||
+      !name ||
+      !email ||
+      !password
+    ) {
+      return NextResponse.json(
+        { error: 'Name, email and password are required' },
+        { status: 400 }
+      );
+    }
+
     // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {

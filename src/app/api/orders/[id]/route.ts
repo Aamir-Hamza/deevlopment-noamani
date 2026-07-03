@@ -1,11 +1,15 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/db';
 import Order from '@/models/Order';
+import { verifyAdminRequest } from '@/lib/adminAuth';
 
 export async function GET(
   request: Request,
   { params }: { params: { id: string } }
 ) {
+  if (!verifyAdminRequest(request)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
   try {
     await connectDB();
     const order = await Order.findById(params.id).populate('items.productId');
@@ -25,6 +29,9 @@ export async function PUT(
   request: Request,
   { params }: { params: { id: string } }
 ) {
+  if (!verifyAdminRequest(request)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
   try {
     const body = await request.json();
     await connectDB();
@@ -48,6 +55,9 @@ export async function DELETE(
   request: Request,
   { params }: { params: { id: string } }
 ) {
+  if (!verifyAdminRequest(request)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
   try {
     await connectDB();
     const order = await Order.findByIdAndDelete(params.id);
@@ -61,4 +71,4 @@ export async function DELETE(
       { status: 500 }
     );
   }
-} 
+}

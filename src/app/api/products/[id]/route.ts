@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import connectDB from '@/lib/db';
 import Product from '@/models/Product';
 import { products } from '@/data/products';
+import { verifyAdminRequest } from '@/lib/adminAuth';
 
 export async function GET(
   request: Request,
@@ -47,6 +48,9 @@ export async function PUT(
   request: Request,
   { params }: { params: { id: string } }
 ) {
+  if (!verifyAdminRequest(request)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
   try {
     const { id } = params;
     const body = await request.json();
@@ -78,10 +82,13 @@ export async function DELETE(
   request: Request,
   { params }: { params: { id: string } }
 ) {
+  if (!verifyAdminRequest(request)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
   try {
     const { id } = params;
     await connectDB();
-    
+
     const deletedProduct = await Product.findByIdAndDelete(id);
 
     if (!deletedProduct) {

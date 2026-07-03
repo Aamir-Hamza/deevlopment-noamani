@@ -2,13 +2,19 @@ import { NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import Admin from '@/models/Admin';
 import connectDB from '@/lib/db';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+import { getJwtSecret } from '@/lib/adminAuth';
 
 export async function POST(request: Request) {
   try {
     await connectDB();
     const { email, password } = await request.json();
+
+    if (typeof email !== 'string' || typeof password !== 'string' || !email || !password) {
+      return NextResponse.json(
+        { error: 'Invalid credentials' },
+        { status: 401 }
+      );
+    }
 
     // Find admin
     const admin = await Admin.findOne({ email });
@@ -31,7 +37,7 @@ export async function POST(request: Request) {
     // Create token
     const token = jwt.sign(
       { id: admin._id, email: admin.email, role: admin.role },
-      JWT_SECRET,
+      getJwtSecret(),
       { expiresIn: '1d' }
     );
 

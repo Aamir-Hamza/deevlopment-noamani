@@ -1,14 +1,21 @@
 import { NextResponse } from 'next/server';
 import Razorpay from 'razorpay';
 
-const razorpay = new Razorpay({
-  key_id: 'rzp_test_Y1SVuHN3IsyjgD',
-  key_secret: 'JLzuhoxBn82XUjZTJxqLsZ6r',
-});
-
 export async function POST(request: Request) {
   try {
+    const keyId = process.env.RAZORPAY_KEY_ID;
+    const keySecret = process.env.RAZORPAY_KEY_SECRET;
+    if (!keyId || !keySecret) {
+      console.error('Payment Error: Razorpay keys are not configured');
+      return NextResponse.json({ error: 'Server misconfiguration' }, { status: 500 });
+    }
+    const razorpay = new Razorpay({ key_id: keyId, key_secret: keySecret });
+
     const { amount } = await request.json();
+
+    if (typeof amount !== 'number' || !Number.isFinite(amount) || amount <= 0) {
+      return NextResponse.json({ error: 'Invalid amount' }, { status: 400 });
+    }
 
     const options = {
       amount: amount * 100, // Razorpay expects amount in paise

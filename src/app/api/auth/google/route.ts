@@ -1,12 +1,23 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import User from "@/models/User";
+import { verifyFirebaseIdToken } from "@/lib/verifyFirebaseToken";
 
 export async function POST(req: Request) {
   try {
     await connectDB();
 
-    const { email, name, profilePic } = await req.json(); // data you get from Google
+    const { idToken } = await req.json();
+
+    // Identity must come from a verified Firebase ID token — never trust
+    // client-submitted email/name fields directly, or anyone could POST
+    // an arbitrary email here and be treated as that user.
+    const verified = await verifyFirebaseIdToken(idToken);
+    if (!verified) {
+      return NextResponse.json({ error: "Invalid or expired token" }, { status: 401 });
+    }
+
+    const { email, name, picture } = verified;
 
     let user = await User.findOne({ email });
 
@@ -15,7 +26,7 @@ export async function POST(req: Request) {
       user = await User.create({
         name,
         email,
-        profilePic,
+        profilePic: picture,
         authType: "google",
         password: "", // optional: skip password or mark as social login
       });

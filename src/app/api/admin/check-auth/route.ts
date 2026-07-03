@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import { cookies } from 'next/headers';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+import { getJwtSecret } from '@/lib/adminAuth';
 
 export async function GET() {
   try {
@@ -18,7 +17,7 @@ export async function GET() {
 
     try {
       // Verify the token
-      jwt.verify(token.value, JWT_SECRET);
+      jwt.verify(token.value, getJwtSecret());
       return NextResponse.json({ isAuthenticated: true });
     } catch (error) {
       return NextResponse.json(
@@ -33,4 +32,4 @@ export async function GET() {
       { status: 500 }
     );
   }
-} 
+}

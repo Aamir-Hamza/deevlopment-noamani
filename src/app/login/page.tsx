@@ -75,15 +75,9 @@ export default function LoginPage() {
         return;
       }
 
-      const { displayName, email, photoURL, providerId, uid } = res.user;
+      const idToken = await res.user.getIdToken();
 
-      const response = await axios.post("/api/auth/google", {
-        name: displayName,
-        email,
-        photoURL,
-        providerId,
-        uid,
-      });
+      const response = await axios.post("/api/auth/google", { idToken });
 
       if (response.data?.user) {
         localStorage.setItem("userInfo", JSON.stringify(response.data.user));

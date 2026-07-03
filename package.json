@@ -34,6 +34,7 @@
     "framer-motion": "^10.18.0",
     "google-auth-library": "^10.1.0",
     "i18next": "^26.3.4",
+    "jose": "^6.2.3",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.338.0",
     "mongoose": "^7.0.0",

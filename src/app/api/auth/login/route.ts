@@ -8,6 +8,13 @@ export async function POST(req: Request) {
 
     const { email, password } = await req.json();
 
+    if (typeof email !== 'string' || typeof password !== 'string' || !email || !password) {
+      return NextResponse.json(
+        { error: 'Invalid email or password' },
+        { status: 401 }
+      );
+    }
+
     // Find user by email
     const user = await User.findOne({ email });
     if (!user) {

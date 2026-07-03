@@ -96,7 +96,7 @@ export default function CheckoutPage() {
 
       // Initialize Razorpay
       const options = {
-        key: 'rzp_test_Y1SVuHN3IsyjgD',
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         amount: data.amount * 100,
         currency: data.currency,
         name: 'Luxury Perfumes',
@@ -168,6 +168,7 @@ export default function CheckoutPage() {
         paymentInfo: {
           razorpayOrderId: response.razorpay_order_id,
           razorpayPaymentId: response.razorpay_payment_id,
+          razorpaySignature: response.razorpay_signature,
           status: 'completed',
           method: response.method || 'card',
           email: formData.email,
