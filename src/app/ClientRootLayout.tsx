@@ -43,7 +43,7 @@ export default function ClientRootLayout({ children }: { children: React.ReactNo
         {showLoginModal && (
           <LoginModal onClose={() => setShowLoginModal(false)} onLoginSuccess={handleLoginSuccess} />
         )}
-        <Toaster position="top-right" />
+        <Toaster position="top-center" />
         <script src="https://accounts.google.com/gsi/client" async defer></script>
       </>
     );

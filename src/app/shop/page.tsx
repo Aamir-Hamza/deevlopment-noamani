@@ -17,6 +17,7 @@ import { Product } from "@/types/product";
 import LazyLoader from "@/components/ui/LazyLoader";
 import EmptyState from "@/components/ui/EmptyState";
 import Footer from '@/components/Footer';
+import { useTranslation } from "react-i18next";
 
 // Format price in Indian Rupee format (raw database price, no conversion)
 const formatIndianRupee = (price: number) => {
@@ -38,6 +39,7 @@ const sortOptions = [
 ];
 
 export default function ShopPage() {
+  const { t } = useTranslation();
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedSort, setSelectedSort] = useState("Newest");
   const [showFilters, setShowFilters] = useState(false);
@@ -154,7 +156,7 @@ export default function ShopPage() {
             className="text-6xl font-light mb-6"
             style={{ fontFamily: 'Didot, serif' }}
           >
-            SHOP ALL
+            {t('shop.shopAll').toUpperCase()}
           </motion.h1>
           <motion.p
             initial={{ y: 20, opacity: 0 }}
@@ -162,7 +164,7 @@ export default function ShopPage() {
             transition={{ delay: 0.7, duration: 0.8 }}
             className="text-xl font-light"
           >
-            Explore our complete collection of luxury fragrances
+            {t('home.exploreCollection')}
           </motion.p>
         </div>
       </motion.div>
@@ -179,7 +181,7 @@ export default function ShopPage() {
             className="flex items-center gap-2 mb-4 md:mb-0"
           >
             <Filter className="w-5 h-5" />
-            <span>Filter & Sort</span>
+            <span>{t('shop.filterSort')}</span>
             <ChevronDown
               className={`w-4 h-4 transition-transform ${
                 showFilters ? "rotate-180" : ""
@@ -228,9 +230,9 @@ export default function ShopPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {filteredProducts.length === 0 ? (
             <EmptyState
-              title="No products found"
-              subtitle="Try a different category, or check back soon for new arrivals."
-              ctaLabel="View All Products"
+              title={t('shop.noProductsFound')}
+              subtitle={t('shop.noProductsSubtitle')}
+              ctaLabel={t('home.viewAllProducts')}
               ctaHref="/shop/all"
             />
           ) : filteredProducts.map((product, index) => {
@@ -272,7 +274,7 @@ export default function ShopPage() {
                     className="w-[80%] bg-black text-white py-2 text-sm rounded-full font-semibold shadow hover:bg-gray-800 transition-all duration-200 flex items-center justify-center gap-2"
                   >
                     <ShoppingCart className="w-5 h-5" />
-                    Add to Cart
+                    {t('common.addToCart')}
                   </button>
                 </div>
               </div>
@@ -290,13 +292,13 @@ export default function ShopPage() {
           className="text-center mt-20"
         >
           <h3 className="text-2xl font-light mb-6">
-            NOT SURE WHICH FRAGRANCE TO CHOOSE?
+            {t('home.quizCtaTitle').toUpperCase()}
           </h3>
           <Link
             href="/quiz"
             className="inline-block bg-black text-white px-12 py-4 text-sm font-medium hover:bg-gray-800 transition-colors"
           >
-            TAKE THE QUIZ
+            {t('home.takeTheQuiz').toUpperCase()}
           </Link>
         </motion.div>
       </div>
