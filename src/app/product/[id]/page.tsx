@@ -15,6 +15,7 @@ import {
   Loader2,
 } from "lucide-react";
 import confetti from "canvas-confetti";
+import { useTranslation } from "react-i18next";
 import { useCart } from "@/context/CartContext";
 import { useCountry } from "@/hooks/useCountry";
 import { getPrice } from "@/lib/priceUtils";
@@ -31,7 +32,8 @@ const DEFAULT_SIZES = [
 ];
 
 interface AccordionSection {
-  label: string;
+  key: string;
+  labelKey: string;
   content: string;
 }
 
@@ -40,6 +42,7 @@ export default function ProductDetailPage({
 }: {
   params: { id: string };
 }) {
+  const { t } = useTranslation();
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -48,7 +51,7 @@ export default function ProductDetailPage({
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [selectedSizeIndex, setSelectedSizeIndex] = useState(2); // default 100 mL
   const [quantity, setQuantity] = useState(1);
-  const [openSection, setOpenSection] = useState<string | null>("Description");
+  const [openSection, setOpenSection] = useState<string | null>("description");
   const [isAdding, setIsAdding] = useState(false);
 
   const { addToCart } = useCart();
@@ -110,16 +113,16 @@ export default function ProductDetailPage({
   const { symbol, value: displayPrice } = getPrice(basePrice, country);
 
   const sections: AccordionSection[] = [
-    { label: "Description", content: product.description },
+    { key: "description", labelKey: "product.description", content: product.description },
     ...(product.olfactoryNotes
-      ? [{ label: "Olfactory Notes", content: product.olfactoryNotes }]
+      ? [{ key: "olfactoryNotes", labelKey: "product.olfactoryNotes", content: product.olfactoryNotes }]
       : []),
     ...(product.perfumersWord
-      ? [{ label: "Perfumer's Word", content: product.perfumersWord }]
+      ? [{ key: "perfumersWord", labelKey: "product.perfumersWord", content: product.perfumersWord }]
       : []),
-    ...(product.knowHow ? [{ label: "Know How", content: product.knowHow }] : []),
+    ...(product.knowHow ? [{ key: "knowHow", labelKey: "product.knowHow", content: product.knowHow }] : []),
     ...(product.applicationTips
-      ? [{ label: "Application Tips", content: product.applicationTips }]
+      ? [{ key: "applicationTips", labelKey: "product.applicationTips", content: product.applicationTips }]
       : []),
   ];
 
@@ -160,10 +163,10 @@ export default function ProductDetailPage({
       {/* Breadcrumb */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-4">
         <nav className="flex items-center gap-1.5 text-xs text-gray-500">
-          <Link href="/" className="hover:text-gray-900 transition-colors">Home</Link>
+          <Link href="/" className="hover:text-gray-900 transition-colors">{t('common.home')}</Link>
           <ChevronRight className="w-3 h-3" />
           <Link href="/shop/all" className="hover:text-gray-900 transition-colors">
-            {product.category || "Fragrance"}
+            {product.category || t('nav.fragrance')}
           </Link>
           <ChevronRight className="w-3 h-3" />
           <span className="text-gray-800 truncate max-w-[160px]">{product.name}</span>
@@ -246,19 +249,19 @@ export default function ProductDetailPage({
                 {symbol}{displayPrice}
               </span>
               {!inStock ? (
-                <span className="text-sm font-medium text-red-600">Out of stock</span>
+                <span className="text-sm font-medium text-red-600">{t('product.outOfStock')}</span>
               ) : lowStock ? (
                 <span className="text-sm font-medium text-amber-600">
-                  Only {product.stock} left
+                  {t('product.onlyXLeft', { count: product.stock })}
                 </span>
               ) : (
-                <span className="text-sm font-medium text-emerald-600">In stock</span>
+                <span className="text-sm font-medium text-emerald-600">{t('product.inStock')}</span>
               )}
             </div>
 
             {/* Size */}
             <div className="mb-6">
-              <p className="text-xs font-semibold uppercase tracking-widest text-gray-500 mb-2.5">Size</p>
+              <p className="text-xs font-semibold uppercase tracking-widest text-gray-500 mb-2.5">{t('product.size')}</p>
               <div className="flex gap-2.5">
                 {DEFAULT_SIZES.map((size, idx) => (
                   <button
@@ -278,7 +281,7 @@ export default function ProductDetailPage({
 
             {/* Quantity */}
             <div className="mb-8">
-              <p className="text-xs font-semibold uppercase tracking-widest text-gray-500 mb-2.5">Quantity</p>
+              <p className="text-xs font-semibold uppercase tracking-widest text-gray-500 mb-2.5">{t('product.quantity')}</p>
               <div className="inline-flex items-center border border-gray-300 rounded-full">
                 <button
                   onClick={() => setQuantity((q) => Math.max(1, q - 1))}
@@ -308,12 +311,12 @@ export default function ProductDetailPage({
               {isAdding ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Adding...
+                  {t('common.adding')}
                 </>
               ) : !inStock ? (
-                "Out of Stock"
+                t('product.outOfStock')
               ) : (
-                "Add to Cart"
+                t('product.addToCart')
               )}
             </button>
 
@@ -321,37 +324,37 @@ export default function ProductDetailPage({
             <div className="grid grid-cols-3 gap-3 mt-8 pt-8 border-t border-gray-100">
               <div className="flex flex-col items-center text-center gap-1.5">
                 <Truck className="w-5 h-5 text-gray-400" />
-                <span className="text-[11px] text-gray-500 leading-tight">Free shipping over ₹2,000</span>
+                <span className="text-[11px] text-gray-500 leading-tight">{t('product.freeShippingOver')}</span>
               </div>
               <div className="flex flex-col items-center text-center gap-1.5">
                 <ShieldCheck className="w-5 h-5 text-gray-400" />
-                <span className="text-[11px] text-gray-500 leading-tight">100% authentic</span>
+                <span className="text-[11px] text-gray-500 leading-tight">{t('product.authentic')}</span>
               </div>
               <div className="flex flex-col items-center text-center gap-1.5">
                 <RotateCcw className="w-5 h-5 text-gray-400" />
-                <span className="text-[11px] text-gray-500 leading-tight">30-day returns</span>
+                <span className="text-[11px] text-gray-500 leading-tight">{t('product.returns30')}</span>
               </div>
             </div>
 
             {/* Accordion */}
             <div className="mt-8 space-y-2.5">
               {sections.map((section) => (
-                <div key={section.label} className="border border-gray-200 rounded-xl overflow-hidden">
+                <div key={section.key} className="border border-gray-200 rounded-xl overflow-hidden">
                   <button
                     onClick={() =>
-                      setOpenSection(openSection === section.label ? null : section.label)
+                      setOpenSection(openSection === section.key ? null : section.key)
                     }
                     className="w-full flex items-center justify-between px-5 py-4 text-left text-sm font-medium text-gray-900 hover:bg-gray-50 transition-colors"
                   >
-                    <span>{section.label}</span>
+                    <span>{t(section.labelKey)}</span>
                     <ChevronDown
                       className={`w-4 h-4 text-[#bfa14a] flex-shrink-0 transition-transform ${
-                        openSection === section.label ? "rotate-180" : ""
+                        openSection === section.key ? "rotate-180" : ""
                       }`}
                     />
                   </button>
                   <AnimatePresence initial={false}>
-                    {openSection === section.label && (
+                    {openSection === section.key && (
                       <motion.div
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: "auto", opacity: 1 }}
@@ -378,7 +381,7 @@ export default function ProductDetailPage({
               className="text-2xl sm:text-3xl font-semibold text-gray-900 mb-8 text-center"
               style={{ fontFamily: "Didot, serif" }}
             >
-              You May Also Like
+              {t('product.youMayAlsoLike')}
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {relatedProducts.map((p) => (

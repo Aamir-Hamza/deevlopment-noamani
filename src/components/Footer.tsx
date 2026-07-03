@@ -1,8 +1,13 @@
+"use client";
+
 import Link from "next/link"
-import { ChevronDown, ChevronRight } from "lucide-react"
+import { ChevronDown } from "lucide-react"
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
+import { LanguageSwitcher } from "@/components/LanguageSwitcher"
 
 export default function Footer() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
@@ -54,12 +59,12 @@ export default function Footer() {
           <form onSubmit={handleSubscribe}>
             <div className="flex flex-col md:flex-row items-start md:items-center gap-6 sm:gap-8 md:gap-12 mb-8 sm:mb-10 md:mb-12">
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-medium text-gray-800 tracking-wide">
-                SIGN UP FOR EXCLUSIVITY
+                {t('footer.signUpExclusivity')}
               </h2>
               <div className="flex flex-col sm:flex-row w-full md:w-auto items-stretch sm:items-center gap-3 sm:gap-4 md:gap-6">
                 <input
                   type="email"
-                  placeholder="Enter an email"
+                  placeholder={t('footer.enterEmail') as string}
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   className="px-4 sm:px-5 md:px-6 py-3 sm:py-4 border border-gray-300 bg-white text-gray-800 placeholder:text-gray-500 focus:outline-none focus:border-gray-400 w-full sm:w-[360px] md:w-[400px] text-base sm:text-lg"
@@ -71,7 +76,7 @@ export default function Footer() {
                   type="submit"
                   disabled={loading}
                 >
-                  {loading ? "..." : "Confirm"}
+                  {loading ? "..." : t('footer.confirm')}
                 </button>
               </div>
             </div>
@@ -111,16 +116,16 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10 sm:gap-12 md:gap-16">
           {/* Find a boutique */}
           <div>
-            <h3 className="text-xl sm:text-2xl font-medium text-gray-800 mb-4 sm:mb-6 md:mb-8">Find a boutique</h3>
+            <h3 className="text-xl sm:text-2xl font-medium text-gray-800 mb-4 sm:mb-6 md:mb-8">{t('footer.findABoutique')}</h3>
             <ul className="space-y-4">
               <li>
                 <Link href="/find-a-boutique" className="text-gray-600 hover:text-gray-800 transition-colors">
-                  Noamani Perfumes Boutiques
+                  {t('footer.perfumeBoutiques')}
                 </Link>
               </li>
               <li>
                 <Link href="/find-a-boutique" className="text-gray-600 hover:text-gray-800 transition-colors">
-                  Noamani Couture Boutiques
+                  {t('footer.coutureBoutiques')}
                 </Link>
               </li>
             </ul>
@@ -128,29 +133,29 @@ export default function Footer() {
 
           {/* Client Services */}
           <div>
-            <h3 className="text-xl sm:text-2xl font-medium text-gray-800 mb-4 sm:mb-6 md:mb-8">Client Services</h3>
+            <h3 className="text-xl sm:text-2xl font-medium text-gray-800 mb-4 sm:mb-6 md:mb-8">{t('footer.clientServices')}</h3>
             <ul className="space-y-4">
               <li>
                 <Link href="/customer-care/contact" className="text-gray-600 hover:text-gray-800 transition-colors flex items-center gap-2">
-                  Contact us
+                  {t('footer.contactUs')}
                   <ChevronDown className="w-4 h-4" />
                 </Link>
               </li>
               <li>
                 <Link href="/customer-care/returns" className="text-gray-600 hover:text-gray-800 transition-colors flex items-center gap-2">
-                  Delivery & Returns
+                  {t('footer.deliveryReturns')}
                   <ChevronDown className="w-4 h-4" />
                 </Link>
               </li>
               <li>
                 <Link href="/customer-care/faqs" className="text-gray-600 hover:text-gray-800 transition-colors flex items-center gap-2">
-                  FAQ
+                  {t('footer.faq')}
                   <ChevronDown className="w-4 h-4" />
                 </Link>
               </li>
               <li>
                 <Link href="/orders" className="text-gray-600 hover:text-gray-800 transition-colors">
-                  Receive My Invoice
+                  {t('footer.receiveInvoice')}
                 </Link>
               </li>
             </ul>
@@ -158,22 +163,22 @@ export default function Footer() {
 
           {/* Maison Noamani */}
           <div>
-            <h3 className="text-xl sm:text-2xl font-medium text-gray-800 mb-4 sm:mb-6 md:mb-8">Maison Noamani</h3>
+            <h3 className="text-xl sm:text-2xl font-medium text-gray-800 mb-4 sm:mb-6 md:mb-8">{t('footer.maisonNoamani')}</h3>
             <ul className="space-y-4">
               <li>
                 <Link href="/maison-noamani" className="text-gray-600 hover:text-gray-800 transition-colors flex items-center gap-2">
-                  Noamani Sustainability
+                  {t('footer.sustainability')}
                   <ChevronDown className="w-4 h-4" />
                 </Link>
               </li>
               <li>
                 <Link href="/maison-noamani" className="text-gray-600 hover:text-gray-800 transition-colors">
-                  Ethics & Compliance
+                  {t('footer.ethicsCompliance')}
                 </Link>
               </li>
               <li>
                 <Link href="/maison-noamani" className="text-gray-600 hover:text-gray-800 transition-colors">
-                  Careers
+                  {t('footer.careers')}
                 </Link>
               </li>
             </ul>
@@ -181,34 +186,34 @@ export default function Footer() {
 
           {/* Legal */}
           <div>
-            <h3 className="text-xl sm:text-2xl font-medium text-gray-800 mb-4 sm:mb-6 md:mb-8">Legal</h3>
+            <h3 className="text-xl sm:text-2xl font-medium text-gray-800 mb-4 sm:mb-6 md:mb-8">{t('footer.legal')}</h3>
             <ul className="space-y-4">
               <li>
                 <Link href="/legal/terms" className="text-gray-600 hover:text-gray-800 transition-colors flex items-center gap-2">
-                  Legal Terms
+                  {t('footer.legalTerms')}
                   <ChevronDown className="w-4 h-4" />
                 </Link>
               </li>
               <li>
                 <Link href="/legal/privacy" className="text-gray-600 hover:text-gray-800 transition-colors flex items-center gap-2">
-                  Privacy Policy
+                  {t('footer.privacyPolicy')}
                   <ChevronDown className="w-4 h-4" />
                 </Link>
               </li>
               <li>
                 <Link href="/legal/general-sales-conditions" className="text-gray-600 hover:text-gray-800 transition-colors flex items-center gap-2">
-                  General Sales Conditions
+                  {t('footer.salesConditions')}
                   <ChevronDown className="w-4 h-4" />
                 </Link>
               </li>
               <li>
                 <Link href="/legal/privacy" className="text-gray-600 hover:text-gray-800 transition-colors">
-                  Cookie Management
+                  {t('footer.cookieManagement')}
                 </Link>
               </li>
               <li>
                 <Link href="/sitemap" className="text-gray-600 hover:text-gray-800 transition-colors flex items-center gap-2">
-                  Sitemap
+                  {t('footer.sitemap')}
                   <ChevronDown className="w-4 h-4" />
                 </Link>
               </li>
@@ -221,7 +226,7 @@ export default function Footer() {
           <div className="flex flex-col md:flex-row items-center justify-between gap-6 sm:gap-8">
             {/* Left Section - Social Media Links */}
             <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-base sm:text-lg text-gray-700">
-              <span className="font-medium">Follow us :</span>
+              <span className="font-medium">{t('footer.followUs')} :</span>
               <Link href="#" className="text-gray-700 hover:text-gray-900 transition-colors">
                 Tiktok
               </Link>
@@ -245,14 +250,11 @@ export default function Footer() {
             </div>
 
             {/* Right Section - Region and Language Selector */}
-            <div className="flex flex-col items-center md:items-end">
-              <div className="text-xs sm:text-sm text-gray-700 mb-1">
-                Choose your Country or Region & Language
+            <div className="flex flex-col items-center md:items-end gap-1.5">
+              <div className="text-xs sm:text-sm text-gray-700">
+                {t('footer.chooseCountry')}
               </div>
-              <div className="flex items-center gap-2 text-base sm:text-lg text-gray-700">
-                <span>International version (English)</span>
-                <ChevronRight className="w-4 h-4" />
-              </div>
+              <LanguageSwitcher isSolid />
             </div>
           </div>
         </div>

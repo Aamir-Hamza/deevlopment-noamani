@@ -31,15 +31,17 @@ import { products } from "@/data/products";
 import { Kolker_Brush, Italianno } from 'next/font/google';
 import { useCountry } from '@/hooks/useCountry';
 import { CountryDisplay } from '@/components/CountryDisplay';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { useTranslation } from 'react-i18next';
 
 const kolker = Kolker_Brush({ weight: '400', subsets: ['latin'] });
 const italianno = Italianno({ weight: '400', subsets: ['latin'] });
 
 const navItems = [
-  { name: "Bestsellers", href: "/bestsellers" },
-  { name: "Fragrance", href: "/fragrance" },
-  { name: "Recreations", href: "/product/recreations" },
-  { name: "About Us", href: "/about" },
+  { name: "Bestsellers", href: "/bestsellers", i18nKey: "nav.bestsellers" },
+  { name: "Fragrance", href: "/fragrance", i18nKey: "nav.fragrance" },
+  { name: "Recreations", href: "/product/recreations", i18nKey: "nav.recreations" },
+  { name: "About Us", href: "/about", i18nKey: "nav.aboutUs" },
 ];
 
 interface UserInfo {
@@ -55,6 +57,7 @@ interface AdminInfo {
 
 export default function Navbar() {
   // ─── STATE ───────────────────────────────────────────────
+  const { t } = useTranslation();
   const { cart, clearCart } = useCart();
   const router = useRouter();
   const pathname = usePathname();
@@ -370,7 +373,7 @@ export default function Navbar() {
         <button
           className={cn("transition-all duration-200 hover:opacity-70 hover:scale-110", iconColor)}
           onClick={() => setShowSearchModal(true)}
-          aria-label="Search"
+          aria-label={t('nav.search')}
           type="button"
         >
           <Search className={iconSize} />
@@ -387,7 +390,7 @@ export default function Navbar() {
               )}
             >
               <UserCircleIcon className={iconSize} />
-              {!isCompact && <span className="tracking-wide">Admin</span>}
+              {!isCompact && <span className="tracking-wide">{t('nav.admin')}</span>}
               <ChevronDown className={cn("h-3.5 w-3.5 transition-transform duration-200", showDropdown && "rotate-180")} />
             </button>
             <AnimatePresence>
@@ -406,8 +409,8 @@ export default function Navbar() {
                       <UserCircleIcon className="h-6 w-6 text-white/90" />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[11px] uppercase tracking-widest text-gray-400 font-medium">Signed in as</p>
-                      <p className="text-sm font-semibold text-gray-900 truncate">Admin</p>
+                      <p className="text-[11px] uppercase tracking-widest text-gray-400 font-medium">{t('nav.signedInAs')}</p>
+                      <p className="text-sm font-semibold text-gray-900 truncate">{t('nav.admin')}</p>
                     </div>
                   </div>
                   <div className="py-1.5">
@@ -417,7 +420,7 @@ export default function Navbar() {
                       onClick={() => setShowDropdown(false)}
                     >
                       <LayoutDashboard className="h-4 w-4 text-gray-400" />
-                      Dashboard
+                      {t('nav.dashboard')}
                     </Link>
                     <div className="mx-3 my-1 h-px bg-gray-100" />
                     <button
@@ -425,7 +428,7 @@ export default function Navbar() {
                       className="flex items-center gap-2.5 w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors"
                     >
                       <ArrowRightOnRectangleIcon className="h-4 w-4" />
-                      Logout
+                      {t('nav.logout')}
                     </button>
                   </div>
                 </motion.div>
@@ -488,7 +491,7 @@ export default function Navbar() {
                     )}
                     <div className="min-w-0">
                       <p className="text-sm font-semibold text-gray-900 truncate">
-                        {userInfo.name || "Welcome back"}
+                        {userInfo.name || t('nav.welcomeBack')}
                       </p>
                       <p className="text-xs text-gray-500 truncate">
                         {userInfo.email}
@@ -502,7 +505,7 @@ export default function Navbar() {
                       onClick={() => setShowDropdown(false)}
                     >
                       <UserCircleIcon className="h-4 w-4 text-gray-400" />
-                      Profile
+                      {t('nav.profile')}
                     </Link>
                     <Link
                       href="/orders"
@@ -510,7 +513,7 @@ export default function Navbar() {
                       onClick={() => setShowDropdown(false)}
                     >
                       <ShoppingBagIcon className="h-4 w-4 text-gray-400" />
-                      Orders
+                      {t('nav.orders')}
                     </Link>
                     <div className="mx-3 my-1 h-px bg-gray-100" />
                     <button
@@ -518,7 +521,7 @@ export default function Navbar() {
                       className="flex items-center gap-2.5 w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors"
                     >
                       <ArrowRightOnRectangleIcon className="h-4 w-4" />
-                      Logout
+                      {t('nav.logout')}
                     </button>
                   </div>
                 </motion.div>
@@ -529,7 +532,7 @@ export default function Navbar() {
           <button
             onClick={() => setShowLoginModal(true)}
             className={cn("transition-all duration-200 hover:opacity-70 hover:scale-110", iconColor)}
-            aria-label="Login"
+            aria-label={t('nav.login')}
           >
             <User className={iconSize} />
           </button>
@@ -552,6 +555,9 @@ export default function Navbar() {
             </motion.span>
           )}
         </Link>
+
+        {/* Language Switcher */}
+        <LanguageSwitcher isSolid={isSolid} />
 
         {/* Country Display — desktop only */}
         {!isCompact && (
@@ -592,7 +598,7 @@ export default function Navbar() {
                 )}
                 style={{ fontFamily: 'Didot, serif', fontWeight: 600 }}
               >
-                {item.name}
+                {t(item.i18nKey)}
 
                 {/* CSS underline */}
                 <span
@@ -642,8 +648,8 @@ export default function Navbar() {
         >
           <div className="flex items-center justify-center h-9 announcement-bar-gradient px-9 sm:px-4 relative">
             <p className="text-[10px] sm:text-[11px] text-white/90 tracking-[0.14em] sm:tracking-[0.18em] font-medium uppercase text-center truncate">
-              <span className="sm:hidden">Free shipping over ₹2,000</span>
-              <span className="hidden sm:inline">Complimentary shipping on orders above ₹2,000 &middot; Free samples with every order</span>
+              <span className="sm:hidden">{t('announcement.short')}</span>
+              <span className="hidden sm:inline">{t('announcement.full')}</span>
             </p>
             <button
               onClick={() => setAnnouncementDismissed(true)}
@@ -928,7 +934,7 @@ export default function Navbar() {
                         )}
                         style={{ fontFamily: 'Didot, serif' }}
                       >
-                        {item.name}
+                        {t(item.i18nKey)}
                       </Link>
                     </motion.div>
                   ))}
@@ -955,7 +961,7 @@ export default function Navbar() {
                     className="flex items-center gap-2 text-sm text-white/40 hover:text-white/70 transition-colors tracking-widest uppercase"
                   >
                     <ShoppingBagIcon className="h-4 w-4" />
-                    Cart {cartItemsCount > 0 && `(${cartItemsCount})`}
+                    {t('nav.cart')} {cartItemsCount > 0 && `(${cartItemsCount})`}
                   </Link>
                   {userInfo && (
                     <Link
@@ -964,19 +970,20 @@ export default function Navbar() {
                       className="flex items-center gap-2 text-sm text-white/40 hover:text-white/70 transition-colors tracking-widest uppercase"
                     >
                       <UserCircleIcon className="h-4 w-4" />
-                      Profile
+                      {t('nav.profile')}
                     </Link>
                   )}
                 </motion.div>
 
-                {/* Country / currency — interactive, matches the desktop selector so mobile
-                    shoppers can change the currency prices are shown in */}
+                {/* Language + Country / currency — interactive, matches the desktop
+                    selectors so mobile shoppers can change language and currency */}
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.55, duration: 0.4 }}
-                  className="absolute bottom-8 flex flex-col items-center gap-2"
+                  className="absolute bottom-8 flex items-center gap-3"
                 >
+                  <LanguageSwitcher isSolid={false} />
                   <CountryDisplay isScrolled={false} isMobileMenuOpen={false} />
                 </motion.div>
               </motion.div>

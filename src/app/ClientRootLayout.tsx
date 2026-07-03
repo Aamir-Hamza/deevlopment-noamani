@@ -1,5 +1,6 @@
 "use client";
 import { CartProvider } from '@/context/CartContext'
+import { LanguageProvider } from '@/context/LanguageContext'
 import Navbar from '@/app/layout/Navbar'
 import { useState } from 'react'
 import { LoginModal } from '@/components/LoginModal'
@@ -49,8 +50,10 @@ export default function ClientRootLayout({ children }: { children: React.ReactNo
   }
 
   return (
-    <CartProvider onRequireLogin={handleRequireLogin}>
-      <AfterCartProvider />
-    </CartProvider>
+    <LanguageProvider>
+      <CartProvider onRequireLogin={handleRequireLogin}>
+        <AfterCartProvider />
+      </CartProvider>
+    </LanguageProvider>
   );
-} 
+}

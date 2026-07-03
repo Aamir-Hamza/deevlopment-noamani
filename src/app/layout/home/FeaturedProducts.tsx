@@ -10,6 +10,7 @@ import { useCountry } from "@/hooks/useCountry";
 import LazyLoader from "@/components/ui/LazyLoader";
 import EmptyState from "@/components/ui/EmptyState";
 import ProductQuickViewModal from "@/app/components/ProductQuickViewModal";
+import { useTranslation } from "react-i18next";
 
 type SizeOption = { label: string; value: number; priceFactor: number };
 type ProductItem = {
@@ -46,6 +47,7 @@ const defaultSizes = [
 ];
 
 export default function FeaturedProducts() {
+  const { t } = useTranslation();
   const { addToCart } = useCart();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -204,10 +206,10 @@ export default function FeaturedProducts() {
             className="text-center mb-12"
           >
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#bfa14a] mb-3">
-              Curated for You
+              {t('home.curatedKicker')}
             </p>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-light" style={{ fontFamily: "Didot, serif" }}>
-              Bestselling Fragrances
+              {t('home.bestsellingFragrances')}
             </h2>
           </motion.div>
 
@@ -228,9 +230,9 @@ export default function FeaturedProducts() {
               </div>
             ) : products.length === 0 ? (
               <EmptyState
-                title="No products yet"
-                subtitle="Check back soon — our fragrances are on their way."
-                ctaLabel="Browse Bestsellers"
+                title={t('shop.noProductsFound')}
+                subtitle={t('shop.noProductsSubtitle')}
+                ctaLabel={t('shop.browseBestsellers')}
                 ctaHref="/bestsellers"
               />
             ) : (
@@ -293,7 +295,7 @@ export default function FeaturedProducts() {
                         onClick={() => handleAddToCart(product)}
                         className="w-full bg-black text-white py-2 text-xs font-semibold uppercase tracking-wide rounded-full hover:bg-gray-800 transition-colors"
                       >
-                        Add to Cart
+                        {t('common.addToCart')}
                       </button>
                     </div>
                   </motion.div>
@@ -348,7 +350,7 @@ export default function FeaturedProducts() {
               href="/shop/all"
               className="inline-block border border-gray-900 text-gray-900 px-10 py-3 text-sm font-medium uppercase tracking-wide hover:bg-gray-900 hover:text-white transition-colors rounded-full"
             >
-              View All Products
+              {t('home.viewAllProducts')}
             </Link>
           </div>
         </div>
@@ -366,7 +368,7 @@ export default function FeaturedProducts() {
             className="text-3xl sm:text-4xl md:text-5xl font-light mb-4 text-center"
             style={{ fontFamily: "Didot, serif" }}
           >
-            Discover Your Signature Scent
+            {t('home.discoverSignatureScent')}
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -375,7 +377,7 @@ export default function FeaturedProducts() {
             transition={{ delay: 0.15 }}
             className="text-base sm:text-lg mb-8 text-center max-w-md text-white/85"
           >
-            Explore our complete collection of luxury fragrances
+            {t('home.exploreCollection')}
           </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -387,7 +389,7 @@ export default function FeaturedProducts() {
               href="/shop"
               className="inline-block bg-white text-black px-9 py-3 rounded-full hover:bg-gray-100 transition-colors text-sm font-semibold uppercase tracking-wide"
             >
-              Shop Now
+              {t('common.shopNow')}
             </Link>
           </motion.div>
         </div>
@@ -398,16 +400,16 @@ export default function FeaturedProducts() {
         <div className="max-w-3xl mx-auto px-4 text-center">
           <Sparkles className="w-8 h-8 text-[#bfa14a] mx-auto mb-4" />
           <h2 className="text-2xl sm:text-3xl font-light mb-3" style={{ fontFamily: "Didot, serif" }}>
-            Not Sure Which Fragrance to Choose?
+            {t('home.quizCtaTitle')}
           </h2>
           <p className="text-gray-600 mb-8">
-            Take our two-minute quiz and we&apos;ll match you with your signature scent.
+            {t('home.quizCtaSubtitle')}
           </p>
           <Link
             href="/quiz"
             className="inline-block bg-black text-white px-10 py-3.5 text-sm font-semibold uppercase tracking-wide rounded-full hover:bg-gray-800 transition-colors"
           >
-            Take the Quiz
+            {t('home.takeTheQuiz')}
           </Link>
         </div>
       </section>

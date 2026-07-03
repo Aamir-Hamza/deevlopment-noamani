@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import ProductImage from '@/components/ui/ProductImage';
 import { useCountry } from '@/hooks/useCountry';
 import { getPrice } from '@/lib/priceUtils';
@@ -12,35 +13,37 @@ import { getPrice } from '@/lib/priceUtils';
 const questions = [
   {
     id: 1,
-    question: 'What type of fragrance do you typically prefer?',
+    questionKey: 'quiz.q1.question',
     options: [
-      { text: 'Floral & Sweet', tags: ['floral', 'rose', 'orchid', 'bloom', 'saffron'], image: 'https://images.pexels.com/photos/4110409/pexels-photo-4110409.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' },
-      { text: 'Fresh & Clean', tags: ['fresh', 'aquatic', 'ocean', 'citrus', 'breeze'], image: 'https://images.pexels.com/photos/4110408/pexels-photo-4110408.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' },
-      { text: 'Warm & Spicy', tags: ['spicy', 'warm', 'pimento', 'amber'], image: 'https://images.pexels.com/photos/4041392/pexels-photo-4041392.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' },
-      { text: 'Woody & Earthy', tags: ['woody', 'oud', 'cedar', 'resin', 'sandalwood'], image: 'https://images.pexels.com/photos/4041393/pexels-photo-4041393.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' },
+      { key: 'floralSweet', tags: ['floral', 'rose', 'orchid', 'bloom', 'saffron'], image: 'https://images.pexels.com/photos/4110409/pexels-photo-4110409.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' },
+      { key: 'freshClean', tags: ['fresh', 'aquatic', 'ocean', 'citrus', 'breeze'], image: 'https://images.pexels.com/photos/4110408/pexels-photo-4110408.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' },
+      { key: 'warmSpicy', tags: ['spicy', 'warm', 'pimento', 'amber'], image: 'https://images.pexels.com/photos/4041392/pexels-photo-4041392.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' },
+      { key: 'woodyEarthy', tags: ['woody', 'oud', 'cedar', 'resin', 'sandalwood'], image: 'https://images.pexels.com/photos/4041393/pexels-photo-4041393.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' },
     ],
   },
   {
     id: 2,
-    question: 'When do you typically wear fragrance?',
+    questionKey: 'quiz.q2.question',
     options: [
-      { text: 'Daily Wear', tags: ['fresh', 'light', 'citrus'], image: 'https://images.pexels.com/photos/5490778/pexels-photo-5490778.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' },
-      { text: 'Special Occasions', tags: ['oud', 'amber', 'rich'], image: 'https://images.pexels.com/photos/5490779/pexels-photo-5490779.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' },
-      { text: 'Evening Events', tags: ['musk', 'oud', 'intense'], image: 'https://images.pexels.com/photos/6621441/pexels-photo-6621441.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' },
-      { text: 'Seasonal Use', tags: ['fresh', 'aquatic'], image: 'https://images.pexels.com/photos/6621442/pexels-photo-6621442.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' },
+      { key: 'dailyWear', tags: ['fresh', 'light', 'citrus'], image: 'https://images.pexels.com/photos/5490778/pexels-photo-5490778.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' },
+      { key: 'specialOccasions', tags: ['oud', 'amber', 'rich'], image: 'https://images.pexels.com/photos/5490779/pexels-photo-5490779.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' },
+      { key: 'eveningEvents', tags: ['musk', 'oud', 'intense'], image: 'https://images.pexels.com/photos/6621441/pexels-photo-6621441.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' },
+      { key: 'seasonalUse', tags: ['fresh', 'aquatic'], image: 'https://images.pexels.com/photos/6621442/pexels-photo-6621442.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' },
     ],
   },
   {
     id: 3,
-    question: "What's your preferred fragrance intensity?",
+    questionKey: 'quiz.q3.question',
     options: [
-      { text: 'Light & Subtle', tags: ['fresh', 'citrus', 'light'], image: 'https://images.pexels.com/photos/6621263/pexels-photo-6621263.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' },
-      { text: 'Moderate', tags: ['floral', 'amber'], image: 'https://images.pexels.com/photos/6621266/pexels-photo-6621266.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' },
-      { text: 'Strong & Bold', tags: ['oud', 'spicy', 'intense'], image: 'https://images.pexels.com/photos/6621472/pexels-photo-6621472.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' },
-      { text: 'Very Intense', tags: ['oud', 'musk', 'resin'], image: 'https://images.pexels.com/photos/6621462/pexels-photo-6621462.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' },
+      { key: 'lightSubtle', tags: ['fresh', 'citrus', 'light'], image: 'https://images.pexels.com/photos/6621263/pexels-photo-6621263.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' },
+      { key: 'moderate', tags: ['floral', 'amber'], image: 'https://images.pexels.com/photos/6621266/pexels-photo-6621266.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' },
+      { key: 'strongBold', tags: ['oud', 'spicy', 'intense'], image: 'https://images.pexels.com/photos/6621472/pexels-photo-6621472.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' },
+      { key: 'veryIntense', tags: ['oud', 'musk', 'resin'], image: 'https://images.pexels.com/photos/6621462/pexels-photo-6621462.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' },
     ],
   },
 ];
+
+const questionNsMap = ['q1', 'q2', 'q3'] as const;
 
 type Product = {
   _id: string;
@@ -54,6 +57,7 @@ type Product = {
 };
 
 export default function QuizPage() {
+  const { t } = useTranslation();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedTags, setSelectedTags] = useState<string[][]>([]);
   const [showResults, setShowResults] = useState(false);
@@ -123,7 +127,7 @@ export default function QuizPage() {
             className="text-5xl font-light mb-4"
             style={{ fontFamily: 'Didot, serif' }}
           >
-            Find Your Perfect Scent
+            {t('quiz.title')}
           </motion.h1>
           <motion.p
             initial={{ y: 20, opacity: 0 }}
@@ -131,7 +135,7 @@ export default function QuizPage() {
             transition={{ delay: 0.4, duration: 0.8 }}
             className="text-lg font-light"
           >
-            Three quick questions to your signature fragrance
+            {t('quiz.subtitle')}
           </motion.p>
         </div>
       </div>
@@ -149,13 +153,13 @@ export default function QuizPage() {
                       className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors"
                     >
                       <ArrowLeft className="w-3.5 h-3.5" />
-                      Back
+                      {t('quiz.back')}
                     </button>
                   ) : (
                     <span />
                   )}
                   <p className="text-sm text-gray-500">
-                    Question {currentQuestion + 1} of {questions.length}
+                    {t('quiz.questionOf', { current: currentQuestion + 1, total: questions.length })}
                   </p>
                 </div>
                 <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
@@ -177,12 +181,12 @@ export default function QuizPage() {
                 className="text-center"
               >
                 <h2 className="text-2xl sm:text-3xl font-light mb-10" style={{ fontFamily: 'Didot, serif' }}>
-                  {questions[currentQuestion].question}
+                  {t(questions[currentQuestion].questionKey)}
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   {questions[currentQuestion].options.map((option, index) => (
                     <motion.button
-                      key={option.text}
+                      key={option.key}
                       initial={{ opacity: 0, y: 15 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.08 }}
@@ -201,7 +205,9 @@ export default function QuizPage() {
                       )}
                       <div className="absolute inset-0 bg-black/40 transition-opacity group-hover:bg-black/50" />
                       <div className="absolute inset-0 flex items-center justify-center text-white">
-                        <h3 className="text-xl sm:text-2xl font-light">{option.text}</h3>
+                        <h3 className="text-xl sm:text-2xl font-light">
+                          {t(`quiz.${questionNsMap[currentQuestion]}.${option.key}`)}
+                        </h3>
                       </div>
                     </motion.button>
                   ))}
@@ -211,9 +217,9 @@ export default function QuizPage() {
           ) : (
             <motion.div key="results" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
               <div className="text-center mb-12">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#bfa14a] mb-3">Your Match</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#bfa14a] mb-3">{t('quiz.yourMatch')}</p>
                 <h2 className="text-3xl sm:text-4xl font-light" style={{ fontFamily: 'Didot, serif' }}>
-                  Recommended For You
+                  {t('quiz.recommendedForYou')}
                 </h2>
               </div>
 
@@ -224,13 +230,13 @@ export default function QuizPage() {
               ) : recommendations.length === 0 ? (
                 <div className="text-center py-8">
                   <p className="text-gray-500 mb-8">
-                    We couldn&apos;t find a perfect match just yet — explore our full collection instead.
+                    {t('quiz.noMatch')}
                   </p>
                   <Link
                     href="/shop/all"
                     className="inline-block bg-black text-white px-8 py-3 text-sm font-medium uppercase tracking-wide hover:bg-gray-800 transition-colors rounded-full"
                   >
-                    Browse All Fragrances
+                    {t('quiz.browseAll')}
                   </Link>
                 </div>
               ) : (
@@ -254,7 +260,7 @@ export default function QuizPage() {
                             />
                             {idx === 0 && (
                               <span className="absolute top-3 left-3 bg-[#bfa14a] text-black px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider rounded-full">
-                                Best Match
+                                {t('quiz.bestMatch')}
                               </span>
                             )}
                           </div>
@@ -276,13 +282,13 @@ export default function QuizPage() {
                   href="/shop/all"
                   className="bg-black text-white px-8 py-3 text-sm font-medium uppercase tracking-wide hover:bg-gray-800 transition-colors rounded-full"
                 >
-                  Shop All Fragrances
+                  {t('quiz.shopAllFragrances')}
                 </Link>
                 <button
                   onClick={restartQuiz}
                   className="bg-white text-black px-8 py-3 text-sm font-medium uppercase tracking-wide border border-gray-300 hover:border-gray-900 transition-colors rounded-full"
                 >
-                  Retake Quiz
+                  {t('quiz.retakeQuiz')}
                 </button>
               </div>
             </motion.div>

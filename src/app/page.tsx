@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { Playfair_Display } from 'next/font/google'
 import { Truck, ShieldCheck, Gift, RotateCcw } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 // Lazy-load heavy sections to speed up initial paint
 const FeaturedProducts = dynamic(() => import('./layout/home/FeaturedProducts'), { ssr: false })
@@ -16,20 +17,21 @@ const Footer = dynamic(() => import('@/components/Footer'), { ssr: false })
 const playfair = Playfair_Display({ subsets: ['latin'], weight: ['700'] })
 
 const trustPoints = [
-  { icon: Truck, label: 'Free Shipping', subtext: 'On orders above ₹2,000' },
-  { icon: ShieldCheck, label: '100% Authentic', subtext: 'Guaranteed genuine' },
-  { icon: Gift, label: 'Free Samples', subtext: 'With every order' },
-  { icon: RotateCcw, label: 'Easy Returns', subtext: '30-day policy' },
+  { icon: Truck, labelKey: 'home.trustShippingTitle', subKey: 'home.trustShippingSub' },
+  { icon: ShieldCheck, labelKey: 'home.trustAuthenticTitle', subKey: 'home.trustAuthenticSub' },
+  { icon: Gift, labelKey: 'home.trustSamplesTitle', subKey: 'home.trustSamplesSub' },
+  { icon: RotateCcw, labelKey: 'home.trustReturnsTitle', subKey: 'home.trustReturnsSub' },
 ]
 
 const categories = [
-  { label: 'Bestsellers', href: '/bestsellers', image: '/product1.jpg' },
-  { label: 'New Arrivals', href: '/new-arrivals', image: '/product3.jpg' },
-  { label: 'Gifts & Sets', href: '/gifts', image: 'https://images.pexels.com/photos/3738338/pexels-photo-3738338.jpeg?auto=compress&cs=tinysrgb&w=800&dpr=2' },
-  { label: 'Recreations', href: '/product/recreations', image: '/product4.jpg' },
+  { labelKey: 'home.categoryBestsellers', href: '/bestsellers', image: '/product1.jpg' },
+  { labelKey: 'home.categoryNewArrivals', href: '/new-arrivals', image: '/product3.jpg' },
+  { labelKey: 'home.categoryGifts', href: '/gifts', image: 'https://images.pexels.com/photos/3738338/pexels-photo-3738338.jpeg?auto=compress&cs=tinysrgb&w=800&dpr=2' },
+  { labelKey: 'home.categoryRecreations', href: '/product/recreations', image: '/product4.jpg' },
 ]
 
 export default function Home() {
+  const { t } = useTranslation()
   // Defer hero video until after hydration for faster LCP
   const [showHeroVideo, setShowHeroVideo] = useState(false)
   useEffect(() => {
@@ -92,7 +94,7 @@ export default function Home() {
             transition={{ duration: 0.7 }}
             className="text-xs sm:text-sm font-medium uppercase tracking-[0.3em] text-white/70 mb-5"
           >
-            Noamani Fragrance House
+            {t('home.heroKicker')}
           </motion.p>
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
@@ -100,7 +102,7 @@ export default function Home() {
             transition={{ duration: 0.8, delay: 0.1 }}
             className={`mb-6 text-4xl md:text-6xl font-bold relative inline-block luxury-shimmer ${playfair.className}`}
           >
-            Luxury Perfumes
+            {t('home.heroTitle')}
             <span className="absolute left-0 top-0 w-full h-full shimmer-overlay pointer-events-none" />
           </motion.h1>
           <motion.p
@@ -109,7 +111,7 @@ export default function Home() {
             transition={{ duration: 0.8, delay: 0.25 }}
             className="mb-10 text-lg md:text-xl font-serif text-gold-200/90 subtitle-shimmer"
           >
-            Discover your signature scent
+            {t('home.heroSubtitle')}
           </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -121,13 +123,13 @@ export default function Home() {
               href="/shop"
               className="rounded-full bg-white px-8 py-3 text-base font-semibold text-black transition-all duration-300 ease-in-out hover:bg-gray-200 hover:scale-105 hover:shadow-lg"
             >
-              Shop Now
+              {t('common.shopNow')}
             </Link>
             <Link
               href="/quiz"
               className="rounded-full border border-white/60 px-8 py-3 text-base font-semibold text-white transition-all duration-300 ease-in-out hover:bg-white/10 hover:scale-105"
             >
-              Find Your Scent
+              {t('home.findYourScent')}
             </Link>
           </motion.div>
         </div>
@@ -139,7 +141,7 @@ export default function Home() {
           transition={{ delay: 1.2, duration: 0.8 }}
           className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2 text-white/60"
         >
-          <span className="text-[10px] uppercase tracking-[0.25em]">Scroll</span>
+          <span className="text-[10px] uppercase tracking-[0.25em]">{t('home.scroll')}</span>
           <span className="w-px h-8 bg-white/40" />
         </motion.div>
       </div>
@@ -148,11 +150,11 @@ export default function Home() {
       <div className="bg-black text-white py-8">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
           {trustPoints.map((point) => (
-            <div key={point.label} className="flex items-center gap-3 justify-center md:justify-start">
+            <div key={point.labelKey} className="flex items-center gap-3 justify-center md:justify-start">
               <point.icon className="w-6 h-6 text-[#bfa14a] flex-shrink-0" />
               <div className="text-left">
-                <p className="text-sm font-medium leading-tight">{point.label}</p>
-                <p className="text-xs text-white/50 leading-tight hidden sm:block">{point.subtext}</p>
+                <p className="text-sm font-medium leading-tight">{t(point.labelKey)}</p>
+                <p className="text-xs text-white/50 leading-tight hidden sm:block">{t(point.subKey)}</p>
               </div>
             </div>
           ))}
@@ -170,17 +172,17 @@ export default function Home() {
             className="text-center mb-12"
           >
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#bfa14a] mb-3">
-              Explore
+              {t('home.exploreKicker')}
             </p>
             <h2 className="text-3xl sm:text-4xl font-light" style={{ fontFamily: 'Didot, serif' }}>
-              Shop by Category
+              {t('home.shopByCategory')}
             </h2>
           </motion.div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
             {categories.map((cat, idx) => (
               <motion.div
-                key={cat.label}
+                key={cat.labelKey}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -190,14 +192,14 @@ export default function Home() {
                   <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 mb-3">
                     <Image
                       src={cat.image}
-                      alt={cat.label}
+                      alt={t(cat.labelKey) as string}
                       fill
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
                   </div>
                   <p className="text-center text-sm sm:text-base font-medium text-gray-900 group-hover:text-[#bfa14a] transition-colors">
-                    {cat.label}
+                    {t(cat.labelKey)}
                   </p>
                 </Link>
               </motion.div>
@@ -220,17 +222,17 @@ export default function Home() {
               transition={{ duration: 0.6 }}
             >
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#bfa14a] mb-3">
-                Our Heritage
+                {t('home.ourHeritage')}
               </p>
-              <h2 className="text-[32px] mb-6" style={{ fontFamily: 'Didot, serif' }}>Our Story</h2>
+              <h2 className="text-[32px] mb-6" style={{ fontFamily: 'Didot, serif' }}>{t('home.ourStory')}</h2>
               <p className="text-[15px] text-gray-600 mb-6 leading-relaxed">
-                Discover the world of <span className="font-semibold text-black">Noamani-Fragrance</span>, where artistry meets luxury. Each bottle is a masterpiece, crafted with the rarest ingredients and a passion for perfection. Our fragrances are designed to evoke unforgettable emotions, leaving a signature impression of elegance and sophistication. Experience the essence of true luxury—crafted for those who desire distinction in every detail.
+                {t('home.storyBody')}
               </p>
               <Link
                 href="/about"
                 className="inline-block mt-4 text-gray-800 font-semibold border-b-2 border-gray-800 hover:text-black hover:border-black transition-colors transition-all duration-300 ease-in-out hover:scale-105 hover:shadow"
               >
-                Learn More About Us
+                {t('home.learnMoreAboutUs')}
               </Link>
             </motion.div>
             <motion.div
