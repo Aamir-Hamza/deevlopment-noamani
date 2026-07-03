@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
 import { motion } from 'framer-motion';
 import { toast } from 'react-hot-toast';
+import { ArrowLeft } from 'lucide-react';
 import { useCountry } from '@/hooks/useCountry';
 import { getPrice } from '@/lib/priceUtils';
 
@@ -53,6 +55,12 @@ export default function CheckoutPage() {
       document.body.removeChild(script);
     };
   }, []);
+
+  useEffect(() => {
+    if (cart.length === 0) {
+      router.replace('/cart');
+    }
+  }, [cart, router]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -203,14 +211,34 @@ export default function CheckoutPage() {
     );
   };
 
+  if (cart.length === 0) {
+    return null;
+  }
+
   return (
-    <div className="min-h-screen bg-white py-8 sm:py-12 lg:py-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-white">
+      {/* Minimal checkout header — keeps branding and a way back without the full nav/promo distractions */}
+      <div className="border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <Link href="/" className="text-xl font-semibold tracking-wide text-gray-900" style={{ fontFamily: 'Didot, serif' }}>
+            Noamani
+          </Link>
+          <Link
+            href="/cart"
+            className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            Back to cart
+          </Link>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
         <div className="lg:grid lg:grid-cols-2 lg:gap-12">
           {/* Contact Information Form */}
           <div className="mb-12 lg:mb-0">
             <h1 className="text-2xl sm:text-3xl font-light mb-6 sm:mb-8">Checkout</h1>
-            
+
             <div className="space-y-6">
               <div>
                 <h2 className="text-lg sm:text-xl font-light mb-4">Contact Information</h2>
@@ -345,4 +373,4 @@ export default function CheckoutPage() {
       </div>
     </div>
   );
-} 
+}

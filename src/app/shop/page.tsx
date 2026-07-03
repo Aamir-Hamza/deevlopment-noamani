@@ -15,6 +15,7 @@ import { toast } from "react-hot-toast";
 
 import { Product } from "@/types/product";
 import LazyLoader from "@/components/ui/LazyLoader";
+import EmptyState from "@/components/ui/EmptyState";
 import Footer from '@/components/Footer';
 
 // Format price in Indian Rupee format (raw database price, no conversion)
@@ -225,8 +226,14 @@ export default function ShopPage() {
 
         {/* Products Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {filteredProducts.map((product, index) => {
-            console.log('PRODUCT_DEBUG:', product);
+          {filteredProducts.length === 0 ? (
+            <EmptyState
+              title="No products found"
+              subtitle="Try a different category, or check back soon for new arrivals."
+              ctaLabel="View All Products"
+              ctaHref="/shop/all"
+            />
+          ) : filteredProducts.map((product, index) => {
             return (
               <Link href={`/product/${product.slug || product._id || product.id}`} key={product.slug || product._id || product.id}>
             <motion.div

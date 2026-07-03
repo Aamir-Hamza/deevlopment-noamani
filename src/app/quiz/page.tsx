@@ -11,7 +11,7 @@ const questions = [
     question: 'What type of fragrance do you typically prefer?',
     options: [
       { text: 'Floral & Sweet', image: 'https://images.pexels.com/photos/4110409/pexels-photo-4110409.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' },
-      { text: 'Fresh & Clean', image: 'https://images.pexels.com/photos/4110410/pexels-photo-4110410.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' },
+      { text: 'Fresh & Clean', image: 'https://images.pexels.com/photos/4110408/pexels-photo-4110408.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' },
       { text: 'Warm & Spicy', image: 'https://images.pexels.com/photos/4041392/pexels-photo-4041392.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' },
       { text: 'Woody & Earthy', image: 'https://images.pexels.com/photos/4041393/pexels-photo-4041393.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' }
     ]
@@ -30,7 +30,7 @@ const questions = [
     id: 3,
     question: 'What\'s your preferred fragrance intensity?',
     options: [
-      { text: 'Light & Subtle', image: 'https://images.pexels.com/photos/6621264/pexels-photo-6621264.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' },
+      { text: 'Light & Subtle', image: 'https://images.pexels.com/photos/6621263/pexels-photo-6621263.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' },
       { text: 'Moderate', image: 'https://images.pexels.com/photos/6621266/pexels-photo-6621266.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' },
       { text: 'Strong & Bold', image: 'https://images.pexels.com/photos/6621472/pexels-photo-6621472.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' },
       { text: 'Very Intense', image: 'https://images.pexels.com/photos/6621462/pexels-photo-6621462.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' }
@@ -42,6 +42,7 @@ export default function QuizPage() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<string[]>([]);
   const [showResults, setShowResults] = useState(false);
+  const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
   const router = useRouter();
 
   const handleAnswer = (answer: string) => {
@@ -136,12 +137,17 @@ export default function QuizPage() {
                     className="relative aspect-[4/3] overflow-hidden group cursor-pointer"
                     onClick={() => handleAnswer(option.text)}
                   >
-                    <Image
-                      src={option.image}
-                      alt={option.text}
-                      fill
-                      className="object-cover transition-transform duration-700 group-hover:scale-110"
-                    />
+                    {failedImages.has(option.image) ? (
+                      <div className="absolute inset-0 bg-gradient-to-br from-[#1c1916] to-[#3a342c]" />
+                    ) : (
+                      <Image
+                        src={option.image}
+                        alt={option.text}
+                        fill
+                        className="object-cover transition-transform duration-700 group-hover:scale-110"
+                        onError={() => setFailedImages(prev => new Set(prev).add(option.image))}
+                      />
+                    )}
                     <div className="absolute inset-0 bg-black/40 transition-opacity group-hover:bg-black/50" />
                     <div className="absolute inset-0 flex items-center justify-center text-white">
                       <h3 className="text-2xl font-light">{option.text}</h3>

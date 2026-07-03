@@ -94,15 +94,6 @@ export default function Navbar() {
   const underlineColor = isSolid ? "bg-gray-900" : "bg-white";
   const showAnnouncementBar = !announcementDismissed && !isScrolled;
 
-  // Country data with safe fallback
-  const safeCountryData = countryData || {
-    country: 'India',
-    countryCode: 'IN',
-    flag: '🇮🇳',
-    currency: 'INR',
-    timezone: 'Asia/Kolkata',
-  };
-
   // ─── EFFECTS ─────────────────────────────────────────────
   useEffect(() => {
     setIsMounted(true);
@@ -618,13 +609,14 @@ export default function Navbar() {
               : "max-h-0 opacity-0"
           )}
         >
-          <div className="flex items-center justify-center h-9 announcement-bar-gradient px-4 relative">
-            <p className="text-[10px] sm:text-[11px] text-white/90 tracking-[0.18em] font-medium uppercase text-center">
-              Complimentary shipping on orders above ₹2,000 &middot; Free samples with every order
+          <div className="flex items-center justify-center h-9 announcement-bar-gradient px-9 sm:px-4 relative">
+            <p className="text-[10px] sm:text-[11px] text-white/90 tracking-[0.14em] sm:tracking-[0.18em] font-medium uppercase text-center truncate">
+              <span className="sm:hidden">Free shipping over ₹2,000</span>
+              <span className="hidden sm:inline">Complimentary shipping on orders above ₹2,000 &middot; Free samples with every order</span>
             </p>
             <button
               onClick={() => setAnnouncementDismissed(true)}
-              className="absolute right-3 sm:right-5 text-white/40 hover:text-white/90 transition-colors p-1"
+              className="absolute right-2 sm:right-5 text-white/40 hover:text-white/90 transition-colors p-1"
               aria-label="Close announcement"
             >
               <X className="h-3 w-3" />
@@ -946,19 +938,15 @@ export default function Navbar() {
                   )}
                 </motion.div>
 
-                {/* Country at bottom */}
+                {/* Country / currency — interactive, matches the desktop selector so mobile
+                    shoppers can change the currency prices are shown in */}
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.55, duration: 0.4 }}
                   className="absolute bottom-8 flex flex-col items-center gap-2"
                 >
-                  <div className="flex items-center gap-2.5">
-                    <span className="text-xl">{safeCountryData.flag}</span>
-                    <span className="text-xs text-white/30 tracking-[0.2em] uppercase font-medium">
-                      {safeCountryData.country} &middot; {safeCountryData.currency}
-                    </span>
-                  </div>
+                  <CountryDisplay isScrolled={false} isMobileMenuOpen={false} />
                 </motion.div>
               </motion.div>
             </>

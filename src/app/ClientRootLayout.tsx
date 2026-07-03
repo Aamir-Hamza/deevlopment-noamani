@@ -44,7 +44,6 @@ export default function ClientRootLayout({ children }: { children: React.ReactNo
         )}
         <Toaster position="top-right" />
         <script src="https://accounts.google.com/gsi/client" async defer></script>
-        <script type="text/javascript" src="https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid.auth.js"></script>
       </>
     );
   }

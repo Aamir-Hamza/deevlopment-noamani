@@ -5,13 +5,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Mail, Lock, Eye, EyeOff, Loader2, ArrowLeft, ShieldAlert } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, Loader2, ArrowLeft } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 import Image from 'next/image';
 import confetti from 'canvas-confetti';
 import { Italianno, Great_Vibes, Playfair_Display } from 'next/font/google';
-import { AdminLogin } from '@/components/AdminLogin';
 import { auth } from '@/lib/firebase';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import axios from 'axios';
@@ -22,7 +21,6 @@ const playfair = Playfair_Display({ weight: ['400', '600', '700'], subsets: ['la
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
-  const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -336,17 +334,6 @@ export default function LoginPage() {
             <span className="text-sm font-medium">Continue with Google</span>
           </Button>
 
-          {/* Admin Access Button */}
-          <div className="mt-4">
-            <Button
-              onClick={() => setShowAdminLogin(true)}
-              className="w-full bg-[#181614] border border-[#262320] text-gray-400 hover:text-white hover:bg-[#201d1a] rounded-lg h-10 transition-all flex items-center justify-center gap-2 text-xs font-semibold uppercase tracking-wider"
-            >
-              <ShieldAlert className="w-3.5 h-3.5 text-[#bfa14a]" />
-              Admin Access Only
-            </Button>
-          </div>
-
           {/* Sign Up Link */}
           <div className="mt-6 text-center border-t border-amber-600/5 pt-4">
             <p className="text-gray-400 text-sm">
@@ -377,11 +364,6 @@ export default function LoginPage() {
             </Link>
           </div>
         </motion.div>
-
-        {/* Admin Login Modal */}
-        {showAdminLogin && (
-          <AdminLogin onClose={() => setShowAdminLogin(false)} />
-        )}
       </div>
     </div>
   );

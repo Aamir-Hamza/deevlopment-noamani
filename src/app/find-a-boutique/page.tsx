@@ -1,9 +1,18 @@
 "use client";
 import React from "react";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 export default function FindABoutique() {
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-[#f8e8c8] via-[#fff9f2] to-[#f8f5ef] animate-fadein">
+    <main className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-[#f8e8c8] via-[#fff9f2] to-[#f8f5ef] animate-fadein relative">
+      <Link
+        href="/"
+        className="absolute top-6 left-6 sm:top-8 sm:left-8 z-20 flex items-center gap-2 text-gray-700 hover:text-gray-900 transition-colors text-sm uppercase tracking-widest font-medium"
+      >
+        <ArrowLeft className="w-4 h-4" />
+        Back to Noamani
+      </Link>
       <section className="w-full flex flex-col items-center justify-center py-20">
         <div className="max-w-4xl w-full bg-white/80 rounded-[2.5rem] shadow-2xl p-14 border-2 border-[#bfa14a] backdrop-blur-2xl relative overflow-hidden">
           <div className="absolute -top-10 -left-10 w-40 h-40 bg-[#bfa14a]/20 rounded-full blur-2xl z-0 animate-pulse" />

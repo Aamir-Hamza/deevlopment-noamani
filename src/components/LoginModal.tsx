@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Lock, Mail, User, Eye, EyeOff, Loader2, X, ShieldAlert } from "lucide-react";
+import { Lock, Mail, User, Eye, EyeOff, Loader2, X } from "lucide-react";
 import { toast } from "react-hot-toast";
 import Image from "next/image";
 import { auth } from "@/lib/firebase";
@@ -14,7 +14,6 @@ import axios from "axios";
 import confetti from 'canvas-confetti';
 import { useCart } from "@/context/CartContext";
 import { Italianno, Great_Vibes, Playfair_Display } from 'next/font/google';
-import { AdminLogin } from "@/components/AdminLogin";
 import Link from "next/link";
 
 const italianno = Italianno({ weight: '400', subsets: ['latin'] });
@@ -30,7 +29,6 @@ export function LoginModal({ onClose, onLoginSuccess }: LoginModalProps) {
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [loading, setLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState(false);
   const { addToCart } = useCart();
@@ -442,26 +440,9 @@ export function LoginModal({ onClose, onLoginSuccess }: LoginModalProps) {
               </p>
             </div>
 
-            {/* Admin trigger button for Login */}
-            {isLogin && (
-              <div className="mt-4">
-                <Button
-                  onClick={() => setShowAdminLogin(true)}
-                  className="w-full bg-[#181614] border border-[#262320] text-gray-400 hover:text-white hover:bg-[#201d1a] rounded-lg h-10 transition-all flex items-center justify-center gap-2 text-xs font-semibold uppercase tracking-wider"
-                >
-                  <ShieldAlert className="w-3.5 h-3.5 text-[#bfa14a]" />
-                  Admin Access Only
-                </Button>
-              </div>
-            )}
           </div>
         </div>
       </motion.div>
-
-      {/* Admin Login Modal overlay */}
-      {showAdminLogin && (
-        <AdminLogin onClose={() => setShowAdminLogin(false)} />
-      )}
     </div>
   );
 }

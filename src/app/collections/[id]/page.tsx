@@ -13,11 +13,11 @@ export default function CollectionPage() {
   const getCollectionProducts = () => {
     switch (params?.id) {
       case 'summer-2024':
-        return products.filter(p => ['Jo Malone London', 'Marc Jacobs Daisy'].includes(p.name))
+        return products.filter(p => ['Ocean Breeze', 'Citrus Bloom'].includes(p.name))
       case 'luxury':
-        return products.filter(p => ['Tom Ford Black Orchid', 'Creed Aventus'].includes(p.name))
+        return products.filter(p => ['Royal Oud', 'Velvet Orchid'].includes(p.name))
       case 'classics':
-        return products.filter(p => ['Chanel N°5', 'Dior Sauvage'].includes(p.name))
+        return products.filter(p => ['Amber Musk', 'Rose Saffron'].includes(p.name))
       case 'spring':
         return products.filter(p => p.category === 'Women')
       case 'summer':
@@ -25,7 +25,7 @@ export default function CollectionPage() {
       case 'fall':
         return products.filter(p => p.category === 'Men')
       case 'winter':
-        return products.filter(p => ['Creed Aventus', 'Tom Ford Black Orchid', 'Bleu de Chanel'].includes(p.name))
+        return products.filter(p => ['Royal Oud', 'Velvet Orchid', 'Resin'].includes(p.name))
       default:
         return []
     }
@@ -74,7 +74,7 @@ export default function CollectionPage() {
             transition={{ duration: 0.6 }}
             className="text-center mb-16"
           >
-            <h1 className="text-[32px] mb-4">{getCollectionTitle()}</h1>
+            <h1 className="text-[32px] mb-4" style={{ fontFamily: 'Didot, serif' }}>{getCollectionTitle()}</h1>
             <p className="text-[15px] text-gray-600 max-w-2xl mx-auto">
               Explore our curated selection of fragrances for this collection.
             </p>

@@ -10,6 +10,7 @@ import { formatPrice } from '@/lib/priceUtils';
 import { useCart } from '@/context/CartContext';
 
 import LazyLoader from '@/components/ui/LazyLoader';
+import EmptyState from '@/components/ui/EmptyState';
 
 import Footer from '@/components/Footer';
 
@@ -117,7 +118,12 @@ export default function BestsellersPage() {
         {/* Bestsellers Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-20">
           {products.length === 0 ? (
-            <p>No bestsellers found.</p>
+            <EmptyState
+              title="No bestsellers found"
+              subtitle="Check back soon — our most loved fragrances will appear here."
+              ctaLabel="Browse All Products"
+              ctaHref="/shop/all"
+            />
           ) : (
             products.map((product, index) => (
               <motion.div
@@ -125,7 +131,7 @@ export default function BestsellersPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
-                className="group relative bg-gradient-to-br from-pink-100 to-blue-100 rounded-2xl shadow-xl hover:shadow-2xl transition-shadow duration-300 p-4"
+                className="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300 p-4"
               >
                 <Link href={`/product/${product._id || product.id}`} legacyBehavior>
                   <a>

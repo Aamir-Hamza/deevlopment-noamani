@@ -10,6 +10,7 @@ import { useCart } from '@/context/CartContext';
 import ProductQuickViewModal from '@/app/components/ProductQuickViewModal';
 
 import LazyLoader from '@/components/ui/LazyLoader';
+import EmptyState from '@/components/ui/EmptyState';
 
 // Format price in Indian Rupee format (raw database price, no conversion)
 const formatIndianRupee = (price: number) => {
@@ -90,24 +91,25 @@ export default function AllProductsPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1 }}
-        className="relative h-[60vh] bg-gradient-to-br from-yellow-50 via-pink-50 to-white flex items-center justify-center pt-24 md:pt-32"
+        className="relative h-[60vh] bg-black text-white flex items-center justify-center"
       >
         <Image
-          src="/newproduct-removebg-preview.png"
+          src="https://images.pexels.com/photos/3059609/pexels-photo-3059609.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
           alt="All Products Hero"
           fill
-          className="object-contain opacity-10"
+          className="object-cover opacity-40"
         />
         <div className="relative z-10 text-center max-w-4xl px-4">
-          <motion.h1 
+          <motion.h1
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.5, duration: 0.8 }}
-            className="text-6xl font-extrabold mb-6 text-yellow-600 drop-shadow-lg"
+            className="text-6xl font-light mb-6"
+            style={{ fontFamily: 'Didot, serif' }}
           >
             ALL PRODUCTS
           </motion.h1>
@@ -115,17 +117,9 @@ export default function AllProductsPage() {
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.7, duration: 0.8 }}
-            className="text-xl font-light text-gray-700 mb-2"
+            className="text-xl font-light"
           >
-            Discover the complete Noamani collection. Every product is crafted with passion, luxury, and a touch of artistry—designed to elevate your senses and style. Explore our full range and find your new signature.
-          </motion.p>
-          <motion.p
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.9, duration: 0.8 }}
-            className="text-lg font-bold text-pink-600"
-          >
-            Total Products: {products.length}
+            Discover the complete Noamani collection, crafted with passion and artistry.
           </motion.p>
         </div>
       </motion.div>
@@ -134,7 +128,12 @@ export default function AllProductsPage() {
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-20">
           {products.length === 0 ? (
-            <p>No products found.</p>
+            <EmptyState
+              title="No products found"
+              subtitle="Check back soon — new fragrances are added regularly."
+              ctaLabel="Browse Bestsellers"
+              ctaHref="/bestsellers"
+            />
           ) : (
             products.map((product, index) => (
               <motion.div
@@ -154,7 +153,7 @@ export default function AllProductsPage() {
                   />
                 </div>
                 <div className="text-center">
-                  <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-yellow-600 transition-colors duration-300">
+                  <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-[#bfa14a] transition-colors duration-300">
                     {product.name}
                   </h3>
                   <p className="text-xs text-gray-500 mb-2">{product.subtext}</p>
@@ -185,7 +184,7 @@ export default function AllProductsPage() {
                     </button>
                     <button
                       onClick={() => handleAddToCart(product)}
-                      className="bg-yellow-400 hover:bg-yellow-500 text-black px-4 py-3 text-sm font-bold rounded-full shadow-lg transition-colors"
+                      className="bg-[#bfa14a] hover:bg-[#a88d3f] text-black px-4 py-3 text-sm font-bold rounded-full shadow-lg transition-colors"
                     >
                       Add to Cart
                     </button>

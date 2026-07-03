@@ -3,8 +3,16 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { ShoppingBagIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
+import Image from "next/image";
+import { ShoppingBag, ArrowLeft } from "lucide-react";
 import LazyLoader from '@/components/ui/LazyLoader';
+
+const STATUS_STYLES: Record<string, string> = {
+  completed: "bg-emerald-50 text-emerald-700 border border-emerald-200",
+  processing: "bg-blue-50 text-blue-700 border border-blue-200",
+};
+const STATUS_DEFAULT = "bg-amber-50 text-amber-700 border border-amber-200";
 
 export default function OrdersPage() {
   const router = useRouter();
@@ -21,7 +29,7 @@ export default function OrdersPage() {
       } else if (adminInfo) {
         setUser({ ...JSON.parse(adminInfo), isAdmin: true });
       } else {
-        router.replace("/auth/login");
+        router.replace("/login");
       }
     }
   }, [router]);
@@ -45,66 +53,102 @@ export default function OrdersPage() {
   if (loading) return <div className="min-h-screen flex items-center justify-center"><LazyLoader /></div>;
   if (!user) return null;
 
+  const sortedOrders = orders
+    .slice()
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0f2027] via-[#2c5364] to-[#f5d365] flex flex-col items-center justify-start p-4">
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7 }}
-        className="mt-40 bg-white/40 backdrop-blur-2xl rounded-3xl shadow-2xl p-10 max-w-2xl w-full border-2 border-gold-400 drop-shadow-2xl"
-        style={{ boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.18)' }}
-      >
-        <div className="flex items-center gap-3 mb-10">
-          <ShoppingBagIcon className="h-10 w-10 text-gold-500 drop-shadow" />
-          <h2 className="text-3xl font-extrabold text-gold-700 tracking-wide drop-shadow">Order History</h2>
-        </div>
-        {orders.length === 0 ? (
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center text-gray-900 text-lg font-semibold"
+    <div className="min-h-screen">
+      {/* Hero Section — matches /shop, /bestsellers, /gifts */}
+      <div className="relative h-[40vh] bg-black text-white flex items-center justify-center">
+        <Image
+          src="https://images.pexels.com/photos/3910071/pexels-photo-3910071.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+          alt="Order History"
+          fill
+          className="object-cover opacity-40"
+        />
+        <div className="relative z-10 text-center px-4">
+          <motion.h1
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.8 }}
+            className="text-5xl font-light mb-4 tracking-wide"
           >
-            You have no orders yet.
+            ORDER HISTORY
+          </motion.h1>
+          <motion.p
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.4, duration: 0.8 }}
+            className="text-lg font-light"
+          >
+            {sortedOrders.length > 0 ? `${sortedOrders.length} order${sortedOrders.length === 1 ? "" : "s"} on file` : "Every order, in one place"}
           </motion.p>
+        </div>
+      </div>
+
+      <div className="max-w-3xl mx-auto px-4 py-16">
+        {sortedOrders.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="text-center py-8"
+          >
+            <ShoppingBag className="mx-auto h-24 w-24 text-gray-300 mb-6" />
+            <h2 className="text-3xl font-light mb-4">No orders yet</h2>
+            <p className="text-gray-500 mb-8">Once you place an order, it will show up here</p>
+            <Link
+              href="/shop"
+              className="inline-flex items-center gap-2 bg-black text-white px-8 py-3 rounded-lg hover:bg-gray-900 transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Continue Shopping
+            </Link>
+          </motion.div>
         ) : (
-          <div className="space-y-8">
-            {orders
-              .slice()
-              .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-              .map((order, idx) => (
-                <motion.div
-                  key={order._id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.1 }}
-                  className="bg-white/80 rounded-2xl p-6 shadow-xl border-2 border-gold-200 hover:scale-[1.03] hover:shadow-2xl transition-transform duration-200"
-                  style={{ boxShadow: '0 4px 24px 0 rgba(218, 165, 32, 0.10)' }}
-                >
-                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-3">
-                    <div className="flex flex-col md:flex-row md:items-center gap-3">
-                      <span className="font-bold text-gold-600 text-lg tracking-wide">Order #{order._id}</span>
-                      <span className="text-gray-700 text-base font-medium">
-                        {order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' ' + new Date(order.createdAt).toLocaleTimeString() : ''}
-                      </span>
-                    </div>
-                    <span className={`px-4 py-1 rounded-full text-sm font-bold shadow-md tracking-wide ${order.status === "completed" ? "bg-green-500 text-white" : order.status === "processing" ? "bg-blue-500 text-white" : "bg-yellow-400 text-black"}`}>{order.status}</span>
+          <div className="space-y-5">
+            {sortedOrders.map((order, idx) => (
+              <motion.div
+                key={order._id}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: idx * 0.06 }}
+                className="border border-gray-200 rounded-xl p-6 hover:border-gray-300 transition-colors"
+              >
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3">
+                    <span className="font-semibold text-gray-900 tracking-wide">Order #{order._id}</span>
+                    <span className="text-gray-500 text-sm">
+                      {order.createdAt
+                        ? new Date(order.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+                        : ''}
+                    </span>
                   </div>
-                  <div className="flex flex-wrap gap-3 mb-3">
-                    {order.items && order.items.map((item: any, i: number) => (
-                      <span key={i} className="bg-gold-100/90 text-gray-900 px-4 py-1 rounded-full text-sm font-semibold shadow">
-                        {item.productId?.name || item.name} x{item.quantity || item.qty}
+                  <span className={`self-start sm:self-auto px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide ${STATUS_STYLES[order.status] || STATUS_DEFAULT}`}>
+                    {order.status}
+                  </span>
+                </div>
+
+                {order.items?.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {order.items.map((item: any, i: number) => (
+                      <span key={i} className="bg-gray-50 border border-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">
+                        {item.productId?.name || item.name} × {item.quantity || item.qty}
                       </span>
                     ))}
                   </div>
-                  <div className="flex justify-between items-center mt-2">
-                    <span className="text-2xl font-extrabold text-gold-600 drop-shadow">₹{order.totalAmount}</span>
-                    <span className="text-base text-gray-700 font-semibold">Total</span>
-                  </div>
-                </motion.div>
-              ))}
+                )}
+
+                <div className="flex justify-between items-center pt-3 border-t border-gray-100">
+                  <span className="text-sm text-gray-500">Total</span>
+                  <span className="text-xl font-semibold text-gray-900">₹{order.totalAmount}</span>
+                </div>
+              </motion.div>
+            ))}
           </div>
         )}
-      </motion.div>
+      </div>
     </div>
   );
-} 
+}
