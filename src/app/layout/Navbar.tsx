@@ -75,8 +75,9 @@ export default function Navbar() {
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [allProducts, setAllProducts] = useState<any[]>([]);
-  const [loadingProducts, setLoadingProducts] = useState(false);
+  // Keep the local catalogue available immediately; the API refreshes it in the
+  // background so opening search never waits on MongoDB/network startup.
+  const [allProducts, setAllProducts] = useState<any[]>(products);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const userDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -188,16 +189,70 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
-    if (showSearchModal) {
-      setLoadingProducts(true);
-      fetch("/api/products")
-        .then((res) => res.json())
-        .then((data) => {
-          setAllProducts(data);
-          setLoadingProducts(false);
+    const controller = new AbortController();
+    const refreshCatalogue = () => {
+      fetch("/api/products", { signal: controller.signal })
+        .then((res) => {
+          if (!res.ok) throw new Error("Unable to refresh product catalogue");
+          return res.json();
         })
-        .catch(() => setLoadingProducts(false));
+        .then((data) => {
+          if (Array.isArray(data) && data.length > 0) setAllProducts(data);
+        })
+        .catch((error) => {
+          if (error instanceof Error && error.name !== "AbortError") {
+            console.error("Search catalogue refresh failed:", error);
+          }
+        });
+    };
+
+    const idleWindow = window as typeof window & {
+      requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number;
+      cancelIdleCallback?: (id: number) => void;
+    };
+    const idleId = idleWindow.requestIdleCallback?.(refreshCatalogue, { timeout: 1200 });
+    const timeoutId = idleId === undefined ? window.setTimeout(refreshCatalogue, 250) : undefined;
+
+    return () => {
+      controller.abort();
+      if (idleId !== undefined) idleWindow.cancelIdleCallback?.(idleId);
+      if (timeoutId !== undefined) window.clearTimeout(timeoutId);
+    };
+  }, []);
+
+  useEffect(() => {
+    const normalizedQuery = searchQuery.trim().toLowerCase();
+    if (!normalizedQuery) {
+      setSearchResults([]);
+      return;
     }
+
+    setSearchResults(
+      allProducts
+        .filter(
+          (product) =>
+            product.name?.toLowerCase().includes(normalizedQuery) ||
+            product.description?.toLowerCase().includes(normalizedQuery) ||
+            product.category?.toLowerCase().includes(normalizedQuery)
+        )
+        .slice(0, 8)
+    );
+  }, [allProducts, searchQuery]);
+
+  useEffect(() => {
+    if (!showSearchModal) return;
+
+    const previousOverflow = document.body.style.overflow;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setShowSearchModal(false);
+    };
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", closeOnEscape);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", closeOnEscape);
+    };
   }, [showSearchModal]);
 
   useEffect(() => {
@@ -273,23 +328,16 @@ export default function Navbar() {
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
-    if (!query.trim()) {
-      setSearchResults([]);
-      return;
-    }
-    const results = allProducts.filter(
-      (p) =>
-        (p.name && p.name.toLowerCase().includes(query.toLowerCase())) ||
-        (p.description &&
-          p.description.toLowerCase().includes(query.toLowerCase()))
-    );
-    setSearchResults(results);
   };
 
-  const handleProductClick = (productId: string) => {
+  const closeSearch = () => {
     setShowSearchModal(false);
     setSearchQuery("");
     setSearchResults([]);
+  };
+
+  const handleProductClick = (productId: string) => {
+    closeSearch();
     router.push(`/product/${productId}`);
   };
 
@@ -1323,67 +1371,113 @@ export default function Navbar() {
         </AnimatePresence>
 
         {/* Search Modal */}
-        {showSearchModal && (
-          <div
-            className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm"
-            onClick={() => setShowSearchModal(false)}
-          >
-            <div
-              className="fixed left-1/2 -translate-x-1/2 top-6 sm:top-16 w-[92vw] sm:w-[90vw] max-w-md bg-white rounded-2xl shadow-2xl flex items-center px-4 sm:px-6 py-3 animate-slide-in-right border border-pink-200"
-              style={{ zIndex: 1001 }}
-              onClick={e => e.stopPropagation()}
+        <AnimatePresence>
+          {showSearchModal && (
+            <motion.div
+              className="fixed inset-0 z-[200] flex items-start justify-center bg-[#0b0908]/70 px-4 pt-[max(1rem,6vh)] sm:pt-[12vh]"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.14 }}
+              onClick={closeSearch}
             >
-              <input
-                type="text"
-                className="flex-1 border-none outline-none bg-transparent text-base sm:text-lg px-2 sm:px-3 py-2 placeholder-pink-400 text-gray-900"
-                placeholder="Search products..."
-                value={searchQuery}
-                onChange={e => handleSearch(e.target.value)}
-                autoFocus
-                style={{ minWidth: 0 }}
-              />
-              <button
-                className="ml-2 text-gray-400 hover:text-pink-500"
-                onClick={() => setShowSearchModal(false)}
-                aria-label="Close search"
+              <motion.div
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="product-search-title"
+                className="w-full max-w-2xl overflow-hidden rounded-2xl border border-[#d8c6a5]/50 bg-[#fffdf8] shadow-[0_24px_80px_rgba(0,0,0,0.4)]"
+                initial={{ opacity: 0, y: -10, scale: 0.985 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -6, scale: 0.99 }}
+                transition={{ duration: 0.16, ease: "easeOut" }}
+                onClick={(event) => event.stopPropagation()}
               >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-            {/* Results Dropdown */}
-            {searchQuery && (
-              <div className="fixed left-1/2 -translate-x-1/2 top-20 sm:top-28 w-[92vw] sm:w-[90vw] max-w-md bg-white rounded-xl shadow-xl mt-2 overflow-y-auto max-h-[60vh] border border-pink-100 animate-fade-in-down" style={{ zIndex: 1002 }}>
-                {loadingProducts && (
-                  <div className="text-center text-gray-500 py-6">Loading products...</div>
-                )}
-                {!loadingProducts && searchQuery && searchResults.length === 0 && (
-                  <div className="text-center text-gray-400 py-6">No products found.</div>
-                )}
-                {!loadingProducts && searchResults.length > 0 && (
-                  <ul className="divide-y divide-gray-100">
-                    {searchResults.map((product) => (
-                      <li
-                        key={product._id || product.id}
-                        className="py-3 px-4 flex items-center gap-3 cursor-pointer hover:bg-pink-50 rounded-lg transition"
-                        onClick={() => handleProductClick(product._id || product.id)}
-                      >
-                        <img
-                          src={product.image || (product.images && product.images[0])}
-                          alt={product.name}
-                          className="w-10 h-10 object-cover rounded-md border"
-                        />
-                        <div className="flex-1 min-w-0">
-                          <div className="font-semibold text-gray-900 truncate">{product.name}</div>
-                          <div className="text-xs text-gray-500 truncate">{product.description}</div>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            )}
-          </div>
-        )}
+                <div className="flex items-center justify-between border-b border-[#e8dfd0] px-5 py-4 sm:px-6">
+                  <div>
+                    <p id="product-search-title" className="text-sm font-semibold tracking-[0.16em] text-[#3b3028] uppercase">
+                      Search Noamani
+                    </p>
+                    <p className="mt-0.5 text-xs text-[#817569]">Find a fragrance by name, note, or collection</p>
+                  </div>
+                  <button
+                    type="button"
+                    className="grid h-9 w-9 place-items-center rounded-full text-[#74695f] transition-colors hover:bg-[#eee7dc] hover:text-[#211a16] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9a7b4f]"
+                    onClick={closeSearch}
+                    aria-label="Close search"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
+
+                <div className="p-4 sm:p-5">
+                  <div className="flex items-center gap-3 rounded-xl border border-[#d8cbb8] bg-white px-4 shadow-[0_4px_16px_rgba(54,42,31,0.05)] transition focus-within:border-[#9a7b4f] focus-within:ring-2 focus-within:ring-[#9a7b4f]/15">
+                    <Search className="h-5 w-5 shrink-0 text-[#8c7557]" aria-hidden="true" />
+                    <input
+                      type="search"
+                      className="min-w-0 flex-1 bg-transparent py-3.5 text-base text-[#211a16] outline-none placeholder:text-[#a49a90] sm:text-[17px]"
+                      placeholder="Search fragrances, notes, collections…"
+                      value={searchQuery}
+                      onChange={(event) => handleSearch(event.target.value)}
+                      autoFocus
+                      autoComplete="off"
+                      aria-label="Search products"
+                    />
+                    <span className="hidden rounded-md border border-[#ded5c8] bg-[#f7f3ed] px-2 py-1 text-[10px] font-medium tracking-wide text-[#80756a] sm:inline">
+                      ESC
+                    </span>
+                  </div>
+
+                  {!searchQuery.trim() && (
+                    <div className="px-2 py-8 text-center sm:py-10">
+                      <p className="text-sm font-medium text-[#4f453d]">Discover your signature scent</p>
+                      <p className="mt-1 text-xs text-[#91867b]">Try “oud”, “floral”, or a fragrance name</p>
+                    </div>
+                  )}
+
+                  {searchQuery.trim() && searchResults.length === 0 && (
+                    <div className="px-2 py-8 text-center sm:py-10">
+                      <p className="text-sm font-medium text-[#4f453d]">No matching fragrances</p>
+                      <p className="mt-1 text-xs text-[#91867b]">Try a broader name, note, or collection</p>
+                    </div>
+                  )}
+
+                  {searchResults.length > 0 && (
+                    <div className="mt-4 max-h-[min(52vh,430px)] overflow-y-auto overscroll-contain pr-1">
+                      <div className="mb-2 flex items-center justify-between px-1">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8a7b6d]">Products</p>
+                        <p className="text-xs text-[#9b9085]">{searchResults.length} result{searchResults.length === 1 ? "" : "s"}</p>
+                      </div>
+                      <ul className="space-y-1">
+                        {searchResults.map((product) => (
+                          <li key={product._id || product.id}>
+                            <button
+                              type="button"
+                              className="group flex w-full items-center gap-4 rounded-xl px-2.5 py-2.5 text-left transition-colors hover:bg-[#f2ece3] focus-visible:bg-[#f2ece3] focus-visible:outline-none"
+                              onClick={() => handleProductClick(product._id || product.id)}
+                            >
+                              <span className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-lg border border-[#e4dbcf] bg-white">
+                                <img
+                                  src={product.image || product.images?.[0] || "/product1.jpg"}
+                                  alt=""
+                                  className="h-full w-full object-contain p-1"
+                                />
+                              </span>
+                              <span className="min-w-0 flex-1">
+                                <span className="block truncate text-sm font-semibold text-[#2e251f] sm:text-[15px]">{product.name}</span>
+                                <span className="mt-1 block truncate text-xs text-[#84786d]">{product.category || product.description}</span>
+                              </span>
+                              <span className="text-lg text-[#a08b70] transition-transform group-hover:translate-x-0.5" aria-hidden="true">→</span>
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Modern Mobile Menu with Glassmorphism */}
         <AnimatePresence>
@@ -1478,13 +1572,6 @@ export default function Navbar() {
         }
         .animate-fade-in-down {
           animation: fadeInDown 0.7s cubic-bezier(0.23, 1, 0.32, 1);
-        }
-        @keyframes slide-in-right {
-          from { transform: translateX(100%); opacity: 0; }
-          to { transform: translateX(0); opacity: 1; }
-        }
-        .animate-slide-in-right {
-          animation: slide-in-right 0.4s cubic-bezier(0.23, 1, 0.32, 1);
         }
       `}</style>
     </CartProvider>
