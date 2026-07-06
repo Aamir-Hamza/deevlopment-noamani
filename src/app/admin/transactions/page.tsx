@@ -3,9 +3,8 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { formatDistance, format } from 'date-fns';
-import { motion } from 'framer-motion';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { X } from 'lucide-react';
 import { AdminSidebar } from '@/components/AdminSidebar';
 
 interface Transaction {
@@ -32,6 +31,20 @@ interface Transaction {
   createdAt: string;
 }
 
+function getStatusBadgeClass(status: string) {
+  switch ((status || '').toLowerCase()) {
+    case 'success':
+    case 'captured':
+      return 'bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20';
+    case 'failed':
+      return 'bg-red-500/10 text-red-400 ring-1 ring-red-500/20';
+    case 'refunded':
+      return 'bg-amber-500/10 text-amber-400 ring-1 ring-amber-500/20';
+    default:
+      return 'bg-slate-500/10 text-slate-400 ring-1 ring-slate-500/20';
+  }
+}
+
 export default function TransactionsPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -40,7 +53,6 @@ export default function TransactionsPage() {
   const router = useRouter();
 
   useEffect(() => {
-    // Check if admin is logged in
     const adminInfo = localStorage.getItem('adminInfo');
     if (!adminInfo) {
       router.push('/admin/login');
@@ -61,24 +73,10 @@ export default function TransactionsPage() {
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'success':
-      case 'captured':
-        return 'bg-green-100 text-green-800';
-      case 'failed':
-        return 'bg-red-100 text-red-800';
-      case 'refunded':
-        return 'bg-yellow-100 text-yellow-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
   const formatDate = (date: string) => {
     try {
       return format(new Date(date), 'PPpp');
-    } catch (error) {
+    } catch {
       return 'Invalid date';
     }
   };
@@ -86,236 +84,184 @@ export default function TransactionsPage() {
   const getTimeAgo = (date: string) => {
     try {
       return formatDistance(new Date(date), new Date(), { addSuffix: true });
-    } catch (error) {
+    } catch {
       return 'Unknown time';
     }
   };
 
-  const handleLogout = () => {
-    try {
-      localStorage.removeItem('adminInfo');
-      router.push('/');
-      toast.success('Logged out successfully');
-    } catch (error) {
-      console.error('Logout error:', error);
-      toast.error('Failed to logout');
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100">
-      {/* Sidebar */}
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex">
       <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
-      {/* Main Content */}
-      <div className="ml-64 p-8">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-4xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600 tracking-wide">Payment Transactions</h1>
+      <div className="ml-64 flex-1 p-8">
+        <div className="mb-8">
+          <h1 className="text-2xl font-semibold text-white">Transactions</h1>
+          <p className="text-sm text-slate-400 mt-1">Payment history and refund tracking</p>
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="bg-gray-800 rounded-xl shadow-lg overflow-hidden border border-gray-700"
-        >
+        <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-700">
-              <thead className="bg-gray-700">
+            <table className="min-w-full divide-y divide-slate-800">
+              <thead className="bg-slate-900/60">
                 <tr>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                    Transaction ID
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                    Customer
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                    Amount
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                    Date
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                    Actions
-                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Transaction ID</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Customer</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Amount</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Date</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
-              <tbody className="bg-gray-800 divide-y divide-gray-700">
+              <tbody className="divide-y divide-slate-800">
                 {isLoading ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-4 text-center text-gray-400">
-                      Loading transactions...
-                    </td>
+                    <td colSpan={6} className="px-6 py-8 text-center text-sm text-slate-500">Loading transactions...</td>
                   </tr>
                 ) : transactions.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-4 text-center text-gray-400">
-                      No transactions found
-                    </td>
+                    <td colSpan={6} className="px-6 py-8 text-center text-sm text-slate-500">No transactions found</td>
                   </tr>
                 ) : (
                   transactions.map((transaction) => (
-                    <motion.tr 
-                      key={transaction._id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="hover:bg-gray-700 transition-colors duration-200"
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                        {transaction.paymentInfo.razorpayPaymentId}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                        {transaction.shippingAddress.name}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                    <tr key={transaction._id} className="hover:bg-slate-800/50 transition-colors">
+                      <td className="px-6 py-4 text-sm text-slate-300 font-mono">{transaction.paymentInfo.razorpayPaymentId}</td>
+                      <td className="px-6 py-4 text-sm text-slate-300">{transaction.shippingAddress.name}</td>
+                      <td className="px-6 py-4 text-sm text-slate-300">
                         {transaction.paymentInfo.currency} {transaction.totalAmount.toFixed(2)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(transaction.paymentInfo.status)}`}>
+                      <td className="px-6 py-4">
+                        <span className={`px-2.5 py-1 inline-flex text-xs font-medium rounded-full capitalize ${getStatusBadgeClass(transaction.paymentInfo.status)}`}>
                           {transaction.paymentInfo.status}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                      <td className="px-6 py-4 text-sm text-slate-400">
                         <span title={formatDate(transaction.paymentInfo.transactionTime)}>
                           {getTimeAgo(transaction.paymentInfo.transactionTime)}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
+                      <td className="px-6 py-4 text-sm">
+                        <button
                           onClick={() => setSelectedTransaction(transaction)}
-                          className="text-blue-500 hover:text-blue-400 transition-colors duration-200"
+                          className="text-indigo-400 hover:text-indigo-300 font-medium transition-colors"
                         >
-                          View Details
-                        </motion.button>
+                          View details
+                        </button>
                       </td>
-                    </motion.tr>
+                    </tr>
                   ))
                 )}
               </tbody>
             </table>
           </div>
-        </motion.div>
+        </div>
 
-        {/* Transaction Details Modal */}
         {selectedTransaction && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            transition={{ duration: 0.3 }}
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
             onClick={() => setSelectedTransaction(null)}
           >
             <div
-              className="bg-gray-800 p-8 rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-gray-700 text-gray-100"
+              className="bg-slate-900 border border-slate-800 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex justify-between items-center mb-6 border-b border-gray-700 pb-4">
-                <h2 className="text-2xl font-bold text-white">Transaction Details</h2>
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
+              <div className="flex justify-between items-center px-6 py-4 border-b border-slate-800">
+                <h2 className="text-lg font-semibold text-white">Transaction details</h2>
+                <button
                   onClick={() => setSelectedTransaction(null)}
-                  className="text-gray-400 hover:text-red-500 transition-colors duration-200 text-2xl"
+                  className="text-slate-500 hover:text-slate-300 transition-colors"
                 >
-                  ✕
-                </motion.button>
+                  <X className="h-5 w-5" />
+                </button>
               </div>
 
-              <div className="space-y-6">
+              <div className="p-6 space-y-6">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <h3 className="text-sm font-medium text-gray-300">Payment ID</h3>
-                    <p className="mt-1 text-gray-400">{selectedTransaction.paymentInfo.razorpayPaymentId}</p>
+                    <h3 className="text-xs font-medium text-slate-500 uppercase tracking-wider">Payment ID</h3>
+                    <p className="mt-1 text-sm text-slate-300 font-mono">{selectedTransaction.paymentInfo.razorpayPaymentId}</p>
                   </div>
                   <div>
-                    <h3 className="text-sm font-medium text-gray-300">Order ID</h3>
-                    <p className="mt-1 text-gray-400">{selectedTransaction.paymentInfo.razorpayOrderId}</p>
+                    <h3 className="text-xs font-medium text-slate-500 uppercase tracking-wider">Order ID</h3>
+                    <p className="mt-1 text-sm text-slate-300 font-mono">{selectedTransaction.paymentInfo.razorpayOrderId}</p>
                   </div>
                   <div>
-                    <h3 className="text-sm font-medium text-gray-300">Amount</h3>
-                    <p className="mt-1 text-gray-400">{selectedTransaction.paymentInfo.currency} {selectedTransaction.totalAmount.toFixed(2)}</p>
+                    <h3 className="text-xs font-medium text-slate-500 uppercase tracking-wider">Amount</h3>
+                    <p className="mt-1 text-sm text-slate-300">{selectedTransaction.paymentInfo.currency} {selectedTransaction.totalAmount.toFixed(2)}</p>
                   </div>
                   <div>
-                    <h3 className="text-sm font-medium text-gray-300">Status</h3>
-                    <p className={`mt-1 inline-flex px-3 py-1 text-sm rounded-full ${getStatusColor(selectedTransaction.paymentInfo.status)}`}>
+                    <h3 className="text-xs font-medium text-slate-500 uppercase tracking-wider">Status</h3>
+                    <p className={`mt-1 inline-flex px-2.5 py-1 text-xs font-medium rounded-full capitalize ${getStatusBadgeClass(selectedTransaction.paymentInfo.status)}`}>
                       {selectedTransaction.paymentInfo.status}
                     </p>
                   </div>
                   <div>
-                    <h3 className="text-sm font-medium text-gray-300">Payment Method</h3>
-                    <p className="mt-1 text-gray-400">{selectedTransaction.paymentInfo.method || 'N/A'}</p>
+                    <h3 className="text-xs font-medium text-slate-500 uppercase tracking-wider">Payment method</h3>
+                    <p className="mt-1 text-sm text-slate-300">{selectedTransaction.paymentInfo.method || 'N/A'}</p>
                   </div>
                   <div>
-                    <h3 className="text-sm font-medium text-gray-300">Date & Time</h3>
-                    <p className="mt-1 text-gray-400">{formatDate(selectedTransaction.paymentInfo.transactionTime)}</p>
+                    <h3 className="text-xs font-medium text-slate-500 uppercase tracking-wider">Date & time</h3>
+                    <p className="mt-1 text-sm text-slate-300">{formatDate(selectedTransaction.paymentInfo.transactionTime)}</p>
                   </div>
                 </div>
 
                 {selectedTransaction.paymentInfo.cardNetwork && (
-                  <div className="border-t border-gray-700 pt-4 mt-6">
-                    <h3 className="text-lg font-medium mb-2 text-purple-400">Card Details</h3>
+                  <div className="border-t border-slate-800 pt-4">
+                    <h3 className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-3">Card details</h3>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <h4 className="text-sm font-medium text-gray-300">Card Network</h4>
-                        <p className="mt-1 text-gray-400">{selectedTransaction.paymentInfo.cardNetwork}</p>
+                        <h4 className="text-xs text-slate-500">Card network</h4>
+                        <p className="mt-1 text-sm text-slate-300">{selectedTransaction.paymentInfo.cardNetwork}</p>
                       </div>
                       <div>
-                        <h4 className="text-sm font-medium text-gray-300">Last 4 Digits</h4>
-                        <p className="mt-1 text-gray-400">****{selectedTransaction.paymentInfo.cardLast4}</p>
+                        <h4 className="text-xs text-slate-500">Last 4 digits</h4>
+                        <p className="mt-1 text-sm text-slate-300">****{selectedTransaction.paymentInfo.cardLast4}</p>
                       </div>
                       <div>
-                        <h4 className="text-sm font-medium text-gray-300">Card Issuer</h4>
-                        <p className="mt-1 text-gray-400">{selectedTransaction.paymentInfo.cardIssuer || 'N/A'}</p>
+                        <h4 className="text-xs text-slate-500">Card issuer</h4>
+                        <p className="mt-1 text-sm text-slate-300">{selectedTransaction.paymentInfo.cardIssuer || 'N/A'}</p>
                       </div>
                     </div>
                   </div>
                 )}
 
                 {selectedTransaction.paymentInfo.refundStatus !== 'none' && (
-                  <div className="border-t border-gray-700 pt-4 mt-6">
-                    <h3 className="text-lg font-medium mb-2 text-purple-400">Refund Information</h3>
+                  <div className="border-t border-slate-800 pt-4">
+                    <h3 className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-3">Refund information</h3>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <h4 className="text-sm font-medium text-gray-300">Refund Status</h4>
-                        <p className="mt-1 text-gray-400">{selectedTransaction.paymentInfo.refundStatus}</p>
+                        <h4 className="text-xs text-slate-500">Refund status</h4>
+                        <p className="mt-1 text-sm text-slate-300">{selectedTransaction.paymentInfo.refundStatus}</p>
                       </div>
                       <div>
-                        <h4 className="text-sm font-medium text-gray-300">Amount Refunded</h4>
-                        <p className="mt-1 text-gray-400">{selectedTransaction.paymentInfo.currency} {selectedTransaction.paymentInfo.amountRefunded.toFixed(2)}</p>
+                        <h4 className="text-xs text-slate-500">Amount refunded</h4>
+                        <p className="mt-1 text-sm text-slate-300">{selectedTransaction.paymentInfo.currency} {selectedTransaction.paymentInfo.amountRefunded.toFixed(2)}</p>
                       </div>
                     </div>
                   </div>
                 )}
 
-                <div className="border-t border-gray-700 pt-4 mt-6">
-                  <h3 className="text-lg font-medium mb-2 text-purple-400">Customer Information</h3>
+                <div className="border-t border-slate-800 pt-4">
+                  <h3 className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-3">Customer information</h3>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <h4 className="text-sm font-medium text-gray-300">Name</h4>
-                      <p className="mt-1 text-gray-400">{selectedTransaction.shippingAddress.name}</p>
+                      <h4 className="text-xs text-slate-500">Name</h4>
+                      <p className="mt-1 text-sm text-slate-300">{selectedTransaction.shippingAddress.name}</p>
                     </div>
                     <div>
-                      <h4 className="text-sm font-medium text-gray-300">Email</h4>
-                      <p className="mt-1 text-gray-400">{selectedTransaction.paymentInfo.email || 'N/A'}</p>
+                      <h4 className="text-xs text-slate-500">Email</h4>
+                      <p className="mt-1 text-sm text-slate-300">{selectedTransaction.paymentInfo.email || 'N/A'}</p>
                     </div>
                     <div>
-                      <h4 className="text-sm font-medium text-gray-300">Contact</h4>
-                      <p className="mt-1 text-gray-400">{selectedTransaction.paymentInfo.contact || 'N/A'}</p>
+                      <h4 className="text-xs text-slate-500">Contact</h4>
+                      <p className="mt-1 text-sm text-slate-300">{selectedTransaction.paymentInfo.contact || 'N/A'}</p>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          </motion.div>
+          </div>
         )}
       </div>
     </div>
   );
-} 
+}

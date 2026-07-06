@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
-import { motion } from 'framer-motion';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { X } from 'lucide-react';
 import { AdminSidebar } from '@/components/AdminSidebar';
+import { formatPrice } from '@/lib/priceUtils';
 
 interface OrderItem {
   productId: {
@@ -37,6 +37,22 @@ interface Order {
   createdAt: string;
 }
 
+function getStatusBadgeClass(status: string) {
+  switch ((status || '').toLowerCase()) {
+    case 'completed':
+    case 'delivered':
+      return 'bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20';
+    case 'shipped':
+      return 'bg-violet-500/10 text-violet-400 ring-1 ring-violet-500/20';
+    case 'processing':
+      return 'bg-blue-500/10 text-blue-400 ring-1 ring-blue-500/20';
+    case 'cancelled':
+      return 'bg-red-500/10 text-red-400 ring-1 ring-red-500/20';
+    default:
+      return 'bg-amber-500/10 text-amber-400 ring-1 ring-amber-500/20';
+  }
+}
+
 export default function OrdersManagement() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -45,7 +61,6 @@ export default function OrdersManagement() {
   const router = useRouter();
 
   useEffect(() => {
-    // Check if admin is logged in
     const adminInfo = localStorage.getItem('adminInfo');
     if (!adminInfo) {
       router.push('/admin/login');
@@ -69,7 +84,7 @@ export default function OrdersManagement() {
   const updateOrderStatus = async (orderId: string, status: string) => {
     try {
       const response = await fetch(`/api/orders/${orderId}`, {
-        method: 'PATCH',
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -87,95 +102,48 @@ export default function OrdersManagement() {
     }
   };
 
-  const handleLogout = () => {
-    try {
-      localStorage.removeItem('adminInfo');
-      router.push('/');
-      toast.success('Logged out successfully');
-    } catch (error) {
-      console.error('Logout error:', error);
-      toast.error('Failed to logout');
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100">
-      {/* Sidebar */}
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex">
       <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
-      {/* Main Content */}
-      <div className="ml-64 p-8">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-4xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-cyan-600 tracking-wide">Orders Management</h1>
+      <div className="ml-64 flex-1 p-8">
+        <div className="mb-8">
+          <h1 className="text-2xl font-semibold text-white">Orders</h1>
+          <p className="text-sm text-slate-400 mt-1">Manage and track customer orders</p>
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="bg-gray-800 rounded-xl shadow-lg overflow-hidden border border-gray-700"
-        >
-          <table className="min-w-full divide-y divide-gray-700">
-            <thead className="bg-gray-700">
+        <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+          <table className="min-w-full divide-y divide-slate-800">
+            <thead className="bg-slate-900/60">
               <tr>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                  Order ID
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                  Customer
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                  Total Amount
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                  Date
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                  Actions
-                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Order ID</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Customer</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Total</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Date</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
-            <tbody className="bg-gray-800 divide-y divide-gray-700">
+            <tbody className="divide-y divide-slate-800">
               {isLoading ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-4 text-center text-gray-400">
-                    Loading...
-                  </td>
+                  <td colSpan={6} className="px-6 py-8 text-center text-sm text-slate-500">Loading...</td>
                 </tr>
               ) : orders.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-4 text-center text-gray-400">
-                    No orders found.
-                  </td>
+                  <td colSpan={6} className="px-6 py-8 text-center text-sm text-slate-500">No orders found.</td>
                 </tr>
               ) : (
                 orders.map((order) => (
-                  <motion.tr 
-                    key={order._id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="hover:bg-gray-700 transition-colors duration-200"
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                      {order._id}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                      {order.shippingAddress.name}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                      ${order.totalAmount.toFixed(2)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                  <tr key={order._id} className="hover:bg-slate-800/50 transition-colors">
+                    <td className="px-6 py-4 text-sm text-slate-300 font-mono">{order._id.slice(-8)}</td>
+                    <td className="px-6 py-4 text-sm text-slate-300">{order.shippingAddress.name}</td>
+                    <td className="px-6 py-4 text-sm text-slate-300">{formatPrice(order.totalAmount, 'INR')}</td>
+                    <td className="px-6 py-4">
                       <select
                         value={order.status}
-                        onChange={(e) =>
-                          updateOrderStatus(order._id, e.target.value)
-                        }
-                        className="text-sm rounded-md border-gray-600 bg-gray-700 text-white focus:border-purple-500 focus:ring-purple-500 py-2 px-3"
+                        onChange={(e) => updateOrderStatus(order._id, e.target.value)}
+                        className={`text-xs font-medium rounded-full pl-2.5 pr-7 py-1 border-0 focus:outline-none focus:ring-2 focus:ring-indigo-500 capitalize ${getStatusBadgeClass(order.status)}`}
                       >
                         <option value="pending">Pending</option>
                         <option value="processing">Processing</option>
@@ -183,80 +151,71 @@ export default function OrdersManagement() {
                         <option value="cancelled">Cancelled</option>
                       </select>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                    <td className="px-6 py-4 text-sm text-slate-400">
                       {new Date(order.createdAt).toLocaleDateString()}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <motion.button
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
+                    <td className="px-6 py-4 text-sm">
+                      <button
                         onClick={() => setSelectedOrder(order)}
-                        className="text-blue-500 hover:text-blue-400 transition-colors duration-200"
+                        className="text-indigo-400 hover:text-indigo-300 font-medium transition-colors"
                       >
-                        View Details
-                      </motion.button>
+                        View details
+                      </button>
                     </td>
-                  </motion.tr>
+                  </tr>
                 ))
               )}
             </tbody>
           </table>
-        </motion.div>
+        </div>
 
-        {/* Order Details Modal */}
         {selectedOrder && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            transition={{ duration: 0.3 }}
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
             onClick={() => setSelectedOrder(null)}
           >
             <div
-              className="bg-gray-800 p-8 rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-gray-700 text-gray-100"
+              className="bg-slate-900 border border-slate-800 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex justify-between items-center mb-6 border-b border-gray-700 pb-4">
-                <h2 className="text-2xl font-bold text-white">Order Details</h2>
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
+              <div className="flex justify-between items-center px-6 py-4 border-b border-slate-800">
+                <h2 className="text-lg font-semibold text-white">Order details</h2>
+                <button
                   onClick={() => setSelectedOrder(null)}
-                  className="text-gray-400 hover:text-red-500 transition-colors duration-200 text-2xl"
+                  className="text-slate-500 hover:text-slate-300 transition-colors"
                 >
-                  ✕
-                </motion.button>
+                  <X className="h-5 w-5" />
+                </button>
               </div>
 
-              <div className="space-y-6">
+              <div className="p-6 space-y-6">
                 <div>
-                  <h3 className="text-lg font-medium mb-2 text-purple-400">Shipping Information</h3>
-                  <p className="text-gray-300">Name: {selectedOrder.shippingAddress.name}</p>
-                  <p className="text-gray-300">Street: {selectedOrder.shippingAddress.street}</p>
-                  <p className="text-gray-300">City: {selectedOrder.shippingAddress.city}</p>
-                  <p className="text-gray-300">State: {selectedOrder.shippingAddress.state}</p>
-                  <p className="text-gray-300">ZIP Code: {selectedOrder.shippingAddress.zipCode}</p>
+                  <h3 className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">Shipping information</h3>
+                  <div className="text-sm text-slate-300 space-y-1">
+                    <p>{selectedOrder.shippingAddress.name}</p>
+                    <p>{selectedOrder.shippingAddress.street}</p>
+                    <p>{selectedOrder.shippingAddress.city}, {selectedOrder.shippingAddress.state} {selectedOrder.shippingAddress.zipCode}</p>
+                  </div>
                 </div>
 
                 <div>
-                  <h3 className="text-lg font-medium mb-2 text-purple-400">Order Items</h3>
-                  <table className="min-w-full divide-y divide-gray-700 rounded-lg overflow-hidden">
-                    <thead className="bg-gray-700">
+                  <h3 className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">Order items</h3>
+                  <table className="min-w-full divide-y divide-slate-800 rounded-lg overflow-hidden">
+                    <thead className="bg-slate-800/60">
                       <tr>
-                        <th className="text-left px-4 py-2 text-gray-300">Product</th>
-                        <th className="text-left px-4 py-2 text-gray-300">Quantity</th>
-                        <th className="text-left px-4 py-2 text-gray-300">Price</th>
-                        <th className="text-left px-4 py-2 text-gray-300">Total</th>
+                        <th className="text-left px-4 py-2 text-xs font-medium text-slate-400">Product</th>
+                        <th className="text-left px-4 py-2 text-xs font-medium text-slate-400">Qty</th>
+                        <th className="text-left px-4 py-2 text-xs font-medium text-slate-400">Price</th>
+                        <th className="text-left px-4 py-2 text-xs font-medium text-slate-400">Total</th>
                       </tr>
                     </thead>
-                    <tbody className="bg-gray-800 divide-y divide-gray-700">
+                    <tbody className="divide-y divide-slate-800">
                       {selectedOrder.items.map((item, index) => (
-                        <tr key={index} className="hover:bg-gray-700 transition-colors duration-200">
-                          <td className="px-4 py-2 text-gray-300">{item.productId.name}</td>
-                          <td className="px-4 py-2 text-gray-300">{item.quantity}</td>
-                          <td className="px-4 py-2 text-gray-300">${item.price.toFixed(2)}</td>
-                          <td className="px-4 py-2 text-gray-300">${(item.price * item.quantity).toFixed(2)}</td>
+                        <tr key={index}>
+                          <td className="px-4 py-2 text-sm text-slate-300">{item.productId?.name}</td>
+                          <td className="px-4 py-2 text-sm text-slate-300">{item.quantity}</td>
+                          <td className="px-4 py-2 text-sm text-slate-300">{formatPrice(item.price, 'INR')}</td>
+                          <td className="px-4 py-2 text-sm text-slate-300">{formatPrice(item.price * item.quantity, 'INR')}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -264,22 +223,23 @@ export default function OrdersManagement() {
                 </div>
 
                 <div>
-                  <h3 className="text-lg font-medium mb-2 text-purple-400">Payment Information</h3>
-                  <p className="text-gray-300">Order ID: {selectedOrder.paymentInfo.razorpayOrderId}</p>
-                  <p className="text-gray-300">Payment ID: {selectedOrder.paymentInfo.razorpayPaymentId}</p>
-                  <p className="text-gray-300">Status: {selectedOrder.paymentInfo.status}</p>
+                  <h3 className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">Payment information</h3>
+                  <div className="text-sm text-slate-300 space-y-1">
+                    <p>Order ID: <span className="font-mono text-slate-400">{selectedOrder.paymentInfo?.razorpayOrderId}</span></p>
+                    <p>Payment ID: <span className="font-mono text-slate-400">{selectedOrder.paymentInfo?.razorpayPaymentId}</span></p>
+                    <p>Status: {selectedOrder.paymentInfo?.status}</p>
+                  </div>
                 </div>
 
-                <div className="border-t border-gray-700 pt-4 mt-6">
-                  <p className="text-2xl font-bold text-white">
-                    Total Amount: ${selectedOrder.totalAmount.toFixed(2)}
-                  </p>
+                <div className="border-t border-slate-800 pt-4 flex justify-between items-center">
+                  <span className="text-sm text-slate-400">Total amount</span>
+                  <span className="text-xl font-semibold text-white">{formatPrice(selectedOrder.totalAmount, 'INR')}</span>
                 </div>
               </div>
             </div>
-          </motion.div>
+          </div>
         )}
       </div>
     </div>
   );
-} 
+}

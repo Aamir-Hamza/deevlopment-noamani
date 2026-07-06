@@ -7,19 +7,8 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AdminSidebar } from "@/components/AdminSidebar";
-import { useCountry } from "@/hooks/useCountry";
 import { formatPrice } from "@/lib/priceUtils";
-
-// Format price in Indian Rupee format (raw database price, no conversion)
-const formatIndianRupee = (price: number) => {
-  if (!price || isNaN(price)) return '₹0';
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(price);
-};
+import { Plus, X, ShoppingBag, Flame, Leaf, Compass, Menu, Check, Pencil, Trash2 } from "lucide-react";
 
 interface Product {
   _id: string;
@@ -112,7 +101,6 @@ export default function ProductsManagement() {
   const fragranceNameRef = useRef<HTMLInputElement>(null);
   const fragranceSlugRef = useRef<HTMLInputElement>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('Shop All');
-  const { country } = useCountry();
   // State for gallery image upload type (url/upload) for Add and Edit forms
   const [galleryImageUploadType, setGalleryImageUploadType] = useState<("url" | "upload")[]>(["upload", "upload", "upload", "upload"]);
   const [editGalleryImageUploadType, setEditGalleryImageUploadType] = useState<("url" | "upload")[]>(["upload", "upload", "upload", "upload"]);
@@ -557,91 +545,73 @@ export default function ProductsManagement() {
     if (!editProductId) setEditGalleryImageUploadType(["upload", "upload", "upload", "upload"]);
   }, [editProductId]);
 
+  const categoryCards = [
+    { key: 'Shop All', label: 'Shop All', sub: 'Total products', icon: ShoppingBag, count: products.length, accent: 'text-blue-400 bg-blue-500/10' },
+    { key: 'Bestsellers', label: 'Bestsellers', sub: 'Bestseller products', icon: Flame, count: products.filter(p => p.assignedPages?.includes('Bestsellers')).length, accent: 'text-rose-400 bg-rose-500/10' },
+    { key: 'Fragrance', label: 'Fragrance', sub: 'Fragrance products', icon: Leaf, count: products.filter(p => p.assignedPages?.includes('Fragrance')).length, accent: 'text-emerald-400 bg-emerald-500/10' },
+  ];
+
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100 flex flex-col md:flex-row">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col md:flex-row">
       {/* Sidebar */}
       <aside className="hidden md:block"><AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} /></aside>
       {/* Mobile Topbar */}
-      <div className="md:hidden flex items-center justify-between bg-gray-800 p-4 sticky top-0 z-20">
-        <button className="text-white text-2xl" aria-label="Open sidebar">☰</button>
-        <span className="font-bold text-lg">Admin Panel</span>
+      <div className="md:hidden flex items-center justify-between bg-slate-900 p-4 sticky top-0 z-20 border-b border-slate-800">
+        <Menu className="h-5 w-5 text-white" aria-label="Open sidebar" />
+        <span className="font-semibold text-white">Admin Panel</span>
       </div>
       {/* Main Content */}
       <div className="flex-1 md:ml-64 ml-0 p-4 md:p-8">
-        <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-          <h1 className="text-2xl md:text-4xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-blue-600 tracking-wide">
-            Products Management
-          </h1>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+        <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
+          <div>
+            <h1 className="text-2xl font-semibold text-white">Products</h1>
+            <p className="text-sm text-slate-400 mt-1">Manage your catalogue and storefront placement</p>
+          </div>
+          <button
             onClick={() => setShowAddForm(!showAddForm)}
-            className="w-full md:w-auto bg-purple-600 text-white px-6 py-3 rounded-xl shadow-lg hover:bg-purple-700 transition-all duration-300 flex items-center justify-center space-x-2"
+            className="w-full sm:w-auto bg-indigo-600 text-white px-4 py-2.5 rounded-lg hover:bg-indigo-500 transition-colors flex items-center justify-center gap-2 text-sm font-medium"
           >
             {showAddForm ? (
               <>
-                <span>✖️</span>
-                <span>Cancel</span>
+                <X className="h-4 w-4" />
+                Cancel
               </>
             ) : (
               <>
-                <span>➕</span>
-                <span>Add New Product</span>
+                <Plus className="h-4 w-4" />
+                Add product
               </>
             )}
-          </motion.button>
+          </button>
         </div>
 
-        {/* Dashboard Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          {/* Shop All Card */}
-          <motion.div
-            whileHover={{ scale: 1.04, boxShadow: '0 8px 32px 0 rgba(0,0,0,0.18)' }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => setSelectedCategory('Shop All')}
-            className={`cursor-pointer bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl p-5 flex flex-col items-center justify-center shadow-lg transition-all duration-300 hover:shadow-2xl border-2 min-h-[140px] ${selectedCategory === 'Shop All' ? 'border-blue-600' : 'border-blue-400'}`}
-          >
-            <span className="text-3xl mb-1">🛒</span>
-            <span className="text-base font-semibold tracking-wide text-white mb-0.5">Shop All</span>
-            <span className="text-2xl font-bold text-white">{products.length}</span>
-            <span className="text-xs text-blue-100 mt-0.5">Total Products</span>
-          </motion.div>
-          {/* Bestseller Card */}
-          <motion.div
-            whileHover={{ scale: 1.04, boxShadow: '0 8px 32px 0 rgba(0,0,0,0.18)' }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => setSelectedCategory('Bestsellers')}
-            className={`cursor-pointer bg-gradient-to-br from-pink-500 to-pink-700 rounded-xl p-5 flex flex-col items-center justify-center shadow-lg transition-all duration-300 hover:shadow-2xl border-2 min-h-[140px] ${selectedCategory === 'Bestsellers' ? 'border-pink-600' : 'border-pink-400'}`}
-          >
-            <span className="text-3xl mb-1">🔥</span>
-            <span className="text-base font-semibold tracking-wide text-white mb-0.5">Bestseller</span>
-            <span className="text-2xl font-bold text-white">{products.filter(p => p.assignedPages && p.assignedPages.includes('Bestsellers')).length}</span>
-            <span className="text-xs text-pink-100 mt-0.5">Bestseller Products</span>
-          </motion.div>
-          {/* Fragrance Card */}
-          <motion.div
-            whileHover={{ scale: 1.04, boxShadow: '0 8px 32px 0 rgba(0,0,0,0.18)' }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => setSelectedCategory('Fragrance')}
-            className={`cursor-pointer bg-gradient-to-br from-green-400 to-green-700 rounded-xl p-5 flex flex-col items-center justify-center shadow-lg transition-all duration-300 hover:shadow-2xl border-2 min-h-[140px] ${selectedCategory === 'Fragrance' ? 'border-green-600' : 'border-green-400'}`}
-          >
-            <span className="text-3xl mb-1">🌿</span>
-            <span className="text-base font-semibold tracking-wide text-white mb-0.5">Fragrance</span>
-            <span className="text-2xl font-bold text-white">{products.filter(p => p.assignedPages && p.assignedPages.includes('Fragrance')).length}</span>
-            <span className="text-xs text-green-100 mt-0.5">Fragrance Products</span>
-          </motion.div>
-          {/* Navbar Card */}
-          <motion.div
-            whileHover={{ scale: 1.04, boxShadow: '0 8px 32px 0 rgba(0,0,0,0.18)' }}
-            whileTap={{ scale: 0.98 }}
+        {/* Category cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+          {categoryCards.map(({ key, label, sub, icon: Icon, count, accent }) => (
+            <button
+              key={key}
+              onClick={() => setSelectedCategory(key)}
+              className={`text-left bg-slate-900 border rounded-xl p-6 transition-colors ${selectedCategory === key ? 'border-indigo-500' : 'border-slate-800 hover:border-slate-700'}`}
+            >
+              <div className={`inline-flex items-center justify-center h-10 w-10 rounded-lg ${accent} mb-4`}>
+                <Icon className="h-5 w-5" />
+              </div>
+              <p className="text-sm text-slate-400">{label}</p>
+              <p className="text-2xl font-semibold text-white mt-1">{count}</p>
+              <p className="text-xs text-slate-500 mt-0.5">{sub}</p>
+            </button>
+          ))}
+          <button
             onClick={handleNavbarCardClick}
-            className="cursor-pointer bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-xl p-5 flex flex-col items-center justify-center shadow-lg transition-all duration-300 hover:shadow-2xl border-2 border-yellow-300 hover:border-yellow-500 min-h-[140px]"
+            className="text-left bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-xl p-6 transition-colors"
           >
-            <span className="text-3xl mb-1">🧭</span>
-            <span className="text-base font-semibold tracking-wide text-white mb-0.5">Navbar</span>
-            <span className="text-2xl font-bold text-white">{navbarProducts.length}</span>
-            <span className="text-xs text-yellow-100 mt-0.5">Navbar Products</span>
-          </motion.div>
+            <div className="inline-flex items-center justify-center h-10 w-10 rounded-lg text-amber-400 bg-amber-500/10 mb-4">
+              <Compass className="h-5 w-5" />
+            </div>
+            <p className="text-sm text-slate-400">Navbar</p>
+            <p className="text-2xl font-semibold text-white mt-1">{navbarProducts.length}</p>
+            <p className="text-xs text-slate-500 mt-0.5">Navbar products</p>
+          </button>
         </div>
 
         {showAddForm && (
@@ -650,7 +620,7 @@ export default function ProductsManagement() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
             transition={{ duration: 0.3 }}
-            className="bg-gray-800 p-4 md:p-8 rounded-xl shadow-lg mb-8 border border-gray-700"
+            className="bg-slate-900 p-4 md:p-8 rounded-xl shadow-lg mb-8 border border-slate-800"
           >
             <h2 className="text-xl md:text-2xl font-bold text-white mb-6">
               Add New Product
@@ -658,7 +628,7 @@ export default function ProductsManagement() {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
                     Name
                   </label>
                   <input
@@ -668,12 +638,12 @@ export default function ProductsManagement() {
                     onChange={(e) =>
                       setFormData({ ...formData, name: e.target.value })
                     }
-                    className="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white p-3 shadow-sm focus:border-purple-500 focus:ring-purple-500 placeholder-gray-500"
+                    className="mt-1 block w-full rounded-md border-slate-700 bg-slate-800 text-white p-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 placeholder-slate-500"
                     placeholder="Product Name"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
                     Price
                   </label>
                   <input
@@ -683,12 +653,12 @@ export default function ProductsManagement() {
                     onChange={(e) =>
                       setFormData({ ...formData, price: e.target.value })
                     }
-                    className="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white p-3 shadow-sm focus:border-purple-500 focus:ring-purple-500 placeholder-gray-500"
+                    className="mt-1 block w-full rounded-md border-slate-700 bg-slate-800 text-white p-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 placeholder-slate-500"
                     placeholder="Product Price"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
                     Category
                   </label>
                   <input
@@ -698,12 +668,12 @@ export default function ProductsManagement() {
                     onChange={(e) =>
                       setFormData({ ...formData, category: e.target.value })
                     }
-                    className="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white p-3 shadow-sm focus:border-purple-500 focus:ring-purple-500 placeholder-gray-500"
+                    className="mt-1 block w-full rounded-md border-slate-700 bg-slate-800 text-white p-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 placeholder-slate-500"
                     placeholder="Product Category"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
                     Stock
                   </label>
                   <input
@@ -713,13 +683,13 @@ export default function ProductsManagement() {
                     onChange={(e) =>
                       setFormData({ ...formData, stock: e.target.value })
                     }
-                    className="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white p-3 shadow-sm focus:border-purple-500 focus:ring-purple-500 placeholder-gray-500"
+                    className="mt-1 block w-full rounded-md border-slate-700 bg-slate-800 text-white p-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 placeholder-slate-500"
                     placeholder="Product Stock"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-slate-300 mb-2">
                   Image Upload Type
                 </label>
                 <div className="flex items-center space-x-4">
@@ -730,9 +700,9 @@ export default function ProductsManagement() {
                       value="url"
                       checked={imageUploadType === "url"}
                       onChange={() => setImageUploadType("url")}
-                      className="form-radio h-4 w-4 text-purple-600"
+                      className="form-radio h-4 w-4 text-indigo-600"
                     />
-                    <span className="ml-2 text-gray-300">URL</span>
+                    <span className="ml-2 text-slate-300">URL</span>
                   </label>
                   <label className="flex items-center">
                     <input
@@ -741,15 +711,15 @@ export default function ProductsManagement() {
                       value="upload"
                       checked={imageUploadType === "upload"}
                       onChange={() => setImageUploadType("upload")}
-                      className="form-radio h-4 w-4 text-purple-600"
+                      className="form-radio h-4 w-4 text-indigo-600"
                     />
-                    <span className="ml-2 text-gray-300">Upload</span>
+                    <span className="ml-2 text-slate-300">Upload</span>
                   </label>
                 </div>
               </div>
               {imageUploadType === "url" ? (
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
                     Image URL
                   </label>
                   <input
@@ -759,13 +729,13 @@ export default function ProductsManagement() {
                     onChange={(e) =>
                       setFormData({ ...formData, image: e.target.value })
                     }
-                    className="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white p-3 shadow-sm focus:border-purple-500 focus:ring-purple-500 placeholder-gray-500"
+                    className="mt-1 block w-full rounded-md border-slate-700 bg-slate-800 text-white p-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 placeholder-slate-500"
                     placeholder="Product Image URL"
                   />
                 </div>
               ) : (
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
                     Upload Image
                   </label>
                   <input
@@ -775,17 +745,17 @@ export default function ProductsManagement() {
                         handleImageUpload(e.target.files[0], "image", "add");
                       }
                     }}
-                    className="mt-1 block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-purple-600 file:text-white hover:file:bg-purple-700"
+                    className="mt-1 block w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700"
                   />
                   {formData.image && (
-                    <p className="text-xs text-gray-400 mt-1">
+                    <p className="text-xs text-slate-400 mt-1">
                       Uploaded: {formData.image}
                     </p>
                   )}
                 </div>
               )}
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-slate-300 mb-2">
                   Hover Image Upload Type
                 </label>
                 <div className="flex items-center space-x-4">
@@ -796,9 +766,9 @@ export default function ProductsManagement() {
                       value="url"
                       checked={hoverImageUploadType === "url"}
                       onChange={() => setHoverImageUploadType("url")}
-                      className="form-radio h-4 w-4 text-purple-600"
+                      className="form-radio h-4 w-4 text-indigo-600"
                     />
-                    <span className="ml-2 text-gray-300">URL</span>
+                    <span className="ml-2 text-slate-300">URL</span>
                   </label>
                   <label className="flex items-center">
                     <input
@@ -807,15 +777,15 @@ export default function ProductsManagement() {
                       value="upload"
                       checked={hoverImageUploadType === "upload"}
                       onChange={() => setHoverImageUploadType("upload")}
-                      className="form-radio h-4 w-4 text-purple-600"
+                      className="form-radio h-4 w-4 text-indigo-600"
                     />
-                    <span className="ml-2 text-gray-300">Upload</span>
+                    <span className="ml-2 text-slate-300">Upload</span>
                   </label>
                 </div>
               </div>
               {hoverImageUploadType === "url" ? (
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
                     Second Image URL (on hover)
                   </label>
                   <input
@@ -824,13 +794,13 @@ export default function ProductsManagement() {
                     onChange={(e) =>
                       setFormData({ ...formData, imageHover: e.target.value })
                     }
-                    className="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white p-3 shadow-sm focus:border-purple-500 focus:ring-purple-500 placeholder-gray-500"
+                    className="mt-1 block w-full rounded-md border-slate-700 bg-slate-800 text-white p-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 placeholder-slate-500"
                     placeholder="Second Image URL (on hover)"
                   />
                 </div>
               ) : (
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
                     Upload Second Image (on hover)
                   </label>
                   <input
@@ -844,17 +814,17 @@ export default function ProductsManagement() {
                         );
                       }
                     }}
-                    className="mt-1 block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-purple-600 file:text-white hover:file:bg-purple-700"
+                    className="mt-1 block w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700"
                   />
                   {formData.imageHover && (
-                    <p className="text-xs text-gray-400 mt-1">
+                    <p className="text-xs text-slate-400 mt-1">
                       Uploaded: {formData.imageHover}
                     </p>
                   )}
                 </div>
               )}
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-slate-300 mb-1">
                   Description
                 </label>
                 <textarea
@@ -864,12 +834,12 @@ export default function ProductsManagement() {
                     setFormData({ ...formData, description: e.target.value })
                   }
                   rows={3}
-                  className="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white p-3 shadow-sm focus:border-purple-500 focus:ring-purple-500 placeholder-gray-500"
+                  className="mt-1 block w-full rounded-md border-slate-700 bg-slate-800 text-white p-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 placeholder-slate-500"
                   placeholder="Product Description"
                 ></textarea>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-slate-300 mb-1">
                   Assigned Pages
                 </label>
                 <div className="mt-2 grid grid-cols-2 gap-2">
@@ -887,11 +857,11 @@ export default function ProductsManagement() {
                               : [...prev.assignedPages, page],
                           }))
                         }
-                        className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-600 rounded"
+                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-slate-700 rounded"
                       />
                       <label
                         htmlFor={page}
-                        className="ml-2 text-sm text-gray-300"
+                        className="ml-2 text-sm text-slate-300"
                       >
                         {page}
                       </label>
@@ -900,13 +870,13 @@ export default function ProductsManagement() {
                 </div>
               </div>
               {/* Gallery Images Section for Add Product */}
-              <div className="mt-6 mb-4 p-4 rounded-lg bg-gray-700/60 border border-yellow-400">
-                <label className="block text-sm font-bold text-yellow-300 mb-2">
-                  Yeh 4 images product [id] ke liye chahiye.
+              <div className="mt-6 mb-4 p-4 rounded-lg bg-slate-800/60 border border-slate-700">
+                <label className="block text-sm font-bold text-slate-200 mb-2">
+                  All 4 gallery images are required for the product detail page.
                 </label>
                 {[0,1,2,3].map(i => (
                   <div key={i} className="mb-2">
-                    <label className="block text-xs font-semibold text-yellow-200 mb-1">Img {i+1}</label>
+                    <label className="block text-xs font-semibold text-slate-400 mb-1">Img {i+1}</label>
                     <div className="flex items-center gap-4 mb-1">
                       <label className="flex items-center">
                         <input
@@ -915,9 +885,9 @@ export default function ProductsManagement() {
                           value="upload"
                           checked={galleryImageUploadType[i] === "upload"}
                           onChange={() => setGalleryImageUploadType(t => { const arr = [...t]; arr[i] = "upload"; return arr; })}
-                          className="form-radio h-4 w-4 text-yellow-500"
+                          className="form-radio h-4 w-4 text-indigo-500"
                         />
-                        <span className="ml-1 text-xs text-yellow-200">Upload</span>
+                        <span className="ml-1 text-xs text-slate-400">Upload</span>
                       </label>
                       <label className="flex items-center">
                         <input
@@ -926,9 +896,9 @@ export default function ProductsManagement() {
                           value="url"
                           checked={galleryImageUploadType[i] === "url"}
                           onChange={() => setGalleryImageUploadType(t => { const arr = [...t]; arr[i] = "url"; return arr; })}
-                          className="form-radio h-4 w-4 text-yellow-500"
+                          className="form-radio h-4 w-4 text-indigo-500"
                         />
-                        <span className="ml-1 text-xs text-yellow-200">URL</span>
+                        <span className="ml-1 text-xs text-slate-400">URL</span>
                       </label>
                     </div>
                     {galleryImageUploadType[i] === "upload" ? (
@@ -941,7 +911,7 @@ export default function ProductsManagement() {
                             handleGalleryImageUpload(files[0], i, "add");
                           }
                         }}
-                        className="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-yellow-500 file:text-white hover:file:bg-yellow-600"
+                        className="block w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700"
                       />
                     ) : (
                       <input
@@ -956,7 +926,7 @@ export default function ProductsManagement() {
                             return { ...prev, galleryImages: arr };
                           });
                         }}
-                        className="block w-full text-sm text-gray-400 bg-gray-800 rounded px-2 py-1 border border-yellow-400"
+                        className="block w-full text-sm text-slate-400 bg-slate-900 rounded px-2 py-1 border border-slate-700"
                       />
                     )}
                     {/* Always show preview if URL is present */}
@@ -981,7 +951,7 @@ export default function ProductsManagement() {
                 <button
                   type="button"
                   onClick={() => setShowAddForm(false)}
-                  className="w-full md:w-auto bg-gray-600 text-white px-5 py-2 rounded-lg shadow-md hover:bg-gray-700 transition-colors duration-200"
+                  className="w-full md:w-auto bg-gray-600 text-white px-5 py-2 rounded-lg shadow-md hover:bg-slate-800 transition-colors duration-200"
                 >
                   Cancel
                 </button>
@@ -996,37 +966,37 @@ export default function ProductsManagement() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-            className="bg-gray-800 rounded-xl shadow-lg overflow-hidden border border-gray-700 min-w-[600px]"
+            className="bg-slate-900 rounded-xl shadow-lg overflow-hidden border border-slate-800 min-w-[600px]"
         >
-          <table className="min-w-full divide-y divide-gray-700">
-            <thead className="bg-gray-700">
+          <table className="min-w-full divide-y divide-slate-800">
+            <thead className="bg-slate-800">
               <tr>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
                   Image
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
                   Name
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
                   Category
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
                   Price
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
                   Stock
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-gray-800 divide-y divide-gray-700">
+            <tbody className="bg-slate-900 divide-y divide-slate-800">
               {isLoading ? (
                 <tr>
                   <td
                     colSpan={6}
-                    className="px-6 py-4 text-center text-gray-400"
+                    className="px-6 py-4 text-center text-slate-400"
                   >
                     Loading products...
                   </td>
@@ -1035,7 +1005,7 @@ export default function ProductsManagement() {
                 <tr>
                   <td
                     colSpan={6}
-                    className="px-6 py-4 text-center text-gray-400"
+                    className="px-6 py-4 text-center text-slate-400"
                   >
                     No products found.
                   </td>
@@ -1047,7 +1017,7 @@ export default function ProductsManagement() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3 }}
-                    className="hover:bg-gray-700 transition-colors duration-200"
+                    className="hover:bg-slate-800 transition-colors duration-200"
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <img
@@ -1056,18 +1026,18 @@ export default function ProductsManagement() {
                         className="h-12 w-12 object-cover rounded-md"
                       />
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-300">
                       <Link href={`/product/${product._id}`}>
                         <span className="hover:underline cursor-pointer">{product.name}</span>
                       </Link>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
                       {product.category}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
-                      {formatIndianRupee(product.price)}
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
+                      {formatPrice(product.price, 'INR')}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
                       {product.stock}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
@@ -1085,7 +1055,7 @@ export default function ProductsManagement() {
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.9 }}
                             onClick={handleEditCancel}
-                            className="text-gray-500 hover:text-gray-400 transition-colors duration-200"
+                            className="text-slate-500 hover:text-slate-400 transition-colors duration-200"
                           >
                             Cancel
                           </motion.button>
@@ -1132,7 +1102,7 @@ export default function ProductsManagement() {
             onClick={() => setEditProductId(null)}
           >
             <div
-              className="bg-gray-800 p-8 rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-gray-700 text-gray-100"
+              className="bg-slate-900 p-8 rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-slate-800 text-gray-100"
               onClick={(e) => e.stopPropagation()}
             >
               <h2 className="text-2xl font-bold text-white mb-6">
@@ -1147,7 +1117,7 @@ export default function ProductsManagement() {
               >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-slate-300 mb-1">
                       Name
                     </label>
                     <input
@@ -1156,11 +1126,11 @@ export default function ProductsManagement() {
                       name="name"
                       value={editFormData.name}
                       onChange={handleEditChange}
-                      className="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white p-3 shadow-sm focus:border-purple-500 focus:ring-purple-500 placeholder-gray-500"
+                      className="mt-1 block w-full rounded-md border-slate-700 bg-slate-800 text-white p-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 placeholder-slate-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-slate-300 mb-1">
                       Price
                     </label>
                     <input
@@ -1169,11 +1139,11 @@ export default function ProductsManagement() {
                       name="price"
                       value={editFormData.price}
                       onChange={handleEditChange}
-                      className="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white p-3 shadow-sm focus:border-purple-500 focus:ring-purple-500 placeholder-gray-500"
+                      className="mt-1 block w-full rounded-md border-slate-700 bg-slate-800 text-white p-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 placeholder-slate-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-slate-300 mb-1">
                       Category
                     </label>
                     <input
@@ -1182,11 +1152,11 @@ export default function ProductsManagement() {
                       name="category"
                       value={editFormData.category}
                       onChange={handleEditChange}
-                      className="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white p-3 shadow-sm focus:border-purple-500 focus:ring-purple-500 placeholder-gray-500"
+                      className="mt-1 block w-full rounded-md border-slate-700 bg-slate-800 text-white p-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 placeholder-slate-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-slate-300 mb-1">
                       Stock
                     </label>
                     <input
@@ -1195,12 +1165,12 @@ export default function ProductsManagement() {
                       name="stock"
                       value={editFormData.stock}
                       onChange={handleEditChange}
-                      className="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white p-3 shadow-sm focus:border-purple-500 focus:ring-purple-500 placeholder-gray-500"
+                      className="mt-1 block w-full rounded-md border-slate-700 bg-slate-800 text-white p-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 placeholder-slate-500"
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
                     Image Upload Type
                   </label>
                   <div className="flex items-center space-x-4">
@@ -1211,9 +1181,9 @@ export default function ProductsManagement() {
                         value="url"
                         checked={imageUploadType === "url"}
                         onChange={() => setImageUploadType("url")}
-                        className="form-radio h-4 w-4 text-purple-600"
+                        className="form-radio h-4 w-4 text-indigo-600"
                       />
-                      <span className="ml-2 text-gray-300">URL</span>
+                      <span className="ml-2 text-slate-300">URL</span>
                     </label>
                     <label className="flex items-center">
                       <input
@@ -1222,15 +1192,15 @@ export default function ProductsManagement() {
                         value="upload"
                         checked={imageUploadType === "upload"}
                         onChange={() => setImageUploadType("upload")}
-                        className="form-radio h-4 w-4 text-purple-600"
+                        className="form-radio h-4 w-4 text-indigo-600"
                       />
-                      <span className="ml-2 text-gray-300">Upload</span>
+                      <span className="ml-2 text-slate-300">Upload</span>
                     </label>
                   </div>
                 </div>
                 {imageUploadType === "url" ? (
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-slate-300 mb-1">
                       Image URL
                     </label>
                     <input
@@ -1239,12 +1209,12 @@ export default function ProductsManagement() {
                       name="image"
                       value={editFormData.image}
                       onChange={handleEditChange}
-                      className="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white p-3 shadow-sm focus:border-purple-500 focus:ring-purple-500 placeholder-gray-500"
+                      className="mt-1 block w-full rounded-md border-slate-700 bg-slate-800 text-white p-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 placeholder-slate-500"
                     />
                   </div>
                 ) : (
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-slate-300 mb-1">
                       Upload Image
                     </label>
                     <input
@@ -1254,17 +1224,17 @@ export default function ProductsManagement() {
                           handleImageUpload(e.target.files[0], "image", "edit");
                         }
                       }}
-                      className="mt-1 block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-purple-600 file:text-white hover:file:bg-purple-700"
+                      className="mt-1 block w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700"
                     />
                     {editFormData.image && (
-                      <p className="text-xs text-gray-400 mt-1">
+                      <p className="text-xs text-slate-400 mt-1">
                         Uploaded: {editFormData.image}
                       </p>
                     )}
                   </div>
                 )}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
                     Hover Image Upload Type
                   </label>
                   <div className="flex items-center space-x-4">
@@ -1275,9 +1245,9 @@ export default function ProductsManagement() {
                         value="url"
                         checked={hoverImageUploadType === "url"}
                         onChange={() => setHoverImageUploadType("url")}
-                        className="form-radio h-4 w-4 text-purple-600"
+                        className="form-radio h-4 w-4 text-indigo-600"
                       />
-                      <span className="ml-2 text-gray-300">URL</span>
+                      <span className="ml-2 text-slate-300">URL</span>
                     </label>
                     <label className="flex items-center">
                       <input
@@ -1286,15 +1256,15 @@ export default function ProductsManagement() {
                         value="upload"
                         checked={hoverImageUploadType === "upload"}
                         onChange={() => setHoverImageUploadType("upload")}
-                        className="form-radio h-4 w-4 text-purple-600"
+                        className="form-radio h-4 w-4 text-indigo-600"
                       />
-                      <span className="ml-2 text-gray-300">Upload</span>
+                      <span className="ml-2 text-slate-300">Upload</span>
                     </label>
                   </div>
                 </div>
                 {hoverImageUploadType === "url" ? (
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-slate-300 mb-1">
                       Second Image URL (on hover)
                     </label>
                     <input
@@ -1302,13 +1272,13 @@ export default function ProductsManagement() {
                       name="imageHover"
                       value={editFormData.imageHover}
                       onChange={handleEditChange}
-                      className="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white p-3 shadow-sm focus:border-purple-500 focus:ring-purple-500 placeholder-gray-500"
+                      className="mt-1 block w-full rounded-md border-slate-700 bg-slate-800 text-white p-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 placeholder-slate-500"
                       placeholder="Second Image URL (on hover)"
                     />
                   </div>
                 ) : (
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-slate-300 mb-1">
                       Upload Second Image (on hover)
                     </label>
                     <input
@@ -1322,17 +1292,17 @@ export default function ProductsManagement() {
                           );
                         }
                       }}
-                      className="mt-1 block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-purple-600 file:text-white hover:file:bg-purple-700"
+                      className="mt-1 block w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700"
                     />
                     {editFormData.imageHover && (
-                      <p className="text-xs text-gray-400 mt-1">
+                      <p className="text-xs text-slate-400 mt-1">
                         Uploaded: {editFormData.imageHover}
                       </p>
                     )}
                   </div>
                 )}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
                     Description
                   </label>
                   <textarea
@@ -1341,11 +1311,11 @@ export default function ProductsManagement() {
                     value={editFormData.description}
                     onChange={handleEditChange}
                     rows={3}
-                    className="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white p-3 shadow-sm focus:border-purple-500 focus:ring-purple-500 placeholder-gray-500"
+                    className="mt-1 block w-full rounded-md border-slate-700 bg-slate-800 text-white p-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 placeholder-slate-500"
                   ></textarea>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
                     Assigned Pages
                   </label>
                   <div className="mt-2 grid grid-cols-2 gap-2">
@@ -1363,11 +1333,11 @@ export default function ProductsManagement() {
                                 : [...prev.assignedPages, page],
                             }))
                           }
-                          className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-600 rounded"
+                          className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-slate-700 rounded"
                         />
                         <label
                           htmlFor={`edit-${page}`}
-                          className="ml-2 text-sm text-gray-300"
+                          className="ml-2 text-sm text-slate-300"
                         >
                           {page}
                         </label>
@@ -1376,13 +1346,13 @@ export default function ProductsManagement() {
                   </div>
                 </div>
                 {/* Gallery Images Section for Edit Product */}
-                <div className="mt-6 mb-4 p-4 rounded-lg bg-gray-700/60 border border-yellow-400">
-                  <label className="block text-sm font-bold text-yellow-300 mb-2">
-                    Yeh 4 images product [id] ke liye chahiye.
+                <div className="mt-6 mb-4 p-4 rounded-lg bg-slate-800/60 border border-slate-700">
+                  <label className="block text-sm font-bold text-slate-200 mb-2">
+                    All 4 gallery images are required for the product detail page.
                   </label>
                   {[0,1,2,3].map(i => (
                     <div key={i} className="mb-2">
-                      <label className="block text-xs font-semibold text-yellow-200 mb-1">Img {i+1}</label>
+                      <label className="block text-xs font-semibold text-slate-400 mb-1">Img {i+1}</label>
                       <div className="flex items-center gap-4 mb-1">
                         <label className="flex items-center">
                           <input
@@ -1391,9 +1361,9 @@ export default function ProductsManagement() {
                             value="upload"
                             checked={editGalleryImageUploadType[i] === "upload"}
                             onChange={() => setEditGalleryImageUploadType(t => { const arr = [...t]; arr[i] = "upload"; return arr; })}
-                            className="form-radio h-4 w-4 text-yellow-500"
+                            className="form-radio h-4 w-4 text-indigo-500"
                           />
-                          <span className="ml-1 text-xs text-yellow-200">Upload</span>
+                          <span className="ml-1 text-xs text-slate-400">Upload</span>
                         </label>
                         <label className="flex items-center">
                           <input
@@ -1402,9 +1372,9 @@ export default function ProductsManagement() {
                             value="url"
                             checked={editGalleryImageUploadType[i] === "url"}
                             onChange={() => setEditGalleryImageUploadType(t => { const arr = [...t]; arr[i] = "url"; return arr; })}
-                            className="form-radio h-4 w-4 text-yellow-500"
+                            className="form-radio h-4 w-4 text-indigo-500"
                           />
-                          <span className="ml-1 text-xs text-yellow-200">URL</span>
+                          <span className="ml-1 text-xs text-slate-400">URL</span>
                         </label>
                       </div>
                       {editGalleryImageUploadType[i] === "upload" ? (
@@ -1417,7 +1387,7 @@ export default function ProductsManagement() {
                               handleGalleryImageUpload(files[0], i, "edit");
                             }
                           }}
-                          className="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-yellow-500 file:text-white hover:file:bg-yellow-600"
+                          className="block w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700"
                         />
                       ) : (
                         <input
@@ -1432,7 +1402,7 @@ export default function ProductsManagement() {
                               return { ...prev, galleryImages: arr };
                             });
                           }}
-                          className="block w-full text-sm text-gray-400 bg-gray-800 rounded px-2 py-1 border border-yellow-400"
+                          className="block w-full text-sm text-slate-400 bg-slate-900 rounded px-2 py-1 border border-slate-700"
                         />
                       )}
                       {/* Always show preview if URL is present */}
@@ -1457,7 +1427,7 @@ export default function ProductsManagement() {
                   <button
                     type="button"
                     onClick={handleEditCancel}
-                    className="bg-gray-600 text-white px-5 py-2 rounded-lg shadow-md hover:bg-gray-700 transition-colors duration-200"
+                    className="bg-gray-600 text-white px-5 py-2 rounded-lg shadow-md hover:bg-slate-800 transition-colors duration-200"
                   >
                     Cancel
                   </button>
@@ -1469,130 +1439,137 @@ export default function ProductsManagement() {
 
         {/* Navbar Modal */}
         {showNavbarModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShowNavbarModal(false)}>
-            <div className="bg-white/80 backdrop-blur-2xl rounded-2xl shadow-2xl p-8 w-full max-w-5xl relative border border-gray-200" onClick={e => e.stopPropagation()}>
-              <button className="absolute top-4 right-4 text-gray-400 hover:text-red-500 text-2xl transition-colors" onClick={() => setShowNavbarModal(false)}>
-                <span className="sr-only">Close</span>✖️
-              </button>
-              <h2 className="text-3xl font-extrabold text-center mb-6 bg-gradient-to-r from-yellow-500 via-pink-500 to-blue-500 bg-clip-text text-transparent drop-shadow-lg tracking-wide uppercase">Edit Navbar Products</h2>
-              {/* Horizontal Sections */}
-              <div className="flex flex-col md:flex-row md:flex-nowrap gap-8 w-full overflow-x-auto pb-2">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => setShowNavbarModal(false)}>
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-6 md:p-8 w-full max-w-5xl max-h-[90vh] overflow-y-auto relative" onClick={e => e.stopPropagation()}>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-lg font-semibold text-white">Navbar product placement</h2>
+                <button className="text-slate-500 hover:text-slate-300 transition-colors" onClick={() => setShowNavbarModal(false)}>
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Shop All Section */}
-                <div className="flex-shrink-0 min-w-[320px] bg-white/95 rounded-2xl shadow-xl border-2 border-yellow-300 p-7 flex flex-col items-stretch justify-between h-full">
-                  <h3 className="text-2xl font-extrabold mb-6 bg-gradient-to-r from-yellow-500 via-yellow-400 to-yellow-600 bg-clip-text text-transparent uppercase tracking-wider drop-shadow">Shop All</h3>
+                <div className="bg-slate-950 rounded-xl border border-slate-800 p-5 flex flex-col">
+                  <h3 className="text-sm font-medium text-white mb-4">Shop All</h3>
                   {navbarLoading ? (
-                    <div className="text-center py-8 text-lg font-semibold text-gray-500">Loading...</div>
+                    <div className="text-center py-8 text-sm text-slate-500">Loading...</div>
                   ) : (
                     <>
-                      <ul className="mb-6 divide-y divide-gray-200">
+                      <ul className="mb-4 divide-y divide-slate-800 flex-1">
                         {navbarProducts.map((item: { id: string; name: string; slug: string }) => (
-                          <li key={item.id} className="flex items-center justify-between py-2 px-2 rounded-lg hover:bg-gradient-to-r hover:from-yellow-50 hover:to-blue-50 transition-all group">
+                          <li key={item.id} className="flex items-center justify-between py-2 group">
                             {navbarEdit && navbarEdit.id === item.id ? (
-                              <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full">
-                                <input ref={nameRef} defaultValue={item.name} className="border border-yellow-300 rounded-lg px-2 py-1 focus:ring-2 focus:ring-yellow-400 shadow-sm w-full sm:w-48 text-gray-900 bg-white font-semibold" />
-                                <input ref={slugRef} defaultValue={item.slug} className="border border-blue-300 rounded-lg px-2 py-1 focus:ring-2 focus:ring-blue-400 shadow-sm w-full sm:w-48 text-gray-900 bg-white font-semibold" />
-                                <div className="flex flex-row flex-wrap gap-2 items-center">
-                                  <button onClick={handleNavbarSave} className="text-green-600 font-bold px-2 py-1 rounded hover:bg-green-100 transition-colors flex items-center gap-1 whitespace-nowrap"><span>✔️</span>Save</button>
-                                  <button onClick={() => setNavbarEdit(null)} className="text-gray-500 px-2 py-1 rounded hover:bg-gray-200 transition-colors font-semibold whitespace-nowrap">Cancel</button>
+                              <div className="flex flex-col gap-2 w-full">
+                                <input ref={nameRef} defaultValue={item.name} className="border border-slate-700 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-indigo-500 text-sm text-white bg-slate-900" />
+                                <input ref={slugRef} defaultValue={item.slug} className="border border-slate-700 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-indigo-500 text-sm text-white bg-slate-900" />
+                                <div className="flex gap-3">
+                                  <button onClick={handleNavbarSave} className="text-emerald-400 hover:text-emerald-300 text-xs font-medium flex items-center gap-1"><Check className="h-3.5 w-3.5" />Save</button>
+                                  <button onClick={() => setNavbarEdit(null)} className="text-slate-500 hover:text-slate-300 text-xs font-medium">Cancel</button>
                                 </div>
                               </div>
                             ) : (
                               <>
-                                <span className="font-semibold text-gray-800 group-hover:text-yellow-700 transition-colors">{item.name}</span>
-                                <span className="text-xs text-gray-400 ml-2 group-hover:text-blue-600 transition-colors">/{item.slug}</span>
-                                <div className="flex gap-2 ml-auto">
-                                  <button onClick={() => handleNavbarEdit(item)} className="text-blue-600 font-bold px-2 py-1 rounded hover:bg-blue-100 transition-colors flex items-center gap-1"><span>✏️</span>Edit</button>
-                                  <button onClick={() => handleNavbarDelete(item.id)} className="text-red-600 font-bold px-2 py-1 rounded hover:bg-red-100 transition-colors flex items-center gap-1"><span>🗑️</span>Delete</button>
+                                <div className="min-w-0">
+                                  <span className="text-sm text-slate-200 truncate block">{item.name}</span>
+                                  <span className="text-xs text-slate-500">/{item.slug}</span>
+                                </div>
+                                <div className="flex gap-2 ml-2 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <button onClick={() => handleNavbarEdit(item)} className="text-slate-400 hover:text-indigo-400"><Pencil className="h-3.5 w-3.5" /></button>
+                                  <button onClick={() => handleNavbarDelete(item.id)} className="text-slate-400 hover:text-red-400"><Trash2 className="h-3.5 w-3.5" /></button>
                                 </div>
                               </>
                             )}
                           </li>
                         ))}
                       </ul>
-                      <div className="flex flex-col sm:flex-row gap-2 mt-4 items-center w-full">
-                        <input ref={nameRef} placeholder="Name" className="border border-yellow-300 rounded-lg px-3 py-2 shadow-sm focus:ring-2 focus:ring-yellow-400 w-full sm:w-1/3" />
-                        <input ref={slugRef} placeholder="Slug" className="border border-blue-300 rounded-lg px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-400 w-full sm:w-1/3" />
-                        <button onClick={handleNavbarAdd} className="bg-gradient-to-r from-yellow-400 via-pink-400 to-blue-400 text-white px-5 py-2 rounded-lg font-bold shadow-md hover:from-yellow-500 hover:to-blue-500 transition-all w-full sm:w-auto">Add</button>
+                      <div className="flex flex-col gap-2 pt-3 border-t border-slate-800">
+                        <input ref={nameRef} placeholder="Name" className="border border-slate-700 rounded-lg px-3 py-1.5 text-sm bg-slate-900 text-white focus:ring-2 focus:ring-indigo-500" />
+                        <input ref={slugRef} placeholder="Slug" className="border border-slate-700 rounded-lg px-3 py-1.5 text-sm bg-slate-900 text-white focus:ring-2 focus:ring-indigo-500" />
+                        <button onClick={handleNavbarAdd} className="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors">Add</button>
                       </div>
                     </>
                   )}
                 </div>
                 {/* Bestseller Section */}
-                <div className="flex-shrink-0 min-w-[320px] bg-white/95 rounded-2xl shadow-xl border-2 border-pink-300 p-7 flex flex-col items-stretch justify-between h-full">
-                  <h3 className="text-2xl font-extrabold mb-6 bg-gradient-to-r from-pink-500 via-pink-400 to-pink-600 bg-clip-text text-transparent uppercase tracking-wider drop-shadow">Bestseller</h3>
+                <div className="bg-slate-950 rounded-xl border border-slate-800 p-5 flex flex-col">
+                  <h3 className="text-sm font-medium text-white mb-4">Bestseller</h3>
                   {bestsellerLoading ? (
-                    <div className="text-center py-8 text-lg font-semibold text-gray-500">Loading...</div>
+                    <div className="text-center py-8 text-sm text-slate-500">Loading...</div>
                   ) : (
                     <>
-                      <ul className="mb-6 divide-y divide-gray-200">
+                      <ul className="mb-4 divide-y divide-slate-800 flex-1">
                         {bestsellerProducts.map((item: { id: string; name: string; slug: string }) => (
-                          <li key={item.id} className="flex items-center justify-between py-2 px-2 rounded-lg hover:bg-gradient-to-r hover:from-pink-50 hover:to-yellow-50 transition-all group">
+                          <li key={item.id} className="flex items-center justify-between py-2 group">
                             {bestsellerEdit && bestsellerEdit.id === item.id ? (
-                              <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full">
-                                <input ref={bestsellerNameRef} defaultValue={item.name} className="border border-pink-300 rounded-lg px-2 py-1 focus:ring-2 focus:ring-pink-400 shadow-sm w-full sm:w-48 text-gray-900 bg-white font-semibold" />
-                                <input ref={bestsellerSlugRef} defaultValue={item.slug} className="border border-yellow-300 rounded-lg px-2 py-1 focus:ring-2 focus:ring-yellow-400 shadow-sm w-full sm:w-48 text-gray-900 bg-white font-semibold" />
-                                <div className="flex flex-row flex-wrap gap-2 items-center">
-                                  <button onClick={handleBestsellerSave} className="text-green-600 font-bold px-2 py-1 rounded hover:bg-green-100 transition-colors flex items-center gap-1 whitespace-nowrap"><span>✔️</span>Save</button>
-                                  <button onClick={() => setBestsellerEdit(null)} className="text-gray-500 px-2 py-1 rounded hover:bg-gray-200 transition-colors font-semibold whitespace-nowrap">Cancel</button>
+                              <div className="flex flex-col gap-2 w-full">
+                                <input ref={bestsellerNameRef} defaultValue={item.name} className="border border-slate-700 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-indigo-500 text-sm text-white bg-slate-900" />
+                                <input ref={bestsellerSlugRef} defaultValue={item.slug} className="border border-slate-700 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-indigo-500 text-sm text-white bg-slate-900" />
+                                <div className="flex gap-3">
+                                  <button onClick={handleBestsellerSave} className="text-emerald-400 hover:text-emerald-300 text-xs font-medium flex items-center gap-1"><Check className="h-3.5 w-3.5" />Save</button>
+                                  <button onClick={() => setBestsellerEdit(null)} className="text-slate-500 hover:text-slate-300 text-xs font-medium">Cancel</button>
                                 </div>
                               </div>
                             ) : (
                               <>
-                                <span className="font-semibold text-gray-800 group-hover:text-pink-700 transition-colors">{item.name}</span>
-                                <span className="text-xs text-gray-400 ml-2 group-hover:text-yellow-600 transition-colors">/{item.slug}</span>
-                                <div className="flex gap-2 ml-auto">
-                                  <button onClick={() => handleBestsellerEdit(item)} className="text-pink-600 font-bold px-2 py-1 rounded hover:bg-pink-100 transition-colors flex items-center gap-1"><span>✏️</span>Edit</button>
-                                  <button onClick={() => handleBestsellerDelete(item.id)} className="text-red-600 font-bold px-2 py-1 rounded hover:bg-red-100 transition-colors flex items-center gap-1"><span>🗑️</span>Delete</button>
+                                <div className="min-w-0">
+                                  <span className="text-sm text-slate-200 truncate block">{item.name}</span>
+                                  <span className="text-xs text-slate-500">/{item.slug}</span>
+                                </div>
+                                <div className="flex gap-2 ml-2 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <button onClick={() => handleBestsellerEdit(item)} className="text-slate-400 hover:text-indigo-400"><Pencil className="h-3.5 w-3.5" /></button>
+                                  <button onClick={() => handleBestsellerDelete(item.id)} className="text-slate-400 hover:text-red-400"><Trash2 className="h-3.5 w-3.5" /></button>
                                 </div>
                               </>
                             )}
                           </li>
                         ))}
                       </ul>
-                      <div className="flex flex-col sm:flex-row gap-2 mt-4 items-center w-full">
-                        <input ref={bestsellerNameRef} placeholder="Name" className="border border-pink-300 rounded-lg px-3 py-2 shadow-sm focus:ring-2 focus:ring-pink-400 w-full sm:w-1/3" />
-                        <input ref={bestsellerSlugRef} placeholder="Slug" className="border border-yellow-300 rounded-lg px-3 py-2 shadow-sm focus:ring-2 focus:ring-yellow-400 w-full sm:w-1/3" />
-                        <button onClick={handleBestsellerAdd} className="bg-gradient-to-r from-pink-400 via-yellow-400 to-pink-500 text-white px-5 py-2 rounded-lg font-bold shadow-md hover:from-pink-500 hover:to-yellow-500 transition-all w-full sm:w-auto">Add</button>
+                      <div className="flex flex-col gap-2 pt-3 border-t border-slate-800">
+                        <input ref={bestsellerNameRef} placeholder="Name" className="border border-slate-700 rounded-lg px-3 py-1.5 text-sm bg-slate-900 text-white focus:ring-2 focus:ring-indigo-500" />
+                        <input ref={bestsellerSlugRef} placeholder="Slug" className="border border-slate-700 rounded-lg px-3 py-1.5 text-sm bg-slate-900 text-white focus:ring-2 focus:ring-indigo-500" />
+                        <button onClick={handleBestsellerAdd} className="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors">Add</button>
                       </div>
                     </>
                   )}
                 </div>
                 {/* Fragrance Section */}
-                <div className="flex-shrink-0 min-w-[320px] bg-white/95 rounded-2xl shadow-xl border-2 border-green-300 p-7 flex flex-col items-stretch justify-between h-full">
-                  <h3 className="text-2xl font-extrabold mb-6 bg-gradient-to-r from-green-500 via-green-400 to-green-600 bg-clip-text text-transparent uppercase tracking-wider drop-shadow">Fragrance</h3>
+                <div className="bg-slate-950 rounded-xl border border-slate-800 p-5 flex flex-col">
+                  <h3 className="text-sm font-medium text-white mb-4">Fragrance</h3>
                   {fragranceLoading ? (
-                    <div className="text-center py-8 text-lg font-semibold text-gray-500">Loading...</div>
+                    <div className="text-center py-8 text-sm text-slate-500">Loading...</div>
                   ) : (
                     <>
-                      <ul className="mb-6 divide-y divide-gray-200">
+                      <ul className="mb-4 divide-y divide-slate-800 flex-1">
                         {fragranceProducts.map((item: { id: string; name: string; slug: string }) => (
-                          <li key={item.id} className="flex items-center justify-between py-2 px-2 rounded-lg hover:bg-gradient-to-r hover:from-green-50 hover:to-yellow-50 transition-all group">
+                          <li key={item.id} className="flex items-center justify-between py-2 group">
                             {fragranceEdit && fragranceEdit.id === item.id ? (
-                              <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full">
-                                <input ref={fragranceNameRef} defaultValue={item.name} className="border border-green-300 rounded-lg px-2 py-1 focus:ring-2 focus:ring-green-400 shadow-sm w-full sm:w-48 text-gray-900 bg-white font-semibold" />
-                                <input ref={fragranceSlugRef} defaultValue={item.slug} className="border border-yellow-300 rounded-lg px-2 py-1 focus:ring-2 focus:ring-yellow-400 shadow-sm w-full sm:w-48 text-gray-900 bg-white font-semibold" />
-                                <div className="flex flex-row flex-wrap gap-2 items-center">
-                                  <button onClick={handleFragranceSave} className="text-green-600 font-bold px-2 py-1 rounded hover:bg-green-100 transition-colors flex items-center gap-1 whitespace-nowrap"><span>✔️</span>Save</button>
-                                  <button onClick={() => setFragranceEdit(null)} className="text-gray-500 px-2 py-1 rounded hover:bg-gray-200 transition-colors font-semibold whitespace-nowrap">Cancel</button>
+                              <div className="flex flex-col gap-2 w-full">
+                                <input ref={fragranceNameRef} defaultValue={item.name} className="border border-slate-700 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-indigo-500 text-sm text-white bg-slate-900" />
+                                <input ref={fragranceSlugRef} defaultValue={item.slug} className="border border-slate-700 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-indigo-500 text-sm text-white bg-slate-900" />
+                                <div className="flex gap-3">
+                                  <button onClick={handleFragranceSave} className="text-emerald-400 hover:text-emerald-300 text-xs font-medium flex items-center gap-1"><Check className="h-3.5 w-3.5" />Save</button>
+                                  <button onClick={() => setFragranceEdit(null)} className="text-slate-500 hover:text-slate-300 text-xs font-medium">Cancel</button>
                                 </div>
                               </div>
                             ) : (
                               <>
-                                <span className="font-semibold text-gray-800 group-hover:text-green-700 transition-colors">{item.name}</span>
-                                <span className="text-xs text-gray-400 ml-2 group-hover:text-yellow-600 transition-colors">/{item.slug}</span>
-                                <div className="flex gap-2 ml-auto">
-                                  <button onClick={() => handleFragranceEdit(item)} className="text-green-600 font-bold px-2 py-1 rounded hover:bg-green-100 transition-colors flex items-center gap-1"><span>✏️</span>Edit</button>
-                                  <button onClick={() => handleFragranceDelete(item.id)} className="text-red-600 font-bold px-2 py-1 rounded hover:bg-red-100 transition-colors flex items-center gap-1"><span>🗑️</span>Delete</button>
+                                <div className="min-w-0">
+                                  <span className="text-sm text-slate-200 truncate block">{item.name}</span>
+                                  <span className="text-xs text-slate-500">/{item.slug}</span>
+                                </div>
+                                <div className="flex gap-2 ml-2 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <button onClick={() => handleFragranceEdit(item)} className="text-slate-400 hover:text-indigo-400"><Pencil className="h-3.5 w-3.5" /></button>
+                                  <button onClick={() => handleFragranceDelete(item.id)} className="text-slate-400 hover:text-red-400"><Trash2 className="h-3.5 w-3.5" /></button>
                                 </div>
                               </>
                             )}
                           </li>
                         ))}
                       </ul>
-                      <div className="flex flex-col sm:flex-row gap-2 mt-4 items-center w-full">
-                        <input ref={fragranceNameRef} placeholder="Name" className="border border-green-300 rounded-lg px-3 py-2 shadow-sm focus:ring-2 focus:ring-green-400 w-full sm:w-1/3" />
-                        <input ref={fragranceSlugRef} placeholder="Slug" className="border border-yellow-300 rounded-lg px-3 py-2 shadow-sm focus:ring-2 focus:ring-yellow-400 w-full sm:w-1/3" />
-                        <button onClick={handleFragranceAdd} className="bg-gradient-to-r from-green-400 via-yellow-400 to-green-500 text-white px-5 py-2 rounded-lg font-bold shadow-md hover:from-green-500 hover:to-yellow-500 transition-all w-full sm:w-auto">Add</button>
+                      <div className="flex flex-col gap-2 pt-3 border-t border-slate-800">
+                        <input ref={fragranceNameRef} placeholder="Name" className="border border-slate-700 rounded-lg px-3 py-1.5 text-sm bg-slate-900 text-white focus:ring-2 focus:ring-indigo-500" />
+                        <input ref={fragranceSlugRef} placeholder="Slug" className="border border-slate-700 rounded-lg px-3 py-1.5 text-sm bg-slate-900 text-white focus:ring-2 focus:ring-indigo-500" />
+                        <button onClick={handleFragranceAdd} className="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors">Add</button>
                       </div>
                     </>
                   )}
