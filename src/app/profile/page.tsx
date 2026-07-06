@@ -72,7 +72,7 @@ export default function ProfilePage() {
         });
         userEmail = adminData.email;
       } else {
-        router.replace("/login");
+        router.replace("/?authModal=login");
       }
       if (userEmail) {
         const storedImg = localStorage.getItem(`profileImg_${userEmail}`);

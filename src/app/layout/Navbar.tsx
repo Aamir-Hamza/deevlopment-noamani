@@ -25,8 +25,8 @@ import {
 import { useRouter, usePathname } from "next/navigation";
 import { toast } from "react-hot-toast";
 import Image from "next/image";
-import { LoginModal } from "@/components/LoginModal";
 import { CartProvider } from "@/context/CartContext";
+import { useAuthModal } from "@/context/AuthModalContext";
 import { products } from "@/data/products";
 import { Kolker_Brush, Italianno } from 'next/font/google';
 import { useCountry } from '@/hooks/useCountry';
@@ -70,8 +70,7 @@ export default function Navbar() {
   const [cartItemsCount, setCartItemsCount] = useState(0);
   const [isMounted, setIsMounted] = useState(false);
   const [profileImg, setProfileImg] = useState<string | null>(null);
-  const [showLoginModal, setShowLoginModal] = useState(false);
-  const [pendingCartItem, setPendingCartItem] = useState<any>(null);
+  const { openAuthModal } = useAuthModal();
   const { countryData, loading: countryLoading, country: selectedCountry } = useCountry();
   const userEmailRef = useRef<string | null>(null);
   const [showSearchModal, setShowSearchModal] = useState(false);
@@ -335,9 +334,8 @@ export default function Navbar() {
     }
   };
 
-  const handleRequireLogin = (item: any) => {
-    setPendingCartItem(item);
-    setShowLoginModal(true);
+  const handleRequireLogin = () => {
+    openAuthModal('login');
   };
 
   const handleSearch = (query: string) => {
@@ -530,7 +528,7 @@ export default function Navbar() {
           </div>
         ) : (
           <button
-            onClick={() => setShowLoginModal(true)}
+            onClick={() => openAuthModal('login')}
             className={cn("transition-all duration-200 hover:opacity-70 hover:scale-110", iconColor)}
             aria-label={t('nav.login')}
           >
@@ -737,18 +735,6 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* ═══ LOGIN MODAL ═══ */}
-        {/* Portaled to document.body: the header's backdrop-blur creates a
-            CSS containing block for fixed-position descendants, which would
-            otherwise clip this full-screen modal to the header's box. */}
-        {createPortal(
-          <AnimatePresence>
-            {showLoginModal && (
-              <LoginModal onClose={() => setShowLoginModal(false)} />
-            )}
-          </AnimatePresence>,
-          document.body
-        )}
 
         {/* ═══ SEARCH MODAL ═══ */}
         {createPortal(

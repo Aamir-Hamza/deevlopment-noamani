@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 export default function AdminLoginPage() {
   const router = useRouter();
   useEffect(() => {
-    router.replace("/login");
+    router.replace("/?authModal=login");
   }, [router]);
   return <div>Redirecting to main login...</div>;
 }

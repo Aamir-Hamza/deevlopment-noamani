@@ -32,7 +32,7 @@ export default function OrdersPage() {
       } else if (adminInfo) {
         setUser({ ...JSON.parse(adminInfo), isAdmin: true });
       } else {
-        router.replace("/login");
+        router.replace("/?authModal=login");
       }
     }
   }, [router]);
