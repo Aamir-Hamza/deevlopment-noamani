@@ -19,17 +19,6 @@ import EmptyState from "@/components/ui/EmptyState";
 import Footer from '@/components/Footer';
 import { useTranslation } from "react-i18next";
 
-// Format price in Indian Rupee format (raw database price, no conversion)
-const formatIndianRupee = (price: number) => {
-  if (!price || isNaN(price)) return '₹0';
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(price);
-};
-
 const categories = ["All", "Floral", "Fresh", "Oriental", "Sets"];
 const sortOptions = [
   "Newest",
@@ -49,7 +38,7 @@ export default function ShopPage() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
-  const { country } = useCountry();
+  const { countryData } = useCountry();
   const { addToCart } = useCart();
 
   useEffect(() => {
@@ -267,7 +256,7 @@ export default function ShopPage() {
                     ({(product.reviews || 0).toLocaleString()} reviews)
                   </span>
                 </div>
-                <p className="text-xl font-extrabold text-pink-600 mb-4">{formatIndianRupee(product.price)}</p>
+                <p className="text-xl font-extrabold text-pink-600 mb-4">{formatPrice(product.price, countryData?.currency)}</p>
                 <div className="flex justify-center mt-4">
                   <button
                     onClick={(e) => handleAddToCart(e, product)}

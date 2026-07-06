@@ -142,7 +142,8 @@
     "fillRequired": "कृपया सभी आवश्यक फ़ील्ड भरें",
     "paymentInitFailed": "भुगतान प्रारंभ करने में विफल",
     "paymentSuccessful": "भुगतान सफल!",
-    "paymentError": "भुगतान प्रोसेस करने में त्रुटि"
+    "paymentError": "भुगतान प्रोसेस करने में त्रुटि",
+    "approxCurrencyNote": "अनुमानित — आपसे {{amount}} (INR) चार्ज किया जाएगा"
   },
   "product": {
     "addToCart": "कार्ट में जोड़ें",

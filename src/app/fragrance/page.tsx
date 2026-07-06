@@ -19,7 +19,7 @@ export default function FragrancePage() {
   const [loading, setLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
-  const country = useCountry();
+  const { countryData } = useCountry();
   const { addToCart } = useCart();
 
   useEffect(() => {
@@ -154,7 +154,7 @@ export default function FragrancePage() {
                         ({(product.reviews || 0).toLocaleString()} reviews)
                       </span>
                     </div>
-                    <p className="text-xl font-extrabold text-pink-600 mb-4">{formatPrice(product.price, country)}</p>
+                    <p className="text-xl font-extrabold text-pink-600 mb-4">{formatPrice(product.price, countryData?.currency)}</p>
                     <div className="flex justify-center mt-4">
                       <button
                         onClick={() => handleAddToCart(product)}

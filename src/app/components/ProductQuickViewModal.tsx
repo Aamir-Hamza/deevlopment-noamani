@@ -45,7 +45,7 @@ const defaultSizes = [
 ];
 
 export default function ProductQuickViewModal({ open, onClose, product, onPrev, onNext }: ProductQuickViewModalProps) {
-  const country = useCountry();
+  const { countryData } = useCountry();
   const { addToCart } = useCart();
   const sizes = product?.sizes || defaultSizes;
   const basePrice = product?.basePrice || product?.price || 0;
@@ -164,7 +164,7 @@ export default function ProductQuickViewModal({ open, onClose, product, onPrev, 
               </h2>
               <div className="flex items-center gap-4 mb-6">
                 <span className="text-xl sm:text-2xl font-bold text-black tracking-wide">
-                  {formatPrice(getPrice(), country)}
+                  {formatPrice(getPrice(), countryData?.currency)}
                 </span>
                 <span className="ml-2 px-3 py-1 bg-gray-100 rounded-full text-sm text-gray-700">
                   {selectedSize.label}

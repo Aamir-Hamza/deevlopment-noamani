@@ -55,7 +55,7 @@ export default function ProductDetailPage({
   const [isAdding, setIsAdding] = useState(false);
 
   const { addToCart } = useCart();
-  const { country } = useCountry();
+  const { countryData } = useCountry();
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -110,7 +110,7 @@ export default function ProductDetailPage({
   const basePrice = Math.round(
     product.price * DEFAULT_SIZES[selectedSizeIndex].priceFactor
   );
-  const { symbol, value: displayPrice } = getPrice(basePrice, country);
+  const { symbol, value: displayPrice } = getPrice(basePrice, countryData?.currency);
 
   const sections: AccordionSection[] = [
     { key: "description", labelKey: "product.description", content: product.description },
@@ -136,7 +136,10 @@ export default function ProductDetailPage({
       await addToCart({
         id: product._id || product.id || params.id,
         name: product.name,
-        price: displayPrice,
+        // Cart/checkout always deal in the raw INR base price — displayPrice
+        // is a currency-converted string for on-screen display only and must
+        // never be what gets charged.
+        price: basePrice,
         image: product.image,
         quantity,
         size: DEFAULT_SIZES[selectedSizeIndex].label,
@@ -402,7 +405,7 @@ export default function ProductDetailPage({
                     {p.name}
                   </h3>
                   <p className="text-sm text-gray-500">
-                    {getPrice(p.price, country).symbol}{getPrice(p.price, country).value}
+                    {getPrice(p.price, countryData?.currency).symbol}{getPrice(p.price, countryData?.currency).value}
                   </p>
                 </Link>
               ))}

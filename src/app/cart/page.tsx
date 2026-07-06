@@ -10,28 +10,27 @@ import { toast } from 'react-hot-toast'
 import Image from 'next/image'
 import { useTranslation } from 'react-i18next'
 import { useCountry } from '@/hooks/useCountry'
-import { formatPrice, getPrice } from '@/lib/priceUtils'
+import { formatPrice } from '@/lib/priceUtils'
 
 export default function CartPage() {
   const router = useRouter()
   const { t } = useTranslation()
   const { cart, removeFromCart, updateQuantity } = useCart()
-  const { country } = useCountry();
+  const { countryData } = useCountry();
+  const currency = countryData?.currency;
   const [isClient, setIsClient] = useState(false)
-  const [subtotal, setSubtotal] = useState(0)
+  const [subtotalINR, setSubtotalINR] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const [checkoutLoading, setCheckoutLoading] = useState(false)
 
   useEffect(() => {
     setIsClient(true)
-    const total = cart.reduce((sum, item) => {
-      const priceInBaseCurrency = item.price;
-      const { value } = getPrice(priceInBaseCurrency, country);
-      return sum + (value * item.quantity);
-    }, 0)
-    setSubtotal(total)
+    // Kept in raw INR — this page only ever displays a converted estimate;
+    // checkout independently recomputes the real INR total for charging.
+    const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
+    setSubtotalINR(total)
     setIsLoading(false)
-  }, [cart, country])
+  }, [cart])
 
   const handleQuantityChange = async (itemId: string, newQuantity: number) => {
     try {
@@ -117,11 +116,10 @@ export default function CartPage() {
     )
   }
 
-  const { symbol } = getPrice(0, country);
-  const shippingThreshold = country === 'IN' ? 8000 : 100;
-  const shippingCost = country === 'IN' ? 80 : 10;
-  const shipping = subtotal >= shippingThreshold ? 0 : shippingCost;
-  const total = subtotal + shipping
+  const shippingThresholdINR = 8000;
+  const shippingCostINR = 80;
+  const shippingINR = subtotalINR >= shippingThresholdINR ? 0 : shippingCostINR;
+  const totalINR = subtotalINR + shippingINR
 
   return (
     <div className="min-h-screen">
@@ -191,7 +189,7 @@ export default function CartPage() {
                             )}
                           </div>
                           <p className="text-lg font-medium text-gray-900">
-                            {formatPrice(item.price * item.quantity, country)}
+                            {formatPrice(item.price * item.quantity, currency)}
                           </p>
                         </div>
                         <div className="flex items-center justify-between mt-6">
@@ -234,23 +232,23 @@ export default function CartPage() {
               <div className="space-y-4">
                 <div className="flex justify-between text-base">
                   <p className="text-gray-500">{t('cart.subtotal')}</p>
-                  <p className="text-gray-900">{symbol}{subtotal}</p>
+                  <p className="text-gray-900">{formatPrice(subtotalINR, currency)}</p>
                 </div>
                 <div className="flex justify-between text-base">
                   <p className="text-gray-500">{t('cart.shipping')}</p>
                   <p className="text-gray-900">
-                    {shipping === 0 ? t('cart.free') : `${symbol}${shipping}`}
+                    {shippingINR === 0 ? t('cart.free') : formatPrice(shippingINR, currency)}
                   </p>
                 </div>
-                {shipping > 0 && (
+                {shippingINR > 0 && (
                   <p className="text-sm text-gray-500 italic">
-                    {t('cart.freeShippingOn', { amount: `${symbol}${shippingThreshold}` })}
+                    {t('cart.freeShippingOn', { amount: formatPrice(shippingThresholdINR, currency) })}
                   </p>
                 )}
                 <div className="border-t pt-4 mt-4">
                   <div className="flex justify-between text-lg font-medium">
                     <p className="text-gray-900">{t('cart.total')}</p>
-                    <p className="text-gray-900">{symbol}{total}</p>
+                    <p className="text-gray-900">{formatPrice(totalINR, currency)}</p>
                   </div>
                 </div>
                 <button

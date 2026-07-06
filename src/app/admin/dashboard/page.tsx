@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { toast } from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import { AdminSidebar } from '@/components/AdminSidebar';
-import { useCountry } from '@/hooks/useCountry';
 import { formatPrice } from '@/lib/priceUtils';
 
 interface DashboardStats {
@@ -26,7 +25,6 @@ export default function AdminDashboard() {
     recentOrders: []
   });
   const [isLoading, setIsLoading] = useState(true);
-  const { country } = useCountry();
 
   useEffect(() => {
     // Check if admin is logged in
@@ -133,7 +131,7 @@ export default function AdminDashboard() {
             <div className="absolute top-0 left-0 w-full h-full bg-black opacity-10 rounded-xl"></div>
             <h3 className="text-lg font-semibold text-white mb-2 relative z-10">Total Revenue</h3>
             <p className="text-4xl font-bold text-white relative z-10">
-              {isLoading ? 'Loading...' : formatPrice(stats.totalRevenue, country)}
+              {isLoading ? 'Loading...' : formatPrice(stats.totalRevenue, 'INR')}
             </p>
           </motion.div>
         </div>
@@ -186,7 +184,7 @@ export default function AdminDashboard() {
                         {order.shippingAddress?.name || 'N/A'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                        {formatPrice(order.totalAmount, country)}
+                        {formatPrice(order.totalAmount, 'INR')}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(order.status)}`}>

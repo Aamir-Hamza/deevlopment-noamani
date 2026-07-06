@@ -10,7 +10,7 @@ import Link from 'next/link';
 export default function RoseSaffronPage() {
   const { addToCart } = useCart();
   const [loading, setLoading] = useState(false);
-  const country = useCountry();
+  const { countryData } = useCountry();
 
   // Product data (should match card)
   const product = {
@@ -89,7 +89,7 @@ export default function RoseSaffronPage() {
               </button>
             ))}
           </div>
-          <div className="text-xl font-bold text-pink-700 mb-4">{formatPrice(getPrice(), country)}</div>
+          <div className="text-xl font-bold text-pink-700 mb-4">{formatPrice(getPrice(), countryData?.currency)}</div>
           <p className="text-gray-700 mb-4 text-base leading-relaxed text-center md:text-left">{product.description}</p>
           <ul className="mb-4 space-y-1 text-sm">
             <li><span className="font-semibold text-gray-900">Top Notes:</span> {product.notes.top}</li>

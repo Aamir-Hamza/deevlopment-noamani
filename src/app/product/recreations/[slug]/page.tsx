@@ -11,6 +11,8 @@ import { useCart } from '@/context/CartContext';
 import confetti from 'canvas-confetti';
 import LazyLoader from '@/components/ui/LazyLoader';
 import ProductImage from '@/components/ui/ProductImage';
+import { useCountry } from '@/hooks/useCountry';
+import { formatPrice } from '@/lib/priceUtils';
 
 const DEFAULT_SIZES = [
   { label: '25 mL', value: 25, priceFactor: 0.25 },
@@ -39,6 +41,7 @@ export default function RecreationProductPage({ params }: { params: { slug: stri
   const [isAdding, setIsAdding] = useState(false);
 
   const { addToCart } = useCart();
+  const { countryData } = useCountry();
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -82,23 +85,14 @@ export default function RecreationProductPage({ params }: { params: { slug: stri
   const images: string[] = product.images && product.images.length > 0 ? product.images : ['/boxs.png'];
   const mainImage = images[selectedImageIndex] || images[0];
 
-  // Raw database price, no currency conversion — recreations are priced in INR only.
+  // Raw database price in INR — this is what actually gets charged and
+  // stored in the cart. Display-only conversion happens via formatPrice below.
   const basePrice = (() => {
     const raw = product?.price;
     const parsed = typeof raw === 'number' ? raw : Number(raw);
     return Number.isFinite(parsed) && parsed > 0 ? parsed : 99;
   })();
   const price = Math.round(basePrice * DEFAULT_SIZES[selectedSizeIndex].priceFactor);
-
-  const formatIndianRupee = (value: number) => {
-    if (!value || isNaN(value)) return '₹0';
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value);
-  };
 
   const sections = [
     { label: 'Description', content: product.description || demo.description },
@@ -194,7 +188,7 @@ export default function RecreationProductPage({ params }: { params: { slug: stri
               {product.name}
             </h1>
 
-            <div className="text-2xl font-semibold text-gray-900 mb-6">{formatIndianRupee(price)}</div>
+            <div className="text-2xl font-semibold text-gray-900 mb-6">{formatPrice(price, countryData?.currency)}</div>
 
             {/* Size */}
             <div className="mb-6">

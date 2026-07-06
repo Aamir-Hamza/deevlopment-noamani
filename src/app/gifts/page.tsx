@@ -11,7 +11,7 @@ import LazyLoader from '@/components/ui/LazyLoader';
 export default function GiftsPage() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const country = useCountry();
+  const { countryData } = useCountry();
 
   useEffect(() => {
     fetch('/api/products?page=Gifts%20%2B%20Sets')
@@ -112,7 +112,7 @@ export default function GiftsPage() {
                 <div className="text-center">
                   <h3 className="text-lg font-light mb-1">{product.name}</h3>
                   <p className="text-sm text-gray-500 mb-2">{product.subtext || ''}</p>
-                  <p className="text-sm font-medium mb-4">{formatPrice(product.price, country)}</p>
+                  <p className="text-sm font-medium mb-4">{formatPrice(product.price, countryData?.currency)}</p>
                   <Link 
                     href={`/shop/${product._id || product.id}`}
                     className="inline-block bg-black text-white px-8 py-3 text-sm font-medium hover:bg-gray-800 transition-colors w-full"

@@ -142,7 +142,8 @@
     "fillRequired": "Please fill in all required fields",
     "paymentInitFailed": "Payment initialization failed",
     "paymentSuccessful": "Payment successful!",
-    "paymentError": "Error processing payment"
+    "paymentError": "Error processing payment",
+    "approxCurrencyNote": "Approximate — you will be charged {{amount}} (INR)"
   },
   "product": {
     "addToCart": "Add to Cart",

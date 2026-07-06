@@ -4,10 +4,13 @@ import { useParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { products } from '@/data/products'
 import { useCart } from '@/context/CartContext'
+import { useCountry } from '@/hooks/useCountry'
+import { formatPrice } from '@/lib/priceUtils'
 
 export default function CollectionPage() {
   const params = useParams()
   const { addToCart } = useCart()
+  const { countryData } = useCountry()
   
   // Find collection products based on the collection ID
   const getCollectionProducts = () => {
@@ -97,7 +100,7 @@ export default function CollectionPage() {
                 </div>
                 <h3 className="text-[15px] mb-2">{product.name}</h3>
                 <div className="flex items-center justify-between">
-                  <span className="text-[15px]">${product.price}</span>
+                  <span className="text-[15px]">{formatPrice(product.price, countryData?.currency)}</span>
                   <button 
                     onClick={() => handleAddToCart(product)}
                     className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-[15px] text-black hover:text-gray-600"

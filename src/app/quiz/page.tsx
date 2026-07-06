@@ -65,7 +65,7 @@ export default function QuizPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
   const router = useRouter();
-  const { country } = useCountry();
+  const { countryData } = useCountry();
 
   useEffect(() => {
     fetch('/api/products')
@@ -242,7 +242,7 @@ export default function QuizPage() {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-12">
                   {recommendations.map((product, idx) => {
-                    const { symbol, value } = getPrice(product.price, country);
+                    const { symbol, value } = getPrice(product.price, countryData?.currency);
                     return (
                       <motion.div
                         key={product._id}

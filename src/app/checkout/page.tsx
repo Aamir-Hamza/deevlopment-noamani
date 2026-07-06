@@ -9,7 +9,7 @@ import { toast } from 'react-hot-toast';
 import { ArrowLeft } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useCountry } from '@/hooks/useCountry';
-import { getPrice } from '@/lib/priceUtils';
+import { formatPrice } from '@/lib/priceUtils';
 
 declare global {
   interface Window {
@@ -33,18 +33,17 @@ export default function CheckoutPage() {
     phone: '',
   });
 
-  const { country } = useCountry();
+  const { countryData } = useCountry();
+  const currency = countryData?.currency;
 
-  const { value: subtotal } = getPrice(
-    cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
-    country
-  );
-
-  const shippingThreshold = country === 'IN' ? 8000 : 100;
-  const shippingCost = country === 'IN' ? 80 : 10;
-  const shipping = subtotal >= shippingThreshold ? 0 : shippingCost;
-  const total = subtotal + shipping;
-  const { symbol } = getPrice(0, country);
+  // Everything that actually gets charged (Razorpay order, saved order record)
+  // must stay in raw INR — Razorpay only ever processes INR here. `currency`
+  // is used purely to render an estimate for the visitor below.
+  const subtotalINR = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const shippingThresholdINR = 8000;
+  const shippingCostINR = 80;
+  const shippingINR = subtotalINR >= shippingThresholdINR ? 0 : shippingCostINR;
+  const totalINR = subtotalINR + shippingINR;
 
   useEffect(() => {
     // Load Razorpay script
@@ -87,7 +86,7 @@ export default function CheckoutPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          amount: total,
+          amount: totalINR,
         }),
       });
 
@@ -157,7 +156,7 @@ export default function CheckoutPage() {
           size: item.size,
           fragrance: item.fragrance,
         })),
-        totalAmount: total,
+        totalAmount: totalINR,
         shippingAddress: {
           name: `${formData.firstName} ${formData.lastName}`,
           street: formData.address,
@@ -340,7 +339,7 @@ export default function CheckoutPage() {
                       <p className="text-xs sm:text-sm text-gray-500">{t('checkout.qty')}: {item.quantity}</p>
                     </div>
                   </div>
-                  <p className="font-medium text-sm sm:text-base">{symbol}{getPrice(item.price * item.quantity, country).value}</p>
+                  <p className="font-medium text-sm sm:text-base">{formatPrice(item.price * item.quantity, currency)}</p>
                 </div>
               ))}
             </div>
@@ -348,18 +347,23 @@ export default function CheckoutPage() {
             <div className="space-y-2 text-sm sm:text-base">
               <div className="flex justify-between">
                 <p>{t('cart.subtotal')}</p>
-                <p>{symbol}{subtotal}</p>
+                <p>{formatPrice(subtotalINR, currency)}</p>
               </div>
               <div className="flex justify-between">
                 <p>{t('cart.shipping')}</p>
-                <p>{shipping === 0 ? t('cart.free') : `${symbol}${shipping}`}</p>
+                <p>{shippingINR === 0 ? t('cart.free') : formatPrice(shippingINR, currency)}</p>
               </div>
             </div>
             <div className="border-t my-6"></div>
             <div className="flex justify-between text-lg sm:text-xl font-bold">
               <p>{t('cart.total')}</p>
-              <p>{symbol}{total}</p>
+              <p>{formatPrice(totalINR, currency)}</p>
             </div>
+            {currency && currency.toUpperCase() !== 'INR' && (
+              <p className="text-xs text-gray-400 mt-2 text-right">
+                {t('checkout.approxCurrencyNote', { amount: formatPrice(totalINR, 'INR') })}
+              </p>
+            )}
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}

@@ -142,7 +142,8 @@
     "fillRequired": "Completa todos los campos obligatorios",
     "paymentInitFailed": "Error al iniciar el pago",
     "paymentSuccessful": "¡Pago exitoso!",
-    "paymentError": "Error al procesar el pago"
+    "paymentError": "Error al procesar el pago",
+    "approxCurrencyNote": "Aproximado — se le cobrará {{amount}} (INR)"
   },
   "product": {
     "addToCart": "Añadir al Carrito",

@@ -12,25 +12,13 @@ import ProductQuickViewModal from '@/app/components/ProductQuickViewModal';
 import LazyLoader from '@/components/ui/LazyLoader';
 import EmptyState from '@/components/ui/EmptyState';
 
-// Format price in Indian Rupee format (raw database price, no conversion)
-const formatIndianRupee = (price: number) => {
-  if (!price || isNaN(price)) return '₹0';
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(price);
-};
-
 export default function AllProductsPage() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
-  const countryObj = useCountry();
-  const country = typeof countryObj === 'string' ? countryObj : countryObj.country;
+  const { countryData } = useCountry();
   const { addToCart } = useCart();
 
   useEffect(() => {
@@ -159,7 +147,7 @@ export default function AllProductsPage() {
                   <p className="text-xs text-gray-500 mb-2">{product.subtext}</p>
                   <p className="text-xl font-extrabold text-pink-600 mb-2">
                     {typeof product.price === 'number'
-                      ? formatIndianRupee(product.price)
+                      ? formatPrice(product.price, countryData?.currency)
                       : product.price}
                   </p>
                   <div className="flex items-center justify-center mb-2">

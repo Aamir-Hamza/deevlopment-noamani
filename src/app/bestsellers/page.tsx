@@ -14,23 +14,12 @@ import EmptyState from '@/components/ui/EmptyState';
 
 import Footer from '@/components/Footer';
 
-// Format price in Indian Rupee format (raw database price, no conversion)
-const formatIndianRupee = (price: number) => {
-  if (!price || isNaN(price)) return '₹0';
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(price);
-};
-
 export default function BestsellersPage() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
-  const country = useCountry();
+  const { countryData } = useCountry();
   const { addToCart } = useCart();
 
   useEffect(() => {
@@ -154,7 +143,7 @@ export default function BestsellersPage() {
                   <p className="text-xs text-gray-500 mb-2">{product.subtext}</p>
                   <p className="text-xl font-extrabold text-pink-600 mb-2">
                     {typeof product.price === 'number'
-                      ? formatIndianRupee(product.price)
+                      ? formatPrice(product.price, countryData?.currency)
                       : product.price}
                   </p>
                   <div className="flex items-center justify-center gap-2 mb-2">

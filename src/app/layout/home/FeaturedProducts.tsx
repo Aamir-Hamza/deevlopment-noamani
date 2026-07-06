@@ -7,6 +7,7 @@ import { useCart } from "@/context/CartContext";
 import { ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 import { useRef, useEffect, useState } from "react";
 import { useCountry } from "@/hooks/useCountry";
+import { formatPrice } from "@/lib/priceUtils";
 import LazyLoader from "@/components/ui/LazyLoader";
 import EmptyState from "@/components/ui/EmptyState";
 import ProductQuickViewModal from "@/app/components/ProductQuickViewModal";
@@ -53,7 +54,7 @@ export default function FeaturedProducts() {
 
   const [products, setProducts] = useState<ProductItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const { setCountry } = useCountry();
+  const { setCountry, countryData } = useCountry();
   const [quickViewProduct, setQuickViewProduct] = useState<QuickViewProduct | null>(null);
   const [quickViewIndex, setQuickViewIndex] = useState<number | null>(null);
   const [showQuickView, setShowQuickView] = useState(false);
@@ -95,16 +96,6 @@ export default function FeaturedProducts() {
     const selected = localStorage.getItem("selectedCountry") || "IN";
     setCountry(selected);
   }, [setCountry]);
-
-  const formatIndianRupee = (price: number) => {
-    if (!price || isNaN(price)) return "₹0";
-    return new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(price);
-  };
 
   const coercePriceToNumber = (value?: number | string): number => {
     if (typeof value === "number") return value;
@@ -289,7 +280,7 @@ export default function FeaturedProducts() {
                         <p className="text-xs text-gray-500 mb-2 truncate">{product.subtext}</p>
                       )}
                       <p className="text-lg font-semibold text-gray-900 mb-3">
-                        {isClient && typeof product.price === "number" ? formatIndianRupee(product.price) : "…"}
+                        {isClient && typeof product.price === "number" ? formatPrice(product.price, countryData?.currency) : "…"}
                       </p>
                       <button
                         onClick={() => handleAddToCart(product)}

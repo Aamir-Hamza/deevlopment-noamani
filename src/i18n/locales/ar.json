@@ -142,7 +142,8 @@
     "fillRequired": "يرجى تعبئة جميع الحقول المطلوبة",
     "paymentInitFailed": "فشل بدء عملية الدفع",
     "paymentSuccessful": "تم الدفع بنجاح!",
-    "paymentError": "خطأ أثناء معالجة الدفع"
+    "paymentError": "خطأ أثناء معالجة الدفع",
+    "approxCurrencyNote": "تقريبي — سيتم خصم {{amount}} (روبية هندية) منك"
   },
   "product": {
     "addToCart": "أضف إلى السلة",
