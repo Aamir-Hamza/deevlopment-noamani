@@ -539,6 +539,12 @@ export default function Navbar() {
         {/* Cart */}
         <Link
           href="/cart"
+          onClick={(e) => {
+            if (!userInfo && !adminInfo) {
+              e.preventDefault();
+              openAuthModal('login');
+            }
+          }}
           className={cn("relative transition-all duration-200 hover:opacity-70 hover:scale-110", iconColor)}
         >
           <ShoppingBagIcon className={iconSize} />
@@ -943,7 +949,13 @@ export default function Navbar() {
                 >
                   <Link
                     href="/cart"
-                    onClick={() => setShowMobileMenu(false)}
+                    onClick={(e) => {
+                      setShowMobileMenu(false);
+                      if (!userInfo && !adminInfo) {
+                        e.preventDefault();
+                        openAuthModal('login');
+                      }
+                    }}
                     className="flex items-center gap-2 text-sm text-white/40 hover:text-white/70 transition-colors tracking-widest uppercase"
                   >
                     <ShoppingBagIcon className="h-4 w-4" />

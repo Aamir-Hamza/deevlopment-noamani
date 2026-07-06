@@ -108,8 +108,7 @@ export default function OrdersPage() {
               href="/shop"
               className="inline-flex items-center gap-2 bg-black text-white px-8 py-3 rounded-lg hover:bg-gray-900 transition-colors"
             >
-              <ArrowLeft className="w-4 h-4" />
-              Continue Shopping
+              Explore More Products
             </Link>
           </motion.div>
         ) : (

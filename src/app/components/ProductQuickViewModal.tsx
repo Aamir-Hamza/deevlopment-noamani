@@ -6,7 +6,6 @@ import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { formatPrice } from '@/lib/priceUtils';
 import { useCountry } from '@/hooks/useCountry';
 import { useCart } from '@/context/CartContext';
-import { toast } from 'react-hot-toast';
 
 interface ProductQuickViewModalProps {
   open: boolean;
@@ -71,9 +70,9 @@ export default function ProductQuickViewModal({ open, onClose, product, onPrev, 
         quantity: 1,
         size: selectedSize.label,
       });
+      // addToCart already shows its own success/error toast
     } catch (error) {
       console.error('Error adding to cart:', error);
-      toast.error('Failed to add item to cart');
     }
   };
 

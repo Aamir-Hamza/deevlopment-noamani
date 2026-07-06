@@ -9,7 +9,6 @@ import { useCountry } from '@/hooks/useCountry';
 import { formatPrice } from '@/lib/priceUtils';
 import { useCart } from '@/context/CartContext';
 import ProductQuickViewModal from '@/app/components/ProductQuickViewModal';
-import { toast } from 'react-hot-toast';
 import { Product } from '@/types/product';
 import LazyLoader from '@/components/ui/LazyLoader';
 import Footer from '@/components/Footer';
@@ -57,10 +56,9 @@ export default function FragrancePage() {
         image: product.image,
         quantity: 1
       });
-      toast.success('Added to cart successfully!');
+      // addToCart already shows its own success/error toast
     } catch (error) {
       console.error('Error adding to cart:', error);
-      toast.error('Failed to add item to cart');
     }
   };
 

@@ -4,12 +4,8 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronRight } from "lucide-react";
-import { useCountry } from "@/hooks/useCountry";
+import { ArrowRight, Sparkles } from "lucide-react";
 import { formatPrice } from "@/lib/priceUtils";
-import { useCart } from "@/context/CartContext";
-import { toast } from "react-hot-toast";
-import { useRouter } from "next/navigation";
 
 // Define types for mega menu content
 type ProductItem = {
@@ -35,6 +31,8 @@ type MegaMenuContent = {
   listItems: ListItem[];
   favoritesTitle: string;
   favoriteItems: FavoriteItem[];
+  viewAllHref?: string;
+  viewAllLabel?: string;
 };
 
 // Sample data for each category
@@ -71,6 +69,8 @@ const megaMenuData: any = {
       { title: "All Products", href: "/shop/all" },
       { title: "New Arrivals", href: "/shop/new" },
     ],
+    viewAllHref: "/shop/all",
+    viewAllLabel: "Shop all products",
   },
   Bestsellers: {
     products: [
@@ -94,6 +94,8 @@ const megaMenuData: any = {
       { title: "Most Reviewed", href: "/collections/most-reviewed" },
       { title: "Trending Now", href: "/collections/trending" },
     ],
+    viewAllHref: "/bestsellers",
+    viewAllLabel: "Shop all bestsellers",
   },
   Fragrance: {
     products: [
@@ -114,30 +116,9 @@ const megaMenuData: any = {
     listItems: [
       // No items
     ],
+    viewAllHref: "/fragrance",
+    viewAllLabel: "Shop all fragrance",
   },
-  // "Skin + Hair": {
-  //   products: [
-  //     {
-  //       title: "Radiance Serum",
-  //       price: 68,
-  //       image: "/productall.png",
-  //       href: "/product/radiance-serum",
-  //     },
-  //     {
-  //       title: "Repair Mask",
-  //       price: 45,
-  //       image: "/product1.jpg",
-  //       href: "/product/repair-mask",
-  //     },
-  //   ],
-  //   listTitle: "Skin Care",
-  //   listItems: [
-  //     { title: "Cleansers", href: "/skin/cleansers" },
-  //     { title: "Moisturizers", href: "/skin/moisturizers" },
-  //     { title: "Serums", href: "/skin/serums" },
-  //     { title: "Masks", href: "/skin/masks" },
-  //   ],
-  // },
   "Discovery Sets": {
     products: [
       {
@@ -162,6 +143,8 @@ const megaMenuData: any = {
       { title: "Hair Sets", href: "/discovery/hair" },
       { title: "Mixed Collections", href: "/discovery/mixed" },
     ],
+    viewAllHref: "/discovery-sets",
+    viewAllLabel: "Shop all discovery sets",
   },
   "Gifts + Sets": {
     products: [
@@ -185,6 +168,8 @@ const megaMenuData: any = {
       { title: "Ready to Gift", href: "/gifts/ready" },
       { title: "Limited Edition", href: "/gifts/limited" },
     ],
+    viewAllHref: "/gifts",
+    viewAllLabel: "Shop all gifts",
   },
   "About Us": {
     products: [
@@ -208,6 +193,8 @@ const megaMenuData: any = {
       { title: "Sustainability", href: "/about/sustainability" },
       { title: "Press", href: "/about/press" },
     ],
+    viewAllHref: "/about",
+    viewAllLabel: "About Noamani",
   },
   "Perfect Perfume Quiz": {
     products: [
@@ -233,6 +220,8 @@ const megaMenuData: any = {
       { title: "Personality", href: "/quiz/personality" },
       { title: "Season", href: "/quiz/season" },
     ],
+    viewAllHref: "/quiz",
+    viewAllLabel: "Take the quiz",
   },
   "Customer Care": {
     products: [
@@ -258,6 +247,8 @@ const megaMenuData: any = {
       { title: "FAQs", href: "/customer-care/faqs" },
       { title: "Contact Us", href: "/customer-care/contact" },
     ],
+    viewAllHref: "/customer-care",
+    viewAllLabel: "Visit help center",
   },
 };
 
@@ -286,6 +277,8 @@ const defaultContent: any = {
     { title: "Bestsellers", href: "/shop/bestsellers" },
     { title: "Last Chance", href: "/shop/last-chance" },
   ],
+  viewAllHref: "/shop/all",
+  viewAllLabel: "Shop all products",
 };
 
 type MegaMenuProps = {
@@ -297,19 +290,20 @@ type MegaMenuProps = {
   isNavbarWhite?: boolean;
 };
 
-// Add these variants at the top, after imports
-const productListVariants = {
-  hidden: { opacity: 1 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0, // Remove stagger for instant load
-    },
-  },
+const menuVariants = {
+  hidden: { opacity: 0, y: -6, transition: { duration: 0.15, ease: "easeInOut" } },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.18, ease: "easeOut" } },
+  exit: { opacity: 0, y: -6, transition: { duration: 0.12, ease: "easeInOut" } },
 };
-const productItemVariants = {
-  hidden: { opacity: 0, y: 0 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.12, ease: 'easeOut' } },
+
+const listVariants = {
+  hidden: { opacity: 1 },
+  visible: { opacity: 1, transition: { staggerChildren: 0.035 } },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 6 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.18, ease: "easeOut" } },
 };
 
 export default function MegaMenu({
@@ -317,13 +311,8 @@ export default function MegaMenu({
   onClose,
   onMouseEnter,
   onMouseLeave,
-  textColor = "text-black",
-  isNavbarWhite = false,
 }: MegaMenuProps) {
   const [content, setContent] = useState<MegaMenuContent>(defaultContent);
-  const country = useCountry();
-  const { addToCart } = useCart();
-  const router = useRouter();
   const [navbarProducts, setNavbarProducts] = useState<{ name: string; slug: string }[]>([]);
   const [bestsellerProducts, setBestsellerProducts] = useState<{ name: string; slug: string }[]>([]);
   const [fragranceProducts, setFragranceProducts] = useState<{ name: string; slug: string }[]>([]);
@@ -370,27 +359,22 @@ export default function MegaMenu({
     }
   }, [category]);
 
-  const menuVariants = {
-    hidden: {
-      opacity: 0,
-      y: -10,
-      transition: { duration: 0.12, ease: 'easeInOut' },
-    },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.12, ease: "easeInOut" },
-    },
-    exit: {
-      opacity: 0,
-      y: -10,
-      transition: { duration: 0.12, ease: 'easeInOut' },
-    },
-  };
+  // Dynamic (admin-managed) categories only ever have a name + slug — no
+  // image/price — so they render as a clean link list rather than product tiles.
+  const dynamicItems =
+    category === "Shop All"
+      ? navbarProducts
+      : category === "Bestsellers"
+      ? bestsellerProducts
+      : category === "Fragrance"
+      ? fragranceProducts
+      : null;
+
+  const hasSideList = !!content.listTitle && !!content.listItems?.length;
 
   return (
     <motion.div
-      className={`absolute top-full left-0 right-0 transition-colors duration-300 z-50 border-t-2 border-amber-600/30 ${isNavbarWhite ? 'bg-white shadow-[0_8px_30px_rgba(0,0,0,0.06)]' : 'bg-black/40 backdrop-blur-xl'}`}
+      className="absolute top-full left-0 right-0 z-50 bg-white border-t border-gray-100 shadow-[0_16px_40px_rgba(0,0,0,0.08)]"
       initial="hidden"
       animate="visible"
       exit="exit"
@@ -398,116 +382,119 @@ export default function MegaMenu({
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1">
-        <div className="grid grid-cols-12 gap-4 bg-transparent">
-          {/* Featured Products */}
-          <div className="col-span-12">
+      <div className="max-w-5xl mx-auto px-8 py-8">
+        <div className={cnRow(hasSideList)}>
+          {/* Featured items */}
+          <div className={hasSideList ? "col-span-8" : "col-span-12"}>
+            <div className="flex items-center justify-between mb-5">
+              <span className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#a88d3f]">
+                <Sparkles className="h-3.5 w-3.5" />
+                Featured in {category}
+              </span>
+              {content.viewAllHref && (
+                <Link
+                  href={content.viewAllHref}
+                  onClick={onClose}
+                  className="group flex items-center gap-1 text-xs font-semibold uppercase tracking-wider text-gray-500 hover:text-gray-900 transition-colors"
+                >
+                  {content.viewAllLabel || "View all"}
+                  <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                </Link>
+              )}
+            </div>
+
             <AnimatePresence mode="wait">
               <motion.div
-                className="flex flex-row justify-center items-center gap-10 h-16 rounded-lg text-center px-12"
-                variants={productListVariants}
+                key={category + '-' + (dynamicItems ? dynamicItems.length : content.products.length)}
+                variants={listVariants}
                 initial="hidden"
                 animate="visible"
-                exit="hidden"
-                key={category + '-' + (
-                  category === 'Shop All' ? navbarProducts.length :
-                  category === 'Bestsellers' ? bestsellerProducts.length :
-                  category === 'Fragrance' ? fragranceProducts.length :
-                  content.products.length
-                )}
+                className="grid grid-cols-2 sm:grid-cols-3 gap-2.5"
               >
-              {category === "Shop All"
-                ? navbarProducts.map((product, index) => (
-                      <motion.div
-                        key={index}
-                        variants={productItemVariants}
-                      >
-                    <Link
-                      href={`/product/${product.slug}`}
-                          className={`uppercase tracking-widest font-bold px-2 group text-lg mb-2 ${textColor}`}
-                          style={{ fontFamily: 'Didot, serif', fontWeight: 'bold', letterSpacing: 2 }}
-                    >
-                      {product.name}
-                          <span className={`block h-0.5 ${textColor === 'text-white' ? 'bg-white' : 'bg-black'} scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-200 mt-1`}></span>
-                    </Link>
+                {dynamicItems
+                  ? dynamicItems.map((product, index) => (
+                      <motion.div key={product.slug + index} variants={itemVariants}>
+                        <Link
+                          href={`/product/${product.slug}`}
+                          onClick={onClose}
+                          className="group flex items-center gap-3 rounded-lg border border-gray-100 px-3.5 py-3 hover:border-[#bfa14a]/40 hover:bg-[#fdfaf3] transition-colors"
+                        >
+                          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gray-50 text-[10px] font-bold text-gray-400 group-hover:bg-[#bfa14a]/10 group-hover:text-[#a88d3f] transition-colors">
+                            {index + 1}
+                          </span>
+                          <span
+                            className="text-[13px] font-semibold text-gray-800 group-hover:text-gray-900 tracking-wide leading-snug"
+                            style={{ fontFamily: 'Didot, serif' }}
+                          >
+                            {product.name}
+                          </span>
+                        </Link>
                       </motion.div>
-                  ))
-                : category === "Bestsellers"
-                ? bestsellerProducts.map((product, index) => (
-                      <motion.div
-                        key={index}
-                        variants={productItemVariants}
-                      >
-                    <Link
-                      href={`/product/${product.slug}`}
-                          className={`uppercase tracking-widest font-bold px-2 group text-lg mb-2 ${textColor}`}
-                          style={{ fontFamily: 'Didot, serif', fontWeight: 'bold', letterSpacing: 2 }}
-                    >
-                      {product.name}
-                          <span className={`block h-0.5 ${textColor === 'text-white' ? 'bg-white' : 'bg-black'} scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-200 mt-1`}></span>
-                    </Link>
+                    ))
+                  : content.products.map((product, index) => (
+                      <motion.div key={product.href + index} variants={itemVariants}>
+                        <Link
+                          href={product.href}
+                          onClick={onClose}
+                          className="group flex items-center gap-3 rounded-lg border border-gray-100 p-2 hover:border-[#bfa14a]/40 hover:bg-[#fdfaf3] transition-colors"
+                        >
+                          <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-md bg-gray-50">
+                            <Image
+                              src={product.image}
+                              alt={product.title}
+                              fill
+                              sizes="48px"
+                              className="object-cover"
+                            />
+                          </span>
+                          <span className="min-w-0">
+                            <span
+                              className="block truncate text-[13px] font-semibold text-gray-800 group-hover:text-gray-900 tracking-wide"
+                              style={{ fontFamily: 'Didot, serif' }}
+                            >
+                              {product.title}
+                            </span>
+                            {product.price > 0 && (
+                              <span className="block text-[11px] text-gray-400">
+                                {formatPrice(product.price)}
+                              </span>
+                            )}
+                          </span>
+                        </Link>
                       </motion.div>
-                  ))
-                : category === "Fragrance"
-                ? fragranceProducts.map((product, index) => (
-                      <motion.div
-                        key={index}
-                        variants={productItemVariants}
-                      >
-                    <Link
-                      href={`/product/${product.slug}`}
-                          className={`uppercase tracking-widest font-bold px-2 group text-lg mb-2 ${textColor}`}
-                          style={{ fontFamily: 'Didot, serif', fontWeight: 'bold', letterSpacing: 2 }}
-                    >
-                      {product.name}
-                          <span className={`block h-0.5 ${textColor === 'text-white' ? 'bg-white' : 'bg-black'} scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-200 mt-1`}></span>
-                    </Link>
-                      </motion.div>
-                  ))
-                : content.products.map((product, index) => (
-                      <motion.div
-                        key={index}
-                        variants={productItemVariants}
-                      >
-                    <Link
-                      href={product.href}
-                          className={`uppercase tracking-widest font-bold px-2 group text-lg mb-2 ${textColor}`}
-                          style={{ fontFamily: 'Didot, serif', fontWeight: 'bold', letterSpacing: 2 }}
-                    >
-                      {product.title}
-                          <span className={`block h-0.5 ${textColor === 'text-white' ? 'bg-white' : 'bg-black'} scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-200 mt-1`}></span>
-                    </Link>
-                      </motion.div>
-                  ))}
+                    ))}
               </motion.div>
             </AnimatePresence>
           </div>
 
-          {/* Categories and Collections - hide for Shop All */}
-          { category !== "Shop All" && (content.listTitle || (content.listItems && content.listItems.length > 0)) && (
-            <div className="col-span-5 flex items-center justify-center">
-              <div className="bg-transparent p-3 w-full max-w-xs mx-auto">
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-900 mb-2 text-center">
-                  {content.listTitle}
-                </h3>
-                <ul className="space-y-2">
-                  {content.listItems.map((item, index) => (
-                    <li key={index} className="text-center">
-                      <Link
-                        href={item.href}
-                        className="group flex items-center justify-center text-sm text-gray-700 hover:text-brand-dark font-medium transition-colors"
-                      >
-                        <span>{item.title}</span>
-                        <ChevronRight className="h-3 w-3 ml-1 opacity-0 group-hover:opacity-100 transition-opacity" />
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+          {/* Categories / collections column */}
+          {hasSideList && (
+            <div className="col-span-4 border-l border-gray-100 pl-8">
+              <span className="block text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-400 mb-5">
+                {content.listTitle}
+              </span>
+              <ul className="space-y-1">
+                {content.listItems.map((item, index) => (
+                  <li key={index}>
+                    <Link
+                      href={item.href}
+                      onClick={onClose}
+                      className="group flex items-center justify-between rounded-md px-2.5 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 font-medium transition-colors -mx-2.5"
+                    >
+                      <span>{item.title}</span>
+                      <ArrowRight className="h-3.5 w-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
         </div>
       </div>
     </motion.div>
   );
+}
+
+function cnRow(hasSideList: boolean) {
+  return hasSideList ? "grid grid-cols-12 gap-8" : "grid grid-cols-12";
 }

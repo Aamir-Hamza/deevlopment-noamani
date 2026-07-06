@@ -103,14 +103,14 @@ export function CartProvider({ children, onRequireLogin }: CartProviderProps) {
       }
 
       setCart(data.items)
-      toast.success('Item removed from cart')
+      // Callers (cart page) show their own success/error toast for this action
     } catch (error) {
       // Revert optimistic update on error
       const response = await fetch('/api/cart')
       const data = await response.json()
       setCart(data.items)
       console.error('Error removing from cart:', error)
-      toast.error('Failed to remove item from cart')
+      throw error
     }
   }
 
@@ -161,14 +161,14 @@ export function CartProvider({ children, onRequireLogin }: CartProviderProps) {
         throw new Error(data.message || 'Failed to clear cart')
       }
 
-      toast.success('Cart cleared')
+      // clearCart runs as a side effect of logout/checkout — those flows show
+      // their own toast, so no toast here to avoid stacking two messages.
     } catch (error) {
       // Revert optimistic update on error
       const response = await fetch('/api/cart')
       const data = await response.json()
       setCart(data.items)
       console.error('Error clearing cart:', error)
-      toast.error('Failed to clear cart')
     }
   }
 

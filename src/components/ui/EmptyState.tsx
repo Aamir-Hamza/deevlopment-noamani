@@ -11,7 +11,7 @@ interface EmptyStateProps {
 export default function EmptyState({
   title,
   subtitle,
-  ctaLabel = "Continue Shopping",
+  ctaLabel = "Explore More Products",
   ctaHref = "/shop",
 }: EmptyStateProps) {
   return (
@@ -24,7 +24,6 @@ export default function EmptyState({
           href={ctaHref}
           className="inline-flex items-center gap-2 bg-black text-white px-8 py-3 rounded-lg hover:bg-gray-900 transition-colors"
         >
-          <ArrowLeft className="w-4 h-4" />
           {ctaLabel}
         </Link>
       )}

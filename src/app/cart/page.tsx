@@ -25,12 +25,16 @@ export default function CartPage() {
 
   useEffect(() => {
     setIsClient(true)
+    if (!localStorage.getItem('userInfo') && !localStorage.getItem('adminInfo')) {
+      router.replace('/?authModal=login')
+      return
+    }
     // Kept in raw INR — this page only ever displays a converted estimate;
     // checkout independently recomputes the real INR total for charging.
     const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
     setSubtotalINR(total)
     setIsLoading(false)
-  }, [cart])
+  }, [cart, router])
 
   const handleQuantityChange = async (itemId: string, newQuantity: number) => {
     try {

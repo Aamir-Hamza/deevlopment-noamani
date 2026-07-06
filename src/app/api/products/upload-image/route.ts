@@ -1,19 +1,13 @@
 import { NextResponse } from "next/server";
-import path from "path";
-import fs from "fs";
+import { v2 as cloudinary } from "cloudinary";
 import { verifyAdminRequest } from "@/lib/adminAuth";
 
-const uploadDir = path.join(process.cwd(), "public/product-images");
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-const ALLOWED_MIME_TYPES: Record<string, string> = {
-  "image/jpeg": "jpg",
-  "image/png": "png",
-  "image/webp": "webp",
-  "image/gif": "gif",
-};
+const ALLOWED_MIME_TYPES = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+]);
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
@@ -22,6 +16,22 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+  const apiKey = process.env.CLOUDINARY_API_KEY;
+  const apiSecret = process.env.CLOUDINARY_API_SECRET;
+
+  if (!cloudName || !apiKey || !apiSecret) {
+    console.error("Upload Error: Cloudinary credentials are not configured");
+    return NextResponse.json({ error: "Server misconfiguration" }, { status: 500 });
+  }
+
+  cloudinary.config({
+    cloud_name: cloudName,
+    api_key: apiKey,
+    api_secret: apiSecret,
+    secure: true,
+  });
+
   const formData = await req.formData();
   const file = formData.get("file") as File | null;
 
@@ -29,8 +39,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "No file found" }, { status: 400 });
   }
 
-  const extension = ALLOWED_MIME_TYPES[file.type];
-  if (!extension) {
+  if (!ALLOWED_MIME_TYPES.has(file.type)) {
     return NextResponse.json(
       { error: "Unsupported file type. Only JPEG, PNG, WEBP and GIF images are allowed." },
       { status: 400 }
@@ -43,15 +52,25 @@ export async function POST(req: Request) {
 
   const buffer = Buffer.from(await file.arrayBuffer());
 
-  // Filename is fully server-generated — the client-supplied name is never
-  // used for the path, which rules out path traversal / arbitrary write.
-  const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-  const fileName = `${uniqueSuffix}.${extension}`;
-  const filePath = path.join(uploadDir, fileName);
+  try {
+    // Images now live in Cloudinary rather than on local disk — this keeps
+    // uploads working correctly regardless of which server instance handled
+    // the request, which matters once the admin panel and customer site are
+    // deployed as separate instances that don't share a filesystem.
+    const imageUrl = await new Promise<string>((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        { folder: "noamani/product-images", resource_type: "image" },
+        (error, result) => {
+          if (error || !result) return reject(error || new Error("Upload failed"));
+          resolve(result.secure_url);
+        }
+      );
+      uploadStream.end(buffer);
+    });
 
-  fs.writeFileSync(filePath, buffer);
-
-  const imageUrl = `/product-images/${fileName}`;
-
-  return NextResponse.json({ imageUrl });
+    return NextResponse.json({ imageUrl });
+  } catch (error) {
+    console.error("Cloudinary Upload Error:", error);
+    return NextResponse.json({ error: "Error uploading image" }, { status: 500 });
+  }
 }

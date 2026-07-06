@@ -57,7 +57,7 @@ export default function OrderSuccessPage() {
             onClick={() => router.push('/shop')}
             className="rounded-lg bg-black px-8 py-3 text-white hover:bg-gray-800"
           >
-            Continue Shopping
+            Explore More Products
           </button>
           <button
             onClick={() => router.push('/orders')}

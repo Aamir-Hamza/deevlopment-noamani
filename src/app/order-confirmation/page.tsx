@@ -45,7 +45,7 @@ export default function OrderConfirmationPage() {
             href="/shop"
             className="block w-full bg-black text-white py-3 hover:opacity-90 transition-opacity"
           >
-            Continue Shopping
+            Explore More Products
           </Link>
           
           <Link
