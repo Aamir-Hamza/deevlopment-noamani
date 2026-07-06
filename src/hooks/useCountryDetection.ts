@@ -420,6 +420,18 @@ const countryNames: { [key: string]: string } = {
   'ZW': 'Zimbabwe'
 };
 
+const currencyByCountry: { [key: string]: string } = {
+  'IN': 'INR', 'US': 'USD', 'GB': 'GBP', 'CA': 'CAD', 'AU': 'AUD', 'DE': 'EUR',
+  'FR': 'EUR', 'IT': 'EUR', 'ES': 'EUR', 'JP': 'JPY', 'CN': 'CNY', 'KR': 'KRW',
+  'BR': 'BRL', 'MX': 'MXN', 'RU': 'RUB', 'AE': 'AED', 'SA': 'SAR', 'EG': 'EGP',
+  'ZA': 'ZAR', 'NG': 'NGN', 'KE': 'KES', 'TH': 'THB', 'SG': 'SGD', 'MY': 'MYR',
+  'ID': 'IDR', 'PH': 'PHP', 'VN': 'VND', 'TR': 'TRY', 'PL': 'PLN', 'NL': 'EUR',
+  'SE': 'SEK', 'NO': 'NOK', 'DK': 'DKK', 'FI': 'EUR', 'CH': 'CHF', 'AT': 'EUR',
+  'BE': 'EUR', 'IE': 'EUR', 'PT': 'EUR', 'GR': 'EUR', 'IL': 'ILS', 'PK': 'PKR',
+  'BD': 'BDT', 'LK': 'LKR', 'NP': 'NPR', 'QA': 'QAR', 'KW': 'KWD', 'BH': 'BHD',
+  'OM': 'OMR', 'AR': 'ARS', 'CL': 'CLP', 'CO': 'COP', 'PE': 'PEN', 'NZ': 'NZD',
+};
+
 const DEFAULT_COUNTRY: CountryData = {
   country: 'India',
   countryCode: 'IN',
@@ -436,28 +448,37 @@ export const useCountryDetection = () => {
   const [error, setError] = useState<string | null>(null);
   const [permission, setPermission] = useState<LocationPermission>('prompt');
 
-  // On mount: check if user previously granted permission (stored in localStorage)
-  useEffect(() => {
-    const storedPermission = localStorage.getItem('locationPermission');
-    const storedCountry = localStorage.getItem('detectedCountry');
+  /** Builds and persists CountryData from a resolved ISO country code */
+  const applyCountryCode = useCallback((countryCode: string, timezone?: string) => {
+    const code = countryCode.toUpperCase();
+    const finalCountryData: CountryData = {
+      country: countryNames[code] || code,
+      countryCode: code,
+      flag: countryFlags[code] || '🌍',
+      currency: currencyByCountry[code] || 'USD',
+      timezone: timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
+    };
 
-    if (storedPermission === 'granted' && storedCountry) {
-      // User previously allowed — use cached data, re-detect in background
-      try {
-        setCountryData(JSON.parse(storedCountry));
-        setPermission('granted');
-      } catch {
-        setPermission('prompt');
-      }
-    } else if (storedPermission === 'denied') {
-      setPermission('denied');
-    } else {
-      // First visit or cleared storage — stay on 'prompt', show default
-      setPermission('prompt');
-    }
+    setCountryData(finalCountryData);
+    setPermission('granted');
+    localStorage.setItem('detectedCountry', JSON.stringify(finalCountryData));
+    localStorage.setItem('locationPermission', 'granted');
+    window.dispatchEvent(new Event('countryChange'));
   }, []);
 
-  /** Performs the actual IP-based country detection */
+  /** Reverse-geocodes GPS coordinates into a country via a free, keyless API */
+  const detectCountryFromCoords = useCallback(async (latitude: number, longitude: number) => {
+    const response = await fetch(
+      `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
+    );
+    if (!response.ok) throw new Error('Reverse geocoding failed');
+    const data = await response.json();
+    const countryCode = (data.countryCode || '').toUpperCase();
+    if (!countryCode) throw new Error('No country resolved from coordinates');
+    return countryCode;
+  }, []);
+
+  /** Performs the actual IP-based country detection (fallback when GPS is unavailable/denied) */
   const detectCountry = useCallback(async () => {
     try {
       setLoading(true);
@@ -515,45 +536,75 @@ export const useCountryDetection = () => {
         };
       }
 
-      const countryName = countryNames[countryInfo.countryCode] || countryInfo.country;
-      const flag = countryFlags[countryInfo.countryCode] || '🌍';
-
-      const finalCountryData: CountryData = {
-        country: countryName,
-        countryCode: countryInfo.countryCode,
-        flag: flag,
-        currency: countryInfo.currency,
-        timezone: countryInfo.timezone,
-      };
-
-      setCountryData(finalCountryData);
-      setPermission('granted');
-
-      // Persist for future visits
-      localStorage.setItem('detectedCountry', JSON.stringify(finalCountryData));
-      localStorage.setItem('locationPermission', 'granted');
-
-      // Notify all listeners
-      window.dispatchEvent(new Event('countryChange'));
+      applyCountryCode(countryInfo.countryCode, countryInfo.timezone);
     } catch (err) {
       console.error('Country detection error:', err);
       setError('Failed to detect country');
+      // Fall back to the safe default rather than leaving the UI stuck —
+      // this is a silent background detection, so there's no button to retry from.
       setPermission('denied');
       localStorage.setItem('locationPermission', 'denied');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [applyCountryCode]);
 
-  /** Called when user clicks "Allow" — triggers detection */
-  const requestPermission = useCallback(() => {
-    detectCountry();
-  }, [detectCountry]);
+  /**
+   * Silently asks the browser's native Geolocation API for the user's position.
+   * This is what actually triggers the browser's built-in permission prompt —
+   * there is no custom UI here by design. Whatever the user picks (allow or
+   * block), we resolve to a usable country: GPS on allow, IP lookup on deny.
+   */
+  const detectViaGeolocation = useCallback(async () => {
+    if (typeof navigator === 'undefined' || !navigator.geolocation) {
+      await detectCountry();
+      return;
+    }
 
-  /** Called when user clicks "Deny" — stays on default */
-  const denyPermission = useCallback(() => {
-    setPermission('denied');
-    localStorage.setItem('locationPermission', 'denied');
+    setLoading(true);
+    setPermission('detecting');
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const countryCode = await detectCountryFromCoords(
+            position.coords.latitude,
+            position.coords.longitude
+          );
+          applyCountryCode(countryCode);
+          setLoading(false);
+        } catch (err) {
+          console.error('Reverse geocoding failed, falling back to IP detection:', err);
+          await detectCountry();
+        }
+      },
+      async () => {
+        // Permission denied, or position unavailable/timed out — fall back
+        // to IP-based detection so the experience still works either way.
+        await detectCountry();
+      },
+      { timeout: 8000, maximumAge: 10 * 60 * 1000 }
+    );
+  }, [applyCountryCode, detectCountry, detectCountryFromCoords]);
+
+  // On mount: use cached country instantly if we have one, otherwise kick off
+  // silent detection (geolocation first, IP fallback) with no button required.
+  useEffect(() => {
+    const storedCountry = localStorage.getItem('detectedCountry');
+    const storedPermission = localStorage.getItem('locationPermission');
+
+    if (storedCountry && (storedPermission === 'granted' || storedPermission === 'denied')) {
+      try {
+        setCountryData(JSON.parse(storedCountry));
+        setPermission('granted');
+        return;
+      } catch {
+        // fall through to fresh detection
+      }
+    }
+
+    detectViaGeolocation();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /** Reset permission (allow user to re-trigger from settings) */
@@ -562,9 +613,10 @@ export const useCountryDetection = () => {
     localStorage.removeItem('detectedCountry');
     setCountryData(DEFAULT_COUNTRY);
     setPermission('prompt');
-  }, []);
+    detectViaGeolocation();
+  }, [detectViaGeolocation]);
 
-  /** Manually update country data */
+  /** Manually update country data (e.g. from a country-picker UI) */
   const updateCountry = useCallback((newCountryData: CountryData) => {
     setCountryData(newCountryData);
     setPermission('granted');
@@ -579,8 +631,6 @@ export const useCountryDetection = () => {
     error,
     permission,
     updateCountry,
-    requestPermission,
-    denyPermission,
     resetPermission,
   };
 };

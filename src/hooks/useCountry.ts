@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useCountryDetection, LocationPermission } from './useCountryDetection';
+import { useCountryDetection } from './useCountryDetection';
 
 export const useCountry = () => {
   const {
@@ -7,8 +7,6 @@ export const useCountry = () => {
     loading,
     updateCountry: updateDetectedCountry,
     permission,
-    requestPermission,
-    denyPermission,
     resetPermission,
   } = useCountryDetection();
 
@@ -54,8 +52,6 @@ export const useCountry = () => {
     countryData,
     loading,
     permission,
-    requestPermission,
-    denyPermission,
     resetPermission,
   };
 };
