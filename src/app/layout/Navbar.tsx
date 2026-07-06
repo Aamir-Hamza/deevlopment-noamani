@@ -572,7 +572,7 @@ export default function Navbar() {
 
   /** Desktop navigation links with CSS underline animation */
   const renderDesktopNav = () => (
-    <nav className="hidden md:flex flex-1 justify-center">
+    <nav className="hidden lg:flex flex-1 justify-center">
       <ul className="flex items-center gap-7 lg:gap-9">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
@@ -664,7 +664,7 @@ export default function Navbar() {
         {/* ═══ MAIN NAVBAR ═══ */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* ─── Desktop (md+) ─── */}
-          <div className="hidden md:flex items-center justify-between h-[72px]">
+          <div className="hidden lg:flex items-center justify-between h-[72px]">
             {/* Brand */}
             <Link
               href="/"
@@ -691,7 +691,7 @@ export default function Navbar() {
           </div>
 
           {/* ─── Mobile (<md) ─── */}
-          <div className="flex md:hidden items-center justify-between h-14 px-1">
+          <div className="flex lg:hidden items-center justify-between h-14 px-1">
             {/* Hamburger */}
             <button
               onClick={() => setShowMobileMenu(true)}
@@ -873,7 +873,7 @@ export default function Navbar() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.35 }}
-                className="fixed inset-0 z-[120] bg-black/60 md:hidden"
+                className="fixed inset-0 z-[120] bg-black/60 lg:hidden"
                 onClick={() => setShowMobileMenu(false)}
               />
 
@@ -883,7 +883,7 @@ export default function Navbar() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                className="fixed inset-0 z-[121] md:hidden flex flex-col items-center justify-center mobile-menu-overlay"
+                className="fixed inset-0 z-[121] lg:hidden flex flex-col items-center justify-center mobile-menu-overlay"
               >
                 {/* Close Button */}
                 <motion.button
