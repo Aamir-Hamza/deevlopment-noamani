@@ -71,7 +71,7 @@ export default function AdminLoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-950 px-4">
       <div className="w-full max-w-sm rounded-2xl border border-gray-800 bg-gray-900 p-8 shadow-xl">
-        <Image src="/Brand_logo/nlogo.png" alt="Noamani" width={48} height={48} className="mx-auto mb-4" />
+        <Image src="/Brand_logo/nlogo-dark.png" alt="Noamani" width={48} height={48} className="mx-auto mb-4" />
         <h1 className="text-2xl font-semibold text-white text-center mb-1">Admin Login</h1>
         <p className="text-sm text-gray-400 text-center mb-8">Noamani Admin Portal</p>
 
