@@ -10,7 +10,7 @@ import {
   ShoppingCart,
   Receipt,
   BarChart3,
-  ArrowLeft,
+  UserCircle,
   LogOut,
   ShieldCheck,
 } from 'lucide-react';
@@ -76,11 +76,16 @@ export function AdminSidebar({ activeTab, setActiveTab }: AdminSidebarProps) {
 
       <div className="p-3 border-t border-slate-800 space-y-1">
         <Link
-          href="/"
-          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-900 hover:text-slate-200 transition-colors"
+          href="/admin/profile"
+          onClick={() => setActiveTab('profile')}
+          className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+            activeTab === 'profile'
+              ? 'bg-slate-800 text-white'
+              : 'text-slate-400 hover:bg-slate-900 hover:text-slate-200'
+          }`}
         >
-          <ArrowLeft className="h-[18px] w-[18px]" strokeWidth={2} />
-          Back to site
+          <UserCircle className="h-[18px] w-[18px]" strokeWidth={2} />
+          Profile
         </Link>
         <button
           onClick={handleLogout}
