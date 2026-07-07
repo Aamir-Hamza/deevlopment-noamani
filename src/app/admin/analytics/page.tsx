@@ -14,6 +14,7 @@ import {
   Line,
 } from "recharts";
 import { AdminSidebar } from "@/components/AdminSidebar";
+import { useAdminSessionGuard } from "@/lib/useAdminSessionGuard";
 import { formatPrice } from "@/lib/priceUtils";
 import { Users, Package, ShoppingCart, IndianRupee } from "lucide-react";
 
@@ -28,6 +29,8 @@ export default function AnalyticsPage() {
   const [salesTrend, setSalesTrend] = useState<any[]>([]);
   const [recentOrders, setRecentOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  useAdminSessionGuard();
 
   useEffect(() => {
     const adminInfo = localStorage.getItem('adminInfo');

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link"
+import Image from "next/image"
 import { ChevronDown, Mail, Phone, MapPin } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -263,9 +264,13 @@ export default function Footer() {
             </div>
 
             {/* Center Section - Brand Logo */}
-            <div className="text-3xl sm:text-4xl font-serif text-gray-800 tracking-widest">
-              NOAMANI
-            </div>
+            <Image
+              src="/Brand_logo/noamani-wordmark-gold.png"
+              alt="Noamani"
+              width={220}
+              height={60}
+              className="h-8 sm:h-10 w-auto"
+            />
 
             {/* Right Section - Region and Language Selector */}
             <div className="flex flex-col items-center md:items-end gap-1.5">

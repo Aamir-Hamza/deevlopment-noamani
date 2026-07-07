@@ -5,6 +5,7 @@ import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { X } from 'lucide-react';
 import { AdminSidebar } from '@/components/AdminSidebar';
+import { useAdminSessionGuard } from '@/lib/useAdminSessionGuard';
 import { formatPrice } from '@/lib/priceUtils';
 
 interface OrderItem {
@@ -59,6 +60,8 @@ export default function OrdersManagement() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [activeTab, setActiveTab] = useState('orders');
   const router = useRouter();
+
+  useAdminSessionGuard();
 
   useEffect(() => {
     const adminInfo = localStorage.getItem('adminInfo');

@@ -4,9 +4,6 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowLeft } from 'lucide-react';
-import { Great_Vibes } from 'next/font/google';
-
-const greatVibes = Great_Vibes({ weight: '400', subsets: ['latin'] });
 
 interface AuthShellProps {
   eyebrow: string;
@@ -117,19 +114,24 @@ export default function AuthShell({ eyebrow, quote, children }: AuthShellProps) 
               height={64}
               className="object-contain mb-3"
             />
-            <h1 className={`text-4xl font-normal text-gray-900 ${greatVibes.className}`}>
-              Noamani
-            </h1>
+            <Image
+              src="/Brand_logo/noamani-wordmark-gold.png"
+              alt="Noamani"
+              width={220}
+              height={60}
+              className="h-9 w-auto"
+            />
           </div>
 
           {/* Title / Brand header inside form for desktop */}
           <div className="hidden lg:block mb-8">
-            <h1
-              className={`text-5xl font-normal text-center text-gray-900 select-none ${greatVibes.className}`}
-              style={{ letterSpacing: "0.02em" }}
-            >
-              Noamani
-            </h1>
+            <Image
+              src="/Brand_logo/noamani-wordmark-gold.png"
+              alt="Noamani"
+              width={280}
+              height={76}
+              className="h-12 w-auto mx-auto"
+            />
           </div>
 
           {children}

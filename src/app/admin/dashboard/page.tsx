@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 import { AdminSidebar } from '@/components/AdminSidebar';
+import { useAdminSessionGuard } from '@/lib/useAdminSessionGuard';
 import { formatPrice } from '@/lib/priceUtils';
 import { ShoppingCart, Package, IndianRupee, TrendingUp } from 'lucide-react';
 import {
@@ -64,6 +65,8 @@ export default function AdminDashboard() {
     allOrders: [],
   });
   const [isLoading, setIsLoading] = useState(true);
+
+  useAdminSessionGuard();
 
   useEffect(() => {
     const adminInfo = localStorage.getItem('adminInfo');

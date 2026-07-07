@@ -6,6 +6,7 @@ import { formatDistance, format } from 'date-fns';
 import { useRouter } from 'next/navigation';
 import { X } from 'lucide-react';
 import { AdminSidebar } from '@/components/AdminSidebar';
+import { useAdminSessionGuard } from '@/lib/useAdminSessionGuard';
 
 interface Transaction {
   _id: string;
@@ -51,6 +52,8 @@ export default function TransactionsPage() {
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [activeTab, setActiveTab] = useState('transactions');
   const router = useRouter();
+
+  useAdminSessionGuard();
 
   useEffect(() => {
     const adminInfo = localStorage.getItem('adminInfo');

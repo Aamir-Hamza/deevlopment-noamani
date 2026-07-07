@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AdminSidebar } from "@/components/AdminSidebar";
+import { useAdminSessionGuard } from "@/lib/useAdminSessionGuard";
 import { formatPrice } from "@/lib/priceUtils";
 import { Plus, X, ShoppingBag, Flame, Leaf, Compass, Menu, Check, Pencil, Trash2 } from "lucide-react";
 
@@ -150,6 +151,8 @@ export default function ProductsManagement() {
       console.error(error);
     }
   };
+
+  useAdminSessionGuard();
 
   useEffect(() => {
     // Check if admin is logged in

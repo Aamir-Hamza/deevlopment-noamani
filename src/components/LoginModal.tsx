@@ -13,9 +13,6 @@ import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import axios from "axios";
 import confetti from 'canvas-confetti';
 import { useCart } from "@/context/CartContext";
-import { Great_Vibes } from 'next/font/google';
-
-const greatVibes = Great_Vibes({ weight: '400', subsets: ['latin'] });
 
 const inputClass =
   "pl-10 bg-white border border-gray-300 text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-[#bfa14a]/40 focus:border-[#bfa14a] rounded-lg h-11 transition-all";
@@ -260,19 +257,24 @@ export function LoginModal({ onClose, onLoginSuccess, initialMode = "login" }: L
                 height={64}
                 className="object-contain mb-3"
               />
-              <h1 className={`text-4xl font-normal text-gray-900 ${greatVibes.className}`}>
-                Noamani
-              </h1>
+              <Image
+                src="/Brand_logo/noamani-wordmark-gold.png"
+                alt="Noamani"
+                width={220}
+                height={60}
+                className="h-9 w-auto"
+              />
             </div>
 
             {/* Header / Brand text for desktop */}
             <div className="hidden lg:block mb-8 text-center">
-              <h1
-                className={`text-5xl font-normal text-gray-900 select-none ${greatVibes.className}`}
-                style={{ letterSpacing: "0.02em" }}
-              >
-                Noamani
-              </h1>
+              <Image
+                src="/Brand_logo/noamani-wordmark-gold.png"
+                alt="Noamani"
+                width={280}
+                height={76}
+                className="h-12 w-auto mx-auto"
+              />
             </div>
 
             <div className="mb-6 text-center lg:text-left">

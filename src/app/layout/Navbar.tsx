@@ -672,19 +672,17 @@ export default function Navbar() {
             {/* Brand */}
             <Link
               href="/"
-              className={cn(
-                italianno.className,
-                "font-extrabold tracking-wider select-none transition-all duration-500 origin-left flex-shrink-0",
-                textColor,
-                "hover:opacity-80"
-              )}
-              style={{
-                fontSize: isHomepage && !isSolid ? '2.6rem' : '1.85rem',
-                letterSpacing: '0.08em',
-                lineHeight: 1,
-              }}
+              className="flex-shrink-0 select-none transition-all duration-500 origin-left hover:opacity-80"
             >
-              Noamani
+              <Image
+                src="/Brand_logo/noamani-wordmark-gold.png"
+                alt="Noamani"
+                width={220}
+                height={60}
+                priority
+                className="w-auto transition-all duration-500"
+                style={{ height: isHomepage && !isSolid ? '2.4rem' : '1.7rem' }}
+              />
             </Link>
 
             {/* Nav Links */}
@@ -708,18 +706,16 @@ export default function Navbar() {
             {/* Brand (centered) */}
             <Link
               href="/"
-              className={cn(
-                italianno.className,
-                "absolute left-1/2 -translate-x-1/2 font-extrabold tracking-wider select-none transition-all duration-500",
-                textColor
-              )}
-              style={{
-                fontSize: isHomepage && !isSolid ? '2rem' : '1.6rem',
-                letterSpacing: '0.06em',
-                lineHeight: 1,
-              }}
+              className="absolute left-1/2 -translate-x-1/2 select-none transition-all duration-500"
             >
-              Noamani
+              <Image
+                src="/Brand_logo/noamani-wordmark-gold.png"
+                alt="Noamani"
+                width={220}
+                height={60}
+                className="w-auto transition-all duration-500"
+                style={{ height: isHomepage && !isSolid ? '1.9rem' : '1.5rem' }}
+              />
             </Link>
 
             {/* Right Icons */}

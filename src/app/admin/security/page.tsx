@@ -4,12 +4,14 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { AdminSidebar } from "@/components/AdminSidebar";
+import { useAdminSessionGuard } from "@/lib/useAdminSessionGuard";
 import { ShieldCheck, Smartphone, MessageSquare } from "lucide-react";
 
 type TwoFactorMethod = "none" | "totp" | "sms";
 type SetupFlow = null | "totp" | "sms";
 
 export default function AdminSecurityPage() {
+  useAdminSessionGuard();
   const [activeTab, setActiveTab] = useState("security");
   const [method, setMethod] = useState<TwoFactorMethod>("none");
   const [maskedPhone, setMaskedPhone] = useState<string | null>(null);

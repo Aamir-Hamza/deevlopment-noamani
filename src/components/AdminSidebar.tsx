@@ -1,6 +1,7 @@
 "use client";
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 import {
@@ -46,9 +47,10 @@ export function AdminSidebar({ activeTab, setActiveTab }: AdminSidebarProps) {
 
   return (
     <div className="fixed inset-y-0 left-0 w-64 flex flex-col bg-slate-950 border-r border-slate-800">
-      <div className="h-16 flex items-center px-6 border-b border-slate-800">
+      <div className="h-16 flex items-center gap-2.5 px-6 border-b border-slate-800">
+        <Image src="/Brand_logo/nlogo.png" alt="" width={24} height={24} className="shrink-0" />
         <span className="text-white font-semibold text-lg tracking-tight">Noamani</span>
-        <span className="ml-2 text-xs font-medium text-slate-500 uppercase tracking-wide">Admin</span>
+        <span className="ml-1 text-xs font-medium text-slate-500 uppercase tracking-wide">Admin</span>
       </div>
 
       <nav className="flex-1 py-4 px-3 space-y-0.5">
