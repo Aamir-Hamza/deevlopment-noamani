@@ -184,7 +184,7 @@ export default function PrivacyPolicyPage() {
               please contact our Privacy Team:
             </p>
             <ul className="list-disc list-inside text-gray-600 mt-4">
-              <li>Email: noamaniperfumes@gmail.com</li>
+              <li>Email: info@noamani.com</li>
               <li>Phone: +91 98217 44247</li>
               <li>Address: J19C, Ground Floor, Thokar No. 4, Abul Fazal, Delhi, India</li>
             </ul>

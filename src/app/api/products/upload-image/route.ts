@@ -12,7 +12,7 @@ const ALLOWED_MIME_TYPES = new Set([
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
 export async function POST(req: Request) {
-  if (!verifyAdminRequest(req)) {
+  if (!(await verifyAdminRequest(req))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

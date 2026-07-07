@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import Admin from '@/models/Admin';
 import connectDB from '@/lib/db';
 import { getJwtSecret } from '@/lib/adminAuth';
@@ -34,9 +35,14 @@ export async function POST(request: Request) {
       );
     }
 
+    // Issue a fresh session id, invalidating any token from a previous login
+    const sessionId = crypto.randomUUID();
+    admin.activeSessionId = sessionId;
+    await admin.save();
+
     // Create token
     const token = jwt.sign(
-      { id: admin._id, email: admin.email, role: admin.role },
+      { id: admin._id, email: admin.email, role: admin.role, sessionId },
       getJwtSecret(),
       { expiresIn: '1d' }
     );

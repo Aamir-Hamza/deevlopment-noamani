@@ -11,7 +11,7 @@ const contactMethods = [
     title: 'Email Us',
     description: 'We\'ll respond within 24 hours',
     icon: Mail,
-    info: 'noamaniperfumes@gmail.com',
+    info: 'info@noamani.com',
     image: 'https://images.pexels.com/photos/4110409/pexels-photo-4110409.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'
   },
   {

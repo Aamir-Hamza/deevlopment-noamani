@@ -175,7 +175,7 @@ export default function AboutPage() {
             </div>
             <div>
               <h3 className="text-lg font-medium mb-2">CONTACT</h3>
-              <p className="text-gray-600">+91 98217 44247<br />noamaniperfumes@gmail.com</p>
+              <p className="text-gray-600">+91 98217 44247<br />info@noamani.com</p>
             </div>
             <div>
               <h3 className="text-lg font-medium mb-2">HOURS</h3>

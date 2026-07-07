@@ -142,7 +142,7 @@ export default function TermsOfUsePage() {
               If you have any questions about these Terms of Use, please contact our legal team:
             </p>
             <ul className="list-disc list-inside text-gray-600 mt-4">
-              <li>Email: noamaniperfumes@gmail.com</li>
+              <li>Email: info@noamani.com</li>
               <li>Phone: +91 98217 44247</li>
               <li>Address: J19C, Ground Floor, Thokar No. 4, Abul Fazal, Delhi, India</li>
             </ul>

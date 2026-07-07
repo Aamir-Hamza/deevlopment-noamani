@@ -29,8 +29,9 @@ const navItems = [
 export function AdminSidebar({ activeTab, setActiveTab }: AdminSidebarProps) {
   const router = useRouter();
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     try {
+      await fetch('/api/admin/logout', { method: 'POST' });
       localStorage.removeItem('adminInfo');
       window.dispatchEvent(new Event('adminLogout'));
       router.push('/');

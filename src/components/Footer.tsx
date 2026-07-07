@@ -224,9 +224,9 @@ export default function Footer() {
         {/* Contact Info */}
         <div className="mt-12 sm:mt-16 pt-6 sm:pt-8 border-t border-gray-300">
           <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-4 sm:gap-8 text-sm text-gray-600">
-            <a href="mailto:noamaniperfumes@gmail.com" className="flex items-center gap-2 hover:text-gray-900 transition-colors">
+            <a href="mailto:info@noamani.com" className="flex items-center gap-2 hover:text-gray-900 transition-colors">
               <Mail className="w-4 h-4 shrink-0" />
-              noamaniperfumes@gmail.com
+              info@noamani.com
             </a>
             <a href="tel:+919821744247" className="flex items-center gap-2 hover:text-gray-900 transition-colors">
               <Phone className="w-4 h-4 shrink-0" />

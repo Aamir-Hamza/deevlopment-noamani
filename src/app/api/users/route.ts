@@ -4,7 +4,7 @@ import User from "@/models/User";
 import { verifyAdminRequest } from "@/lib/adminAuth";
 
 export async function GET(request: Request) {
-  if (!verifyAdminRequest(request)) {
+  if (!(await verifyAdminRequest(request))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   try {

@@ -1,30 +1,16 @@
 import { NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
-import { cookies } from 'next/headers';
-import { getJwtSecret } from '@/lib/adminAuth';
+import { verifyAdminRequest } from '@/lib/adminAuth';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const cookieStore = cookies();
-    const token = cookieStore.get('admin_token');
-
-    if (!token) {
+    const payload = await verifyAdminRequest(request);
+    if (!payload) {
       return NextResponse.json(
         { isAuthenticated: false },
         { status: 401 }
       );
     }
-
-    try {
-      // Verify the token
-      jwt.verify(token.value, getJwtSecret());
-      return NextResponse.json({ isAuthenticated: true });
-    } catch (error) {
-      return NextResponse.json(
-        { isAuthenticated: false },
-        { status: 401 }
-      );
-    }
+    return NextResponse.json({ isAuthenticated: true });
   } catch (error) {
     console.error('Auth Check Error:', error);
     return NextResponse.json(

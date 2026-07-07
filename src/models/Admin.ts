@@ -19,6 +19,10 @@ const adminSchema = new mongoose.Schema({
     type: String,
     default: 'admin',
   },
+  activeSessionId: {
+    type: String,
+    default: null,
+  },
   createdAt: {
     type: Date,
     default: Date.now,

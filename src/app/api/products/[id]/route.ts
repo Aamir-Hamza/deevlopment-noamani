@@ -48,7 +48,7 @@ export async function PUT(
   request: Request,
   { params }: { params: { id: string } }
 ) {
-  if (!verifyAdminRequest(request)) {
+  if (!(await verifyAdminRequest(request))) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
   try {
@@ -82,7 +82,7 @@ export async function DELETE(
   request: Request,
   { params }: { params: { id: string } }
 ) {
-  if (!verifyAdminRequest(request)) {
+  if (!(await verifyAdminRequest(request))) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
   try {

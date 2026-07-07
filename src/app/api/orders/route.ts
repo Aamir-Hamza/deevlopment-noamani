@@ -13,7 +13,7 @@ export async function GET(request: Request) {
 
     // Customer-facing requests pass userEmail and must only see their own
     // orders. Omitting it returns every order, so that path is admin-only.
-    if (!userEmail && !verifyAdminRequest(request)) {
+    if (!userEmail && !(await verifyAdminRequest(request))) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
