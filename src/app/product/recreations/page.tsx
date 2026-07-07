@@ -72,7 +72,7 @@ export default function RecreationsPage() {
             setPage(1);
           }}
         />
-        In stock only
+        In Stock
       </label>
     </div>
   );

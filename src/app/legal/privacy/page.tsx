@@ -184,9 +184,9 @@ export default function PrivacyPolicyPage() {
               please contact our Privacy Team:
             </p>
             <ul className="list-disc list-inside text-gray-600 mt-4">
-              <li>Email: privacy@luxeperfume.com</li>
-              <li>Phone: 1-800-LUXE-PRIVACY</li>
-              <li>Address: 123 Luxury Avenue, New York, NY 10001</li>
+              <li>Email: noamaniperfumes@gmail.com</li>
+              <li>Phone: +91 98217 44247</li>
+              <li>Address: J19C, Ground Floor, Thokar No. 4, Abul Fazal, Delhi, India</li>
             </ul>
           </motion.div>
         </div>

@@ -30,7 +30,7 @@ const faqs = [
   {
     question: "How do I contact customer support?",
     answer:
-      "You can reach us anytime via our Contact page, by emailing noamaniperfumes@gmail.com, or call us: 9821744247. We're here to help!",
+      "You can reach us anytime via our Contact page, by emailing noamaniperfumes@gmail.com, or call us: +91 98217 44247. We're here to help!",
   },
 ];
 

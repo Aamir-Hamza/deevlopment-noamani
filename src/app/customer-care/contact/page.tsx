@@ -16,23 +16,23 @@ const contactMethods = [
   },
   {
     title: 'Call Us',
-    description: 'Mon-Fri, 9am-6pm EST',
+    description: 'Mon-Sat, 10am-7pm IST',
     icon: Phone,
-    info: '9821744247',
+    info: '+91 98217 44247',
     image: 'https://images.pexels.com/photos/5632397/pexels-photo-5632397.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'
   },
   {
     title: 'Visit Us',
-    description: 'Our Flagship Store',
+    description: 'Our Office',
     icon: MapPin,
-    info: '123 Luxury Ave, NY',
+    info: 'J19C, Ground Floor, Thokar No. 4, Abul Fazal, Delhi, India',
     image: 'https://images.pexels.com/photos/5632402/pexels-photo-5632402.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'
   },
   {
     title: 'Store Hours',
     description: 'Open Daily',
     icon: Clock,
-    info: '10am-8pm EST',
+    info: 'Mon - Sat: 10AM - 7PM, Sun: 12PM - 6PM',
     image: 'https://images.pexels.com/photos/965989/pexels-photo-965989.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'
   }
 ];
@@ -294,8 +294,8 @@ export default function ContactPage() {
         />
         <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-white">
           <div className="text-center">
-            <h3 className="text-2xl font-light mb-4">Visit Our Flagship Store</h3>
-            <p className="text-lg font-light">123 Luxury Avenue, New York, NY 10001</p>
+            <h3 className="text-2xl font-light mb-4">Visit Our Office</h3>
+            <p className="text-lg font-light">J19C, Ground Floor, Thokar No. 4, Abul Fazal, Delhi, India</p>
           </div>
         </div>
       </motion.div>

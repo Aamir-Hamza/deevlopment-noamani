@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link"
-import { ChevronDown } from "lucide-react"
+import { ChevronDown, Mail, Phone, MapPin } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { LanguageSwitcher } from "@/components/LanguageSwitcher"
@@ -221,8 +221,26 @@ export default function Footer() {
           </div>
         </div>
 
+        {/* Contact Info */}
+        <div className="mt-12 sm:mt-16 pt-6 sm:pt-8 border-t border-gray-300">
+          <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-4 sm:gap-8 text-sm text-gray-600">
+            <a href="mailto:noamaniperfumes@gmail.com" className="flex items-center gap-2 hover:text-gray-900 transition-colors">
+              <Mail className="w-4 h-4 shrink-0" />
+              noamaniperfumes@gmail.com
+            </a>
+            <a href="tel:+919821744247" className="flex items-center gap-2 hover:text-gray-900 transition-colors">
+              <Phone className="w-4 h-4 shrink-0" />
+              +91 98217 44247
+            </a>
+            <span className="flex items-center gap-2">
+              <MapPin className="w-4 h-4 shrink-0" />
+              J19C, Ground Floor, Thokar No. 4, Abul Fazal, Delhi, India
+            </span>
+          </div>
+        </div>
+
         {/* Bottom Bar - Social Media, Brand, Region Selector */}
-        <div className="mt-12 sm:mt-16 md:mt-20 pt-6 sm:pt-8 border-t border-gray-300">
+        <div className="mt-8 sm:mt-10 pt-6 sm:pt-8 border-t border-gray-300">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6 sm:gap-8">
             {/* Left Section - Social Media Links */}
             <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-base sm:text-lg text-gray-700">

@@ -168,14 +168,14 @@ export default function AboutPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
             <div>
               <h3 className="text-lg font-medium mb-2">VISIT</h3>
-              <p className="text-gray-600 mb-2">Shipping across India</p>
+              <p className="text-gray-600 mb-2">J19C, Ground Floor, Thokar No. 4, Abul Fazal, Delhi, India</p>
               <Link href="/find-a-boutique" className="text-sm text-[#bfa14a] hover:text-black font-medium">
                 Find a Boutique →
               </Link>
             </div>
             <div>
               <h3 className="text-lg font-medium mb-2">CONTACT</h3>
-              <p className="text-gray-600">9821744247<br />noamaniperfumes@gmail.com</p>
+              <p className="text-gray-600">+91 98217 44247<br />noamaniperfumes@gmail.com</p>
             </div>
             <div>
               <h3 className="text-lg font-medium mb-2">HOURS</h3>

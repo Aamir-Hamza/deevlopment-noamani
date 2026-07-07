@@ -10,43 +10,31 @@ const contactMethods = [
     title: 'Email Us',
     description: 'We\'ll respond within 24 hours',
     icon: Mail,
-    info: 'support@luxeperfume.com',
+    info: 'noamaniperfumes@gmail.com',
     image: 'https://images.pexels.com/photos/4110409/pexels-photo-4110409.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'
   },
   {
     title: 'Call Us',
-    description: 'Mon-Fri, 9am-6pm EST',
+    description: 'Mon-Sat, 10am-7pm IST',
     icon: Phone,
-    info: '1-800-LUXE',
+    info: '+91 98217 44247',
     image: 'https://images.pexels.com/photos/5632397/pexels-photo-5632397.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'
   },
   {
     title: 'Visit Us',
-    description: 'Our Flagship Store',
+    description: 'Our Office',
     icon: MapPin,
-    info: '123 Luxury Ave, NY',
+    info: 'Delhi, India',
     image: 'https://images.pexels.com/photos/5632402/pexels-photo-5632402.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'
   }
 ];
 
 const storeLocations = [
   {
-    city: 'New York',
-    address: '123 Luxury Avenue, NY 10001',
-    hours: 'Mon-Sat: 10AM-8PM, Sun: 11AM-6PM',
+    city: 'Delhi',
+    address: 'J19C, Ground Floor, Thokar No. 4, Abul Fazal, Delhi, India',
+    hours: 'Mon - Sat: 10AM - 7PM, Sun: 12PM - 6PM',
     image: 'https://images.pexels.com/photos/466685/pexels-photo-466685.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'
-  },
-  {
-    city: 'Los Angeles',
-    address: '456 Beverly Hills Dr, LA 90210',
-    hours: 'Mon-Sat: 10AM-9PM, Sun: 12PM-6PM',
-    image: 'https://images.pexels.com/photos/5490778/pexels-photo-5490778.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'
-  },
-  {
-    city: 'Miami',
-    address: '789 Ocean Drive, Miami 33139',
-    hours: 'Mon-Sun: 10AM-10PM',
-    image: 'https://images.pexels.com/photos/4110410/pexels-photo-4110410.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'
   }
 ];
 
@@ -255,8 +243,8 @@ export default function ContactPage() {
 
       {/* Store Locations */}
       <div className="py-16">
-        <h2 className="text-3xl font-light text-center mb-12">Our Stores</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto px-4">
+        <h2 className="text-3xl font-light text-center mb-12">Our Office</h2>
+        <div className="grid grid-cols-1 gap-8 max-w-sm mx-auto px-4">
           {storeLocations.map((location, index) => (
             <motion.div
               key={location.city}

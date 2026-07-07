@@ -137,9 +137,9 @@ export default function TermsPage() {
               If you have any questions about these Terms of Use, please contact us:
             </p>
             <ul className="mt-4 space-y-2 text-gray-600">
-              <li>Email: legal@luxuryperfume.com</li>
-              <li>Phone: +1 (800) 123-4567</li>
-              <li>Address: 123 Fifth Avenue, New York, NY 10001</li>
+              <li>Email: noamaniperfumes@gmail.com</li>
+              <li>Phone: +91 98217 44247</li>
+              <li>Address: J19C, Ground Floor, Thokar No. 4, Abul Fazal, Delhi, India</li>
             </ul>
           </motion.div>
         </div>
