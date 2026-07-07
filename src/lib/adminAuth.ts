@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import Admin from '@/models/Admin';
 import connectDB from '@/lib/db';
 
@@ -49,4 +50,52 @@ export async function verifyAdminRequest(request: Request): Promise<AdminTokenPa
   }
 }
 
-export { getJwtSecret };
+const TWO_FACTOR_PENDING_COOKIE = 'admin_2fa_pending';
+
+/**
+ * Signs a short-lived token proving the admin passed the password step,
+ * used to gate the second (2FA code) step of login without granting any
+ * real session access yet.
+ */
+export function signTwoFactorPendingToken(adminId: string): string {
+  return jwt.sign({ id: adminId, purpose: 'admin_2fa' }, getJwtSecret(), { expiresIn: '10m' });
+}
+
+/**
+ * Verifies the `admin_2fa_pending` cookie set after the password step.
+ * Returns the admin id if valid, or null if missing/invalid/expired.
+ */
+export function verifyTwoFactorPendingToken(request: Request): string | null {
+  const cookieHeader = request.headers.get('cookie') || '';
+  const match = cookieHeader.match(new RegExp(`(?:^|;\\s*)${TWO_FACTOR_PENDING_COOKIE}=([^;]+)`));
+  if (!match) return null;
+
+  try {
+    const decoded = jwt.verify(decodeURIComponent(match[1]), getJwtSecret());
+    if (typeof decoded === 'string') return null;
+    if (decoded.purpose !== 'admin_2fa' || !decoded.id) return null;
+    return decoded.id;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Issues a fresh session for an admin who has fully authenticated (password,
+ * and 2FA code if enabled). Invalidates any previously active session and
+ * returns the signed `admin_token` JWT for the route to set as a cookie.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function issueAdminSession(admin: any): Promise<string> {
+  const sessionId = crypto.randomUUID();
+  admin.activeSessionId = sessionId;
+  await admin.save();
+
+  return jwt.sign(
+    { id: admin._id, email: admin.email, role: admin.role, sessionId },
+    getJwtSecret(),
+    { expiresIn: '1d' }
+  );
+}
+
+export { getJwtSecret, TWO_FACTOR_PENDING_COOKIE };

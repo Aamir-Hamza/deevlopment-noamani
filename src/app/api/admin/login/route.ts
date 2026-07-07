@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
-import crypto from 'crypto';
 import Admin from '@/models/Admin';
 import connectDB from '@/lib/db';
-import { getJwtSecret } from '@/lib/adminAuth';
+import { issueAdminSession, signTwoFactorPendingToken, TWO_FACTOR_PENDING_COOKIE } from '@/lib/adminAuth';
+import { generateSixDigitOtp, hashOtpWithSecret } from '@/lib/otp';
+import { sendSmsOtp, maskPhone } from '@/lib/sms';
 
 export async function POST(request: Request) {
   try {
@@ -35,36 +35,50 @@ export async function POST(request: Request) {
       );
     }
 
-    // Issue a fresh session id, invalidating any token from a previous login
-    const sessionId = crypto.randomUUID();
-    admin.activeSessionId = sessionId;
-    await admin.save();
+    if (admin.twoFactorMethod === 'none') {
+      const token = await issueAdminSession(admin);
+      const response = NextResponse.json({
+        success: true,
+        admin: {
+          id: admin._id,
+          name: admin.name,
+          email: admin.email,
+          role: admin.role,
+        },
+      });
+      response.cookies.set('admin_token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 86400, // 1 day
+      });
+      return response;
+    }
 
-    // Create token
-    const token = jwt.sign(
-      { id: admin._id, email: admin.email, role: admin.role, sessionId },
-      getJwtSecret(),
-      { expiresIn: '1d' }
-    );
+    // 2FA is enabled — issue a short-lived pending token instead of a real
+    // session, and require a second step before granting access.
+    if (admin.twoFactorMethod === 'sms') {
+      const otp = generateSixDigitOtp();
+      admin.twoFactorOtpHash = hashOtpWithSecret(otp, admin.email);
+      admin.twoFactorOtpExpires = new Date(Date.now() + 10 * 60 * 1000);
+      admin.twoFactorAttempts = 0;
+      await admin.save();
+      await sendSmsOtp(admin.phone, otp);
+    }
 
-    // Set cookie
+    const pendingToken = signTwoFactorPendingToken(admin._id.toString());
     const response = NextResponse.json({
       success: true,
-      admin: {
-        id: admin._id,
-        name: admin.name,
-        email: admin.email,
-        role: admin.role,
-      },
+      requires2FA: true,
+      method: admin.twoFactorMethod,
+      ...(admin.twoFactorMethod === 'sms' ? { maskedPhone: maskPhone(admin.phone) } : {}),
     });
-
-    response.cookies.set('admin_token', token, {
+    response.cookies.set(TWO_FACTOR_PENDING_COOKIE, pendingToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 86400, // 1 day
+      maxAge: 10 * 60, // 10 minutes
     });
-
     return response;
   } catch (error) {
     console.error('Login Error:', error);
@@ -73,4 +87,4 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
-} 
+}

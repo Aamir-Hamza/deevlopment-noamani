@@ -11,6 +11,7 @@ import {
   BarChart3,
   ArrowLeft,
   LogOut,
+  ShieldCheck,
 } from 'lucide-react';
 
 interface AdminSidebarProps {
@@ -24,6 +25,7 @@ const navItems = [
   { key: 'orders', href: '/admin/orders', label: 'Orders', icon: ShoppingCart },
   { key: 'transactions', href: '/admin/transactions', label: 'Transactions', icon: Receipt },
   { key: 'analytics', href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
+  { key: 'security', href: '/admin/security', label: 'Security', icon: ShieldCheck },
 ];
 
 export function AdminSidebar({ activeTab, setActiveTab }: AdminSidebarProps) {

@@ -23,6 +23,31 @@ const adminSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
+  twoFactorMethod: {
+    type: String,
+    enum: ['none', 'totp', 'sms'],
+    default: 'none',
+  },
+  totpSecret: {
+    type: String,
+    default: null,
+  },
+  phone: {
+    type: String,
+    default: null,
+  },
+  twoFactorOtpHash: {
+    type: String,
+    default: null,
+  },
+  twoFactorOtpExpires: {
+    type: Date,
+    default: null,
+  },
+  twoFactorAttempts: {
+    type: Number,
+    default: 0,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
